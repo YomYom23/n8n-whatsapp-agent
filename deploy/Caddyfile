@@ -1,0 +1,13 @@
+# Public entry point for the live instance.
+# SITE_ADDRESS is the public hostname on a server (Caddy gets the HTTPS certificate),
+# or ":80" behind a development tunnel that already terminates HTTPS.
+{$SITE_ADDRESS} {
+	# Only production webhooks are public. The editor, REST API and test webhooks are not.
+	handle /webhook/* {
+		reverse_proxy n8n:5678
+	}
+
+	handle {
+		respond 404
+	}
+}

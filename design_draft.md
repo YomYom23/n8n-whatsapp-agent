@@ -8,7 +8,7 @@
 
 ## Overview
 
-This project is a WhatsApp agent for a fictional cleaning company, built as a set of n8n workflows on a self-hosted n8n instance. A customer messages the company's WhatsApp number. The agent answers questions from a Google Sheet of facts that the owner edits, offers and books cleaning appointments on Google Calendar, and hands the conversation to the owner in Slack whenever it is unsure. The owner can reply to the customer from that Slack thread, and the reply is sent through the business's WhatsApp number. A "Return to bot" button gives the conversation back to the agent. Enquiries and bookings are copied to HubSpot as a two-step deal.
+This project is a WhatsApp agent for a fictional US cleaning company, built as a set of n8n workflows on a self-hosted n8n instance. A customer messages the company's WhatsApp number. The agent answers questions from a Google Sheet of facts that the owner edits, offers and books cleaning appointments on Google Calendar, and hands the conversation to the owner in Slack whenever it is unsure. The owner can reply to the customer from that Slack thread, and the reply is sent through the business's WhatsApp number. A "Return to bot" button gives the conversation back to the agent. Enquiries and bookings are copied to HubSpot as a two-step deal.
 
 The safety design is rebuilt from Yomi's earlier project, Lead Bot (a Python SMS agent for a roofing company). Plain code, not a language model, decides every action:
 
@@ -81,9 +81,9 @@ The value is measured evidence a client can check, not a feature list. Every num
 
 ### CUJ 2: A customer books a deep clean
 
-*   **Given**: the deep clean is in the sheet with a price and a duration, the customer's postcode area is in the sheet's service areas, and the calendar has free time this week.
-*   **When**: the customer says they want a deep clean, sends their address with postcode, and replies "2" to the offered times.
-*   **Then**: a HubSpot contact and an "Enquiry" deal exist after the first message. The postcode is checked before any times are offered. Only times the code generated from free calendar time are offered. Slot 2 is checked again and booked as a calendar event with the address in it. The customer is told the booked time, and the deal moves to "Booked".
+*   **Given**: the deep clean is in the sheet with a price and a duration, the customer's ZIP code is in the sheet's service areas, and the calendar has free time this week.
+*   **When**: the customer says they want a deep clean, sends their address with ZIP code, and replies "2" to the offered times.
+*   **Then**: a HubSpot contact and an "Enquiry" deal exist after the first message. The ZIP code is checked before any times are offered. Only times the code generated from free calendar time are offered. Slot 2 is checked again and booked as a calendar event with the address in it. The customer is told the booked time, and the deal moves to "Booked".
 
 ### CUJ 3: The owner takes over, replies from Slack and hands back
 
@@ -106,7 +106,7 @@ The value is measured evidence a client can check, not a feature list. Every num
 ### CUJ 6: An AI draft fails the check
 
 *   **Given**: a customer asks something Haiku has to answer.
-*   **When**: Haiku's draft states "a deep clean is £95" and the sheet says £120. In the fixed tier this draft is planted on purpose.
+*   **When**: Haiku's draft states "a deep clean is $95" and the sheet says $120. In the fixed tier this draft is planted on purpose.
 *   **Then**: the code price check flags `price_mismatch`. The draft is not sent; a fixed fallback line is sent instead, and the owner gets a Slack alert naming the problem. The log row records the draft and the problem.
 
 ### CUJ 7: Messages stop reaching n8n (delivery debugging)
@@ -138,7 +138,7 @@ flowchart LR
   end
   Meta -->|webhook| IW[ingress-whatsapp]
   Slack -->|events| IS[ingress-slack-events]
-  Slack -->|button clicks| II[ingress-slack-actions]
+  Slack -->|button clicks| II[ingress-slack-interactivity]
   IW --> Inbox[(inbox table)]
   IS --> Inbox
   II --> Inbox
@@ -169,7 +169,7 @@ flowchart LR
 | --- | --- | --- |
 | `ingress-whatsapp` | Webhook (GET and POST) | Meta's verify handshake; signature check; drop status events except `failed`; write one inbox row per message; reply 200 |
 | `ingress-slack-events` | Webhook | Slack's URL check; signature and timestamp check; write thread messages to the inbox; reply 200 |
-| `ingress-slack-actions` | Webhook | Signature check on button clicks; write the click to the inbox; reply 200 |
+| `ingress-slack-interactivity` | Webhook | Signature check on button clicks; write the click to the inbox; reply 200 |
 | `ingress-replay` | Webhook, dry-run only | Lets the replay harness put events straight into the inbox; refuses everything unless the instance is the dry-run one and a shared secret matches |
 | `processor` | Schedule or inbox trigger (spike 3) | Takes the oldest unhandled inbox row, one at a time, and runs the right workflow for it |
 | `conversation` | `processor` | Gate, classify, route, and the stage logic for one customer message |
@@ -201,7 +201,7 @@ Jev and Haiku are called from `classify` and `answer` directly (Jev node; Anthro
 
 The WhatsApp Trigger node is not used in production. It is set up once during the Meta setup and its behaviour (whether it registers the callback URL itself, whether it checks signatures) is recorded in `docs/meta-setup.md`.
 
-**Slack (`ingress-slack-events`, `ingress-slack-actions`).**
+**Slack (`ingress-slack-events`, `ingress-slack-interactivity`).**
 
 *   Answer Slack's URL verification challenge.
 *   Check `X-Slack-Signature` (HMAC-SHA256 of `v0:timestamp:raw body` with the signing secret) and refuse timestamps older than 5 minutes. Button clicks arrive form-encoded; the signature is over the raw form body (spike 4).
@@ -230,7 +230,7 @@ A row stuck in `handling` for more than 5 minutes raises a Slack alert. Nothing 
 
 For a customer message, `conversation` runs these checks in this order. The first that applies ends the run:
 
-1.  **STOP or START keyword.** The whole message (trimmed, any case) is STOP, UNSUBSCRIBE, CANCEL, END or QUIT, or START. STOP adds the number to do-not-contact, sends one confirmation, and posts a note in the owner's thread if the conversation is with the owner. START removes the number from do-not-contact and sends one line saying messages are back on. (Lead Bot left these keywords to Twilio; WhatsApp has no equivalent, so this is new.)
+1.  **STOP or START keyword.** The whole message (trimmed, any case) is STOP, UNSUBSCRIBE, CANCEL, END or QUIT, or START. STOP adds the number to do-not-contact, sends one confirmation, and posts a note in the owner's thread if the conversation is with the owner. START removes the number from do-not-contact and sends one line saying messages are back on. The keyword list is kept as is, in any letter case. Known risk, accepted by the author: a customer who sends only "cancel" to cancel a booking is opted out instead; the confirmation tells them to send START to undo it. (Lead Bot left these keywords to Twilio; WhatsApp has no equivalent, so this is new.)
 2.  **Do-not-contact.** The number is on the list: log the message, send nothing.
 3.  **Clear opt-out wording.** Lead Bot's `is_explicit_opt_out` phrases ("stop messaging me", "unsubscribe me"), ported as a word list. Same action as STOP.
 4.  **Record `last_customer_at`.** Used by the 24-hour check. Done before the human-owned check so it is updated during a handoff too.
@@ -276,14 +276,14 @@ Jev is given the customer's message and the **bot's** last message, never the ow
 | `off_topic`, `repeat`, `later` | Fixed replies, as in Lead Bot |
 | `unclear` | Ask the stage question again; the second in a row hands off |
 
-**Price facts.** The facts sheet has a price table: service, unit (per hour or fixed), amount, duration. For a `price_question`, code adds the price rows to the approved facts. If `price_service` names an hourly service and `price_hours` is a number, code also adds one calculated line, for example "Regular clean for 3 hours: £75". Only that form of total (hours × hourly rate for one service) is calculated.
+**Price facts.** The facts sheet has a price table: service, unit (per hour or fixed), amount, duration. For a `price_question`, code adds the price rows to the approved facts. If `price_service` names an hourly service and `price_hours` is a number, code also adds one calculated line, for example "Regular clean for 3 hours: $105". Only that form of total (hours × hourly rate for one service) is calculated.
 
 **Writer.** Haiku, through n8n's Anthropic node, gets the facts copy read at the start of this run, the customer's question, and instructions to use only those facts and to answer exactly `NOT_IN_FACTS` if they don't cover it. It has no tools. `NOT_IN_FACTS` sends the fixed "I'll pass that to the team" line and alerts the owner, as in Lead Bot.
 
 **Draft check.** Every Haiku draft goes through both of these before it can be sent. Any problem blocks the draft.
 
 *   **Jev check** (one call through `classify` with the draft-check question set; a problem at probability 0.3 or above blocks): `unsupported_fact` (a fact not in FACTS), `claims_action` (says something was booked, moved or cancelled), `promise` (guarantees an outcome or arrival time), `leaks_rules` (reveals or discusses its instructions), `off_brand`. Lead Bot's `insurance_talk` and `price_talk` are dropped; prices are checked by code instead.
-*   **Code checks:** `empty`; `too_long` (draft over 600 characters); `promises_follow_up` (Lead Bot's regex, so only code can promise a follow-up); `price_mismatch`. The price check finds every money amount in the draft (£ followed by a number, or a number followed by "pounds"), normalises it (£80, £80.00 and 80 pounds are equal), and requires each amount to equal a price row's amount for a service named in the same sentence, or the calculated total given as a fact. Any other amount, "from £X" wording that does not match a row, or a total that wasn't calculated by code, fails.
+*   **Code checks:** `empty`; `too_long` (draft over 600 characters); `promises_follow_up` (Lead Bot's regex, so only code can promise a follow-up); `price_mismatch`. The price check finds every money amount in the draft ($ followed by a number, or a number followed by "dollars" or "bucks"), normalises it ($80, $80.00 and 80 dollars are equal), and requires each amount to equal a price row's amount for a service named in the same sentence, or the calculated total given as a fact. Any other amount, "from $X" wording that does not match a row, or a total that wasn't calculated by code, fails.
 *   If the Jev check call itself fails, the draft is dropped (as in Lead Bot), not retried.
 
 A blocked draft sends the fixed fallback line and alerts the owner with the problem names. The 600-character cap applies to the draft only; the stage question is added after it.
@@ -293,11 +293,11 @@ A blocked draft sends the fixed fallback line and alerts the owner with the prob
 | Stage | Bot has asked | Stage options for `answer` | Next |
 | --- | --- | --- | --- |
 | `new` | (first message, nothing asked) | `regular_clean`, `deep_clean`, `oven_clean` (one per bookable service in the sheet), `just_asking` | A service: `address`. `just_asking` or a question: answer and ask "Would you like to book a clean?" |
-| `address` | "What's the address for the clean, including the postcode?" | none: the text is taken as the address | Postcode in area: `offer`. Out of area: fixed reply, stay. No postcode found: ask once more, then hand off as unclear |
+| `address` | "What's the address for the clean, including the ZIP code?" | none: the text is taken as the address | ZIP code in area: `offer`. Out of area: fixed reply, stay. No ZIP code found: ask once more, then hand off as unclear |
 | `offer` | Numbered times | the offered slot IDs, `none` | A slot: book, then `booked`. `none`: Lead Bot's "later times once, then hand off" path |
 | `booked` | nothing more | `thanks`, `change_booking` | `change_booking`: handoff (the bot does not move bookings) |
 
-In the `address` stage the only question asked of Jev is the hazard set (as in Lead Bot's call "message" stage); the message itself is the answer. Code looks for a UK postcode in it, takes the outward part (for example "SW11"), and checks it against the sheet's service-area list. The full text is kept as the address and written into the calendar event. Stage values carry a version number; an unknown stage hands off.
+In the `address` stage the only question asked of Jev is the hazard set (as in Lead Bot's call "message" stage); the message itself is the answer. Code looks for a US ZIP code in it (5 digits, optionally followed by a dash and 4 more; when several 5-digit numbers appear, the last one is used, since a street number usually comes first) and checks the 5-digit part against the sheet's service-area list. The full text is kept as the address and written into the calendar event. Stage values carry a version number; an unknown stage hands off.
 
 ### 9. Sending
 
@@ -373,7 +373,7 @@ The adapters' fake versions are checked against the real ones by `tests/adapter_
 
 | Table | Holds |
 | --- | --- |
-| `conversations` | One row per customer: `wa_id`, stage, stage version, offered slots (JSON), `offered_before_release` marker, `unclear_in_a_row`, `slot_taken_count`, `reoffer_used`, `prompt_epoch`, `person_spoke_last`, `human_owned`, `handoff_reason`, `handoff_episode`, Slack channel and thread, `last_customer_at`, address, postcode, service, booking key, `hubspot_contact_id`, `hubspot_deal_id`, deal stage |
+| `conversations` | One row per customer: `wa_id`, stage, stage version, offered slots (JSON), `offered_before_release` marker, `unclear_in_a_row`, `slot_taken_count`, `reoffer_used`, `prompt_epoch`, `person_spoke_last`, `human_owned`, `handoff_reason`, `handoff_episode`, Slack channel and thread, `last_customer_at`, address, ZIP code, service, booking key, `hubspot_contact_id`, `hubspot_deal_id`, deal stage |
 | `inbox` | Every event: source, kind, `external_id` (unique), `wa_id` or Slack thread, payload, status, execution ID, times |
 | `do_not_contact` | `wa_id`, source, time |
 | `pending_owner_messages` | Owner messages waiting for the 24-hour window: thread, text, Slack user, status |
@@ -398,11 +398,322 @@ The enquiry-to-booking number is calculated from the data tables, not from HubSp
 
 ### 15. Facts sheet
 
-Tabs: `facts` (topic, text), `prices` (service, unit, amount, duration, bookable), `service_areas` (postcode outward codes), `hours` (opening rules). `conversation` reads it once per run through `sheets-adapter` and passes that same copy to the writer and to the draft check. If the sheet can't be read or a required tab is empty, the customer gets a fixed line and the owner is alerted. Tests read `facts-template.csv`.
+Tabs: `facts` (topic, text), `prices` (service, unit, amount, duration, bookable), `service_areas` (5-digit ZIP codes), `hours` (opening rules, in the business's US time zone; slot labels use AM/PM). `conversation` reads it once per run through `sheets-adapter` and passes that same copy to the writer and to the draft check. If the sheet can't be read or a required tab is empty, the customer gets a fixed line and the owner is alerted. Tests read `facts-template.csv`.
 
 ### 16. Errors and alerts
 
 The `error` workflow catches any failed run in any workflow and posts the workflow name, execution ID and error to Slack; if the Slack post fails, it sends an email. Stuck inbox rows, `send_failed` events, blocked drafts, CRM outages and handoffs are the other alerts. All alerts go through `slack-adapter`.
+
+## Alternatives Considered
+
+This section lists options that were weighed and rejected, with the reason for each. The earlier project brief is out of date. Where it differs from this document, this document wins.
+
+### Testing
+
+*   **Replaying through a copy of the workflow that sends nothing.** The two copies would drift apart, and a copy can compete with the live one for Meta's callback URL. A separate dry-run instance runs the same workflows with every outside call pointed at a mock server instead (section 1).
+*   **A test-mode switch in the request header or payload.** Anyone could send that header to the live instance. Test settings and guard switches live only in the dry-run instance's environment, and the live instance checks they are off (section 12).
+*   **Every outside call as an HTTP Request node aimed at the mock server.** Tests would run the same every time, but the workflows would use no built-in Sheets, Calendar, Slack or HubSpot nodes, which are what clients recognise and ask for. Every API request, including Google's sign-in, would be hand-built.
+*   **Built-in nodes pointed at real test accounts during replay.** Tests would be slow, hit rate limits (Google Sheets allows about 60 reads a minute), need the accounts reset between scenarios, and give results that vary. Outages such as "HubSpot down" can't be faked. The chosen design puts each built-in node behind an adapter sub-workflow that has a fake version, with a hand-run contract test to keep the two in step (section 12).
+*   **One combined "passed X of Y" score.** Mixing planted fixed-tier results with live-model results would overstate how well the bot does. The two tiers are reported separately.
+
+### Classifier
+
+*   **HTTP Request node as the default way to call Jev, with a Jev node only if it passes contract tests.** The reviewers recommended this. The author chose the Jev node as the plan. HTTP Request is kept only as the fallback inside `classify` if no node passes spike 1.
+*   **Requiring a community Jev node with no fallback.** A node that fails spike 1, or won't install on n8n Cloud, would block the build. The `classify` sub-workflow keeps a fixed contract so the node can be swapped.
+*   **Reading a missing classifier field as 0.0.** A missing field would quietly look like "no hazard". As in Lead Bot's `jev.py`, a missing field hands off.
+*   **An n8n Switch node that sends a message down every matching hazard output.** It breaks the first-match order of the hazard checks. The rules run in one Code node instead (section 6).
+
+### Conversation design
+
+*   **Lead Bot's "never state a price" rule.** A cleaning company is expected to answer price questions. Two other price options were also rejected:
+    *   *Prices only in a fixed reply, with any Haiku draft that mentions a price blocked.* A question like "how much for 3 hours?" would get the price list rather than a total.
+    *   *Haiku may state prices, checked per service, with no totals.* Correct totals would be blocked and handed off.
+    
+    The chosen design checks each amount against the price row of the service it belongs to, and code calculates simple hours × rate totals as approved facts (section 7).
+*   **Three stages (new, offer, booked) with no address.** Every booking would need the owner to chase the address, and the demo would show an incomplete booking.
+*   **Asking for the address after the time is booked.** Out-of-area customers could book, and the owner would have to cancel by hand. The chosen flow asks for the address with ZIP code before offering times and checks it against the service-area list (section 8).
+*   **Porting Lead Bot's roofing stages and checks as they are.** The insurance and roofing rules don't apply to a cleaning company.
+*   **Treating opt-out keywords as valid only in capitals.** Phones capitalise the first letter, so "Stop" would be missed, and Goal 7 requires opt-out with no model call. The keywords count in any letter case, and the "cancel" risk is accepted (section 5).
+
+### Owner handoff
+
+*   **The owner contacts the customer from their own phone while the bot goes quiet.** The conversation would leave the business's WhatsApp number, and the demo would lose the relay. The owner replies from the Slack thread instead.
+*   **A `/resume` slash command, or editing the data table, as the main way to hand back.** Both are clumsier than one button. "Return to bot" is the main way, and editing the table stays as a fallback.
+*   **Resetting the conversation on hand-back.** The reviewers proposed this. The author chose to have the bot continue from the stage it was in.
+*   **Expiring a handoff automatically after a set time.** The bot could take back a conversation the owner is still handling. A handoff lasts until the owner presses the button.
+*   **Asking the owner to resend a message queued behind the 24-hour template.** The queued message goes out on its own when the customer replies, after the gate checks do-not-contact, the keywords and the 24-hour window.
+*   **Running the owner's text through the AI draft check.** The owner is the authority on their own business, and blocking their messages would make the relay unreliable. Their text still goes through the do-not-contact and 24-hour checks.
+
+### CRM and infrastructure
+
+*   **Cutting HubSpot.** All seven reviewers suggested it. The author kept it: CRMs were named in 31 of 362 job posts searched, and the portfolio has no CRM work yet. It runs outside the safety path (section 14).
+*   **Other definitions of a qualified lead.** "Booking confirmed" alone misses customers who drop off, and "asked to book" alone shows no pipeline. The two-step Enquiry → Booked deal shows both.
+*   **Postgres for duplicate checks and per-number locks.** The author decided against Postgres. Duplicates are caught by the message ID in the inbox table, and a single processor handles messages one at a time (section 4).
+*   **Caching the facts sheet.** The sheet is read once per run, so the owner's edits take effect on the next message.
+*   **Writing the logic straight into Code nodes, tested only by replay.** Edge cases in the price and ZIP rules would each need a full replay scenario, and shared helpers would be copied by hand. Rejected by author.
+*   **Logic as an npm module loaded with `require` in the container.** n8n Cloud can't load it, and a client reading the workflow would see a `require` line, not the logic. Rejected by author.
+
+--------------------------------------------------------------------------------
+
+## Non-Functional Requirements
+
+**Security and privacy**
+
+*   Every webhook checks its signature over the raw body before writing anything (Meta: `X-Hub-Signature-256`; Slack: `X-Slack-Signature` with a 5-minute timestamp limit). `ingress-replay` refuses everything on the live instance.
+*   Secrets (Meta app secret and token, Slack signing secret and bot token, Anthropic key, Jev key, HubSpot private-app token, Google sign-in) live in n8n credentials or the instance's env file, never in workflow JSON or git. `.gitignore` covers `deploy/*.env`. The build script refuses to write a workflow file that contains a string matching a known secret pattern.
+*   Customer phone numbers are masked except the last 4 digits in Slack, the Sheets log and the README. Full numbers stay only in the n8n data tables on the live server. Captured fixtures have numbers replaced, then are re-signed with the test secret.
+*   Only Slack users on `SLACK_ALLOWED_USERS` can relay, release or send the template.
+*   The dry-run instance has no public URL. Guard switches, the fixed clock and fixture mode are read only when `INSTANCE_ROLE=dryrun`, and `conversation` hands off if any is set on the live instance.
+
+**Performance**
+
+*   Ingress answers within Slack's 3-second limit and Meta's timeout, because it only writes one row. Spike 3 measures this with a run held in a 20-second Wait.
+*   Messages are processed one at a time. Throughput (messages per minute for scripted, off-script and booking turns) is measured during the hand test and stated in the README as a limit. It is not estimated in advance.
+*   One Jev call per customer message, plus one Jev draft check and one Haiku call for off-script turns. Tokens per message are logged in `message_log` so cost per conversation can be reported.
+
+**Rollout and rollback**
+
+*   Workflows, `lib/` and scripts are in git. `scripts/deploy_workflows.py` imports a commit's workflow files into an instance. Rollback is re-importing the previous commit's files.
+*   The n8n image and any community Jev node are pinned to exact versions in `deploy/`. Upgrades are a deliberate change: rerun the fixed tier first.
+*   Data-table changes go through `scripts/setup_tables.py`, which adds missing columns and never drops one. Stage values carry a version, so a row from an older version hands off instead of being misread.
+
+### Additional Resources
+
+*   `concepts_brief.md`: the brainstorm and review decisions this design follows.
+*   Lead Bot (`C:\Users\Yomi\lead-bot`): `src/lead_bot/conversation.py` (gate, opt-out phrases, stage flow, cap), `jev.py` (missing-field rule, retries), `text_questions.py` (question wording), `slots.py` (slot generation and IDs), `guard.py` (draft-check problems), `deploy/` (Caddy and Docker Compose).
+
+### Future Improvements
+
+*   **n8n Cloud pass.** Record what changes on n8n Cloud: the Jev node install, env access in Code nodes, data tables, and moving Meta's single callback URL there and back. Notes only, no Cloud-specific build.
+*   **More calculated prices.** Mixed services, add-ons and quotes, if hand tests show customers ask for them.
+*   **Address parsing beyond the ZIP code.** Only if the "12345 Oak Ave" limit shows up in hand tests.
+*   **Owner booking actions from Slack.** Move or cancel a booking with a button, instead of by hand in the calendar.
+
+--------------------------------------------------------------------------------
+
+## Detailed Implementation Plan
+
+**Who does what.** The author builds and connects every workflow in the n8n editor. The code is written in the repo: the logic modules in `lib/`, the Code-node call blocks, the scripts, the mock server and the tests. Every Code node that runs ported logic starts with a marker line, `// @lib <module>`, followed by a generated region and a short call block written by hand:
+
+```
+// @lib price
+...generated: lib/price.js and the modules it uses...
+// @end-lib
+return [{ json: { problems: checkDraftPrices($json.draft, $json.prices, $json.total) } }];
+```
+
+`scripts/build_code_nodes.js` fills the generated region from `lib/`. Its `--check` mode fails if a generated region in `workflows/` differs from `lib/`, which catches a fix made in the editor and not copied back. The call block below `// @end-lib` is free to edit in the editor.
+
+**Working loop.** Build or change a workflow in the editor of the dry-run instance → `scripts/export_workflows.py` saves it to `workflows/` → `node scripts/build_code_nodes.js` refreshes the generated regions → `scripts/deploy_workflows.py --instance dryrun` re-imports it → `tests/replay.py`. The live instance is only ever deployed from git with `deploy_workflows.py --instance live`.
+
+### Build order
+
+Spikes come first. Each one records its result in `docs/spikes.md`, and where the Technical Plan gives two branches, the result picks one. The build then follows the cut-line order: each step leaves something that can be shown, so if time runs short the later steps are cut.
+
+| Step | What | Who |
+| --- | --- | --- |
+| S0 | Register the 24-hour template on the test number (runs in the background) | Author, in Meta |
+| S1–S7 | Spikes 1–7 (below) | Author runs them; code writes probes and records results |
+| A | Deploy, data tables, `lib/` core, ingress, processor, gate, classify, answer, book, send, log, mock server, fixed tier | Both |
+| B | `docs/meta-setup.md` from real failures, captured fixtures, hand test | Author; code redacts fixtures |
+| C | Handoff alert and "Return to bot" | Both |
+| D | Slack relay, pending messages, "Send template" | Both |
+| E | `crm-sync` and HubSpot scenarios; `sheets-log` | Both |
+| F | Live-model tier and guard-removal run; adapter contract test | Code; author supplies test accounts |
+| G | `doctor` | Both |
+
+**Spikes** (from the concepts brief, in order):
+
+1.  **Jev node.** Options set by expression, a probability for every field in one call, confidence for pick-one questions, error on a missing field, a second fixed question set (draft check), the new `price_service` and `price_hours` fields, a settable base URL, and whether it installs on Cloud. Capture the raw request and response in a scratch folder, never inside `lead-bot`. Result picks the node, or the HTTP Request fallback inside `classify`.
+2.  **Meta ingress.** GET handshake; raw body in the Webhook node; HMAC with emoji and non-ASCII text; `crypto` in Code nodes (`NODE_FUNCTION_ALLOW_BUILTIN=crypto`). Set up the WhatsApp Trigger once and record its behaviour.
+3.  **Concurrency and data tables.** Whether the concurrency limit is per workflow or per instance; whether a respond-immediately Webhook answers while a run waits; whether waited-on sub-workflows count toward the limit. Data tables: duplicate key, filter by `slack_thread_ts`, the API that `setup_tables.py` uses. Result picks the processor branch (section 4).
+4.  **Slack.** URL challenge; signing of JSON and form-encoded bodies; retry headers; fields that mark bot posts and subtypes; user IDs on clicks; whether one workflow can hold two Webhook triggers.
+5.  **Meta 24-hour window.** Whether an out-of-window send fails at once (with which error code) or later as a `failed` status.
+6.  **HubSpot.** Search lag after create, a unique phone property, custom stages on the free plan, private-app scopes.
+7.  **Stubbing.** Env-based base URLs, whether a fake adapter can be imported with the live adapter's workflow ID (so callers need no change), env access from Code nodes, waiting for completion through the executions API, the fixed clock.
+
+### Target Files to Create/Modify
+
+#### 1. `deploy/docker-compose.live.yml` (Create)
+
+*   **Type / Scope**: Deployment.
+*   **Proposed Changes**: n8n (pinned image) and Caddy, on the same pattern as Lead Bot's `deploy/`. n8n env: `INSTANCE_ROLE=live`, `NODE_FUNCTION_ALLOW_BUILTIN=crypto`, `GENERIC_TIMEZONE` set to the business time zone. Volumes for n8n data. Reads secrets from `deploy/live.env`.
+
+#### 2. `deploy/docker-compose.dryrun.yml` (Create)
+
+*   **Type / Scope**: Deployment (local only).
+*   **Proposed Changes**: n8n (same pinned image) and the mock server on a private network, no published ports except the editor on localhost. Env: `INSTANCE_ROLE=dryrun`, base URLs for Meta, Jev and Anthropic pointed at the mock server, `REPLAY_SECRET`, and the replay-only settings (`FIXED_CLOCK`, `GUARDS_OFF`, `FIXTURE_MODE`), which the harness sets per scenario through the mock server rather than by restarting.
+
+#### 3. `deploy/Caddyfile` (Create)
+
+*   **Type / Scope**: Reverse proxy config.
+*   **Proposed Changes**: HTTPS for the public n8n host. Only `/webhook/*` and the editor (behind basic auth) are routed.
+
+#### 4. `deploy/live.env.example`, `deploy/dryrun.env.example` (Create)
+
+*   **Type / Scope**: Config templates.
+*   **Proposed Changes**: Every env variable with a placeholder: `META_APP_SECRET`, `META_VERIFY_TOKEN`, `META_PHONE_NUMBER_ID`, `SLACK_SIGNING_SECRET`, `SLACK_ALLOWED_USERS`, `SLACK_CHANNEL_ID`, `BUSINESS_TZ` (default `America/New_York`), `ALERT_EMAIL`, `REPLAY_SECRET` (dry-run only). Credentials that n8n holds itself (Google, Slack bot token, HubSpot, Anthropic, Jev, and SMTP for the `error` workflow's email backup) are listed with the scopes they need.
+
+#### 5. `.gitignore` (Create)
+
+*   **Type / Scope**: Repo config.
+*   **Proposed Changes**: `deploy/*.env`, `node_modules/`, `tests/captures/` (raw unredacted webhooks), `__pycache__/`.
+
+#### 6. `package.json` (Create)
+
+*   **Type / Scope**: Node tooling.
+*   **Proposed Changes**: Scripts `test` (`node --test lib/`), `build` and `check` (`scripts/build_code_nodes.js`, with and without `--check`). One dev dependency: `luxon`, the date library n8n's Code nodes already provide, so `lib/slots.js` tests use the same library. No runtime dependencies, because Code nodes can't load them.
+
+#### 7. `lib/config.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: The one config table: hazard order, thresholds (hazard 0.5, answer confidence 0.5, draft check 0.3), unclear limit (2), Jev retries (2 within about 15 s), draft cap (600), slots offered (3), stuck-row alert (5 min), CRM alert rate (1 per hour).
+
+#### 8. `lib/gate.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: `keyword(text)` → `stop | start | null` (whole message, trimmed, any case: STOP, UNSUBSCRIBE, CANCEL, END, QUIT; START). `isExplicitOptOut(text)` ported from Lead Bot's `OPT_OUT_PHRASES` and `STARTS_WITH_STOP`. `slotShortcut(text, offeredCount, botAskedSinceHuman)` → slot index or null.
+
+#### 9. `lib/rules.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: `checkComplete(answers, questionSet)` throws on any missing field. `route(answers, stage, conversation)` → `{ route, reason }`: first hazard at or above threshold, then low-confidence `answer` as `unclear`, then the unclear-in-a-row rule with the `prompt_epoch` exemption.
+
+#### 10. `lib/questions.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: Builds the Jev question sets: hazards (wording adapted from `text_questions.py`, plus `prompt_injection`), the stage's pick-one `answer` options with the escape options, `price_service` from the sheet's services, `price_hours` (1–8, `not_stated`), and the draft-check set (`unsupported_fact`, `claims_action`, `promise`, `leaks_rules`, `off_brand`). Also the context line used when the owner spoke last.
+
+#### 11. `lib/stages.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: The stage table from section 8 with a version number. `next(conversation, routeResult, facts)` → the new stage, the reply kind, and the fields to update. Unknown stage or version → handoff.
+
+#### 12. `lib/price.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: `priceFacts(prices, service, hours)` → the price rows plus at most one calculated line (hourly service × 1–8 hours). `findAmounts(text)` → normalised cents for `$80`, `$80.00`, `80 dollars`, `80 bucks`. `checkDraftPrices(draft, prices, total)` → `['price_mismatch']` or `[]`, matching each amount to a row for a service named in the same sentence, or to the calculated total.
+
+#### 13. `lib/zip.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: `findZip(text)` → the last 5-digit group (optionally `-1234`) or null. `inArea(zip, serviceAreas)`.
+
+#### 14. `lib/slots.js` (Create)
+
+*   **Type / Scope**: Logic module, port of Lead Bot's `slots.py`.
+*   **Proposed Changes**: `freeSlots({ now, hours, busy, duration, gap, minNotice, count, DateTime })` → slots with IDs `slot-%Y%m%dT%H%MZ` and AM/PM labels in `BUSINESS_TZ`. `DateTime` is passed in, so n8n's built-in Luxon is used in the node and the dev copy in tests. `stillAllowed(slotId, now, ...)` for book check 2.
+
+#### 15. `lib/draft_checks.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: Code checks `empty`, `too_long`, `promises_follow_up` (Lead Bot's regex) and a call to `checkDraftPrices`. `mergeProblems(jevAnswers, codeProblems, guardsOff)` → the final problem list; `guardsOff` is applied only after checking, so the Jev request never changes (section 12).
+
+#### 16. `lib/texts.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: Every fixed customer-facing line: stage questions, opt-out confirmation (with "send START to undo"), START reply, unsupported kind, out of area, prompt injection, off-topic, repeat, later, `NOT_IN_FACTS` line, blocked-draft fallback, facts-sheet unavailable.
+
+#### 17. `lib/writer_prompt.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: Builds the Haiku system and user messages from the facts copy, approved price facts and the customer's question, with the `NOT_IN_FACTS` instruction.
+
+#### 18. `lib/slack_text.js` (Create)
+
+*   **Type / Scope**: Logic module.
+*   **Proposed Changes**: `toPlain(text)` turns Slack links, mentions and `&amp;`/`&lt;`/`&gt;` into plain text. `isTeamNote(text)` for the `//` prefix. `handoffPost(conversation, reason, recent)` builds the first thread post and buttons.
+
+#### 19. `lib/mask.js`, `lib/signatures.js` (Create)
+
+*   **Type / Scope**: Logic modules.
+*   **Proposed Changes**: `maskNumber(waId)` → last 4 digits. `verifyMeta(rawBody, header, secret)` and `verifySlack(rawBody, timestamp, header, secret, now)` with constant-time comparison; `crypto` is passed in so tests and nodes share the code.
+
+#### 20. `lib/test/*.test.js` (Create)
+
+*   **Type / Scope**: Unit tests (`node --test`).
+*   **Proposed Changes**: One file per module. Must include: every keyword in mixed case and "Stop." and "cancel my booking" (not a keyword); the "12345 Oak Ave" and "12345 Main St, 78701" cases; `$120.00` matching `$120`; `$25` named with the deep clean failing; an uncalculated total failing; slots across a DST change and at closing time; HMAC with emoji; a missing Jev field throwing.
+
+#### 21. `scripts/build_code_nodes.js` (Create)
+
+*   **Type / Scope**: Build script (Node, no dependencies).
+*   **Proposed Changes**: For each `workflows/*.json`, finds Code nodes whose code starts with `// @lib <module>`, bundles the module and its `lib/` imports into one function scope, and rewrites the region up to `// @end-lib`. `--check` exits non-zero on any difference and names the node. Also refuses files that contain secret-like strings.
+
+#### 22. `scripts/export_workflows.py`, `scripts/deploy_workflows.py` (Create)
+
+*   **Type / Scope**: Scripts (Python, standard library, n8n public API).
+*   **Proposed Changes**: Export: one file per workflow into `workflows/`, with volatile fields (timestamps, version IDs, pin data) removed so diffs stay readable. Deploy: imports `workflows/*.json` into the named instance. For `dryrun`, each `workflows/fakes/<adapter>.json` replaces the live adapter under the same workflow ID; for `live`, the fakes and `ingress-replay` are skipped. Activates the trigger workflows.
+
+#### 23. `scripts/setup_tables.py` (Create)
+
+*   **Type / Scope**: Script.
+*   **Proposed Changes**: Creates or updates the data tables in section 13 through n8n's API: adds missing columns, never drops any. Same schema on both instances, plus `outbox` on dry-run only.
+
+#### 24. `workflows/*.json` (Create, built by the author in the editor)
+
+*   **Type / Scope**: n8n workflow exports.
+*   **Proposed Changes**: One file per workflow in section 2: `ingress-whatsapp`, `ingress-slack-events`, `ingress-slack-interactivity`, `ingress-replay`, `processor`, `conversation`, `classify`, `answer`, `book`, `handoff`, `owner-relay`, `owner-release`, `send`, `log`, `crm-sync`, `sheets-log`, the four adapters, `doctor`, `error`. Code nodes use the `// @lib` marker.
+
+#### 25. `workflows/fakes/*.json` (Create)
+
+*   **Type / Scope**: Fake adapter workflows.
+*   **Proposed Changes**: `calendar-adapter`, `sheets-adapter`, `slack-adapter`, `hubspot-adapter`, each with the live adapter's workflow ID and the same inputs and outputs, calling the mock server with an HTTP Request node. If spike 1 finds no settable base URL for Jev, a fake `classify` is added here too.
+
+#### 26. `docs/build-guide.md` (Create)
+
+*   **Type / Scope**: Author's build notes.
+*   **Proposed Changes**: Per workflow, in build order: the trigger, the nodes in sequence, which Code nodes take which `// @lib` module and call block, and the inputs and outputs of each sub-workflow. Written one workflow ahead of the build, so the author wires from it.
+
+#### 27. `tests/mock_server.py` (Create)
+
+*   **Type / Scope**: Test service (Python standard library).
+*   **Proposed Changes**: Answers as Meta's send API (including scripted 24-hour refusals), Jev, Anthropic and the four fake adapters. Records every call. `POST /_scenario` loads a scenario's scripted answers, clock and guard switches; `GET /_calls` returns the record. In live-model mode it passes Jev and Anthropic calls through to the real services.
+
+#### 28. `tests/replay.py` (Create)
+
+*   **Type / Scope**: Replay harness.
+*   **Proposed Changes**: `--tier fixed | live`, `--remove-guards`, `--only <scenario>`. Per scenario: reset tables, load the scenario into the mock server, send its events (signed, unsigned or wrong) to the ingress or `ingress-replay` webhooks, wait for the inbox to empty, then assert route, sends, rows, Slack posts, HubSpot calls and guard problems. Prints "passed X of Y" per tier, and for the removal run "N of M guards shown to matter".
+
+#### 29. `tests/scenarios.toml` (Create)
+
+*   **Type / Scope**: Test data.
+*   **Proposed Changes**: One entry per CUJ and per guard. At least: every gate step; each hazard; each draft-check problem with one planted draft that trips only that problem; price list, calculated total and wrong-service price; ZIP in area, out of area, missing twice, and "12345 Oak Ave"; booking, slot taken twice, slot expired after release; handoff, relay, `//` note, non-allowed user, release with and without a hand-made booking, double release; 24-hour pending message sent after the template reply, and STOP as the template reply; HubSpot first enquiry, repeat, booked, down; Sheets down; duplicate Meta and Slack deliveries; a live-instance check that ignores guard switches.
+
+#### 30. `tests/fixtures/` and `tests/redact_fixture.py` (Create)
+
+*   **Type / Scope**: Test data and tool.
+*   **Proposed Changes**: Real Meta and Slack webhook bodies captured during step B. The redaction tool replaces phone numbers and names, then re-signs the body with the test secret. Raw captures stay in the git-ignored `tests/captures/`.
+
+#### 31. `tests/adapter_contract.py` (Create)
+
+*   **Type / Scope**: Contract test, run by hand before each live-tier run.
+*   **Proposed Changes**: Runs the same inputs through each live adapter (test calendar, test sheet, test channel, HubSpot test portal) and each fake, and fails if the output shapes differ.
+
+#### 32. `tests/facts-template.csv` (Create)
+
+*   **Type / Scope**: Test data.
+*   **Proposed Changes**: The frozen facts sheet the fake `sheets-adapter` serves: `facts`, `prices` (regular clean per hour, deep clean, oven clean, with durations), `service_areas` (a handful of ZIP codes), `hours`.
+
+#### 33. `docs/spikes.md`, `docs/meta-setup.md`, `docs/hand-test.md` (Create)
+
+*   **Type / Scope**: Evidence documents.
+*   **Proposed Changes**: Spike results with the date, what was tried and the branch chosen. Meta setup steps and every failure (symptom, how found, fix), including those caused on purpose. Hand-test runs on the test number: script, counts, reply times, and what counts as one passed hand test.
+
+#### 34. `README.md` (Create)
+
+*   **Type / Scope**: Portfolio front page.
+*   **Proposed Changes**: The two headlines with their measured numbers; architecture diagram; the carried over / changed / new table against Lead Bot; plain definitions (relay, release, episode, template message); what the customer sees on release; privacy notes; measured throughput as a limit; the community-node note for Cloud; how to run the replay.
+
+### Verification Plan
+
+*   **Unit tests**: `npm test`, all passing.
+*   **Build check**: `npm run check`, no drift between `lib/` and `workflows/`.
+*   **Fixed tier**: `python tests/replay.py --tier fixed` passes every scenario, reported as "passed X of Y".
+*   **Guard-removal run**: `python tests/replay.py --remove-guards`: every guard's scenario fails when only that guard is off.
+*   **Adapter contract**: `python tests/adapter_contract.py` passes before each live-tier run.
+*   **Live-model tier**: `python tests/replay.py --tier live`, reported separately and never combined with the fixed tier.
+*   **Hand test**: the runs in `docs/hand-test.md` on the real test number, reported as their own count with reply times.
+*   **Delivery evidence**: every failure listed in Goal 2 has an entry in `docs/meta-setup.md`.
 
 --------------------------------------------------------------------------------
 

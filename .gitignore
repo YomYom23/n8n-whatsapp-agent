@@ -4,3 +4,4 @@ tests/captures/
 __pycache__/
 .staging/
 scratch/
+docs/build-guide.md

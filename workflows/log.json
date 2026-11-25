@@ -1,0 +1,260 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "log:row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "log:row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Insert row",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "MmzCFtBICmiFgEDP",
+  "name": "log",
+  "nodes": [
+    {
+      "id": "fe945a4e-3480-49aa-8325-63aeed4d395b",
+      "name": "Insert row",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "logged_at",
+              "id": "logged_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "direction",
+              "id": "direction",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "author",
+              "id": "author",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "text",
+              "id": "text",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "route",
+              "id": "route",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "stage",
+              "id": "stage",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "classifier",
+              "id": "classifier",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "draft",
+              "id": "draft",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "problems",
+              "id": "problems",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "facts_version",
+              "id": "facts_version",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "workflow_version",
+              "id": "workflow_version",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "input_tokens",
+              "id": "input_tokens",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "output_tokens",
+              "id": "output_tokens",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "reply_ms",
+              "id": "reply_ms",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            }
+          ],
+          "value": {}
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "message_log",
+          "cachedResultUrl": "/projects/lekCoLDLh5z5Jh7L/datatables/__table:message_log__",
+          "mode": "list",
+          "value": "__table:message_log__"
+        },
+        "options": {}
+      },
+      "position": [
+        448,
+        0
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "ed312152-7802-4132-8882-2b2a94e5d870",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3
+    },
+    {
+      "id": "f425523f-a5fd-4cd7-9bc3-d232a00e2aab",
+      "name": "log:row",
+      "parameters": {
+        "jsCode": "const i = $input.first().json;\nconst json = (v) => (v === undefined || v === null || v === '' ? '' : typeof v === 'string' ? v : JSON.stringify(v));\nreturn [{ json: {\n  logged_at: i.logged_at || i.now, wa_id: i.wa_id || '', direction: i.direction, author: i.author,\n  kind: i.kind || 'text', text: i.text || '', route: i.route || '', stage: i.stage || '',\n  classifier: json(i.classifier), draft: i.draft || '', problems: json(i.problems),\n  facts_version: i.facts_version || '', execution_id: String(i.execution_id || $execution.id),\n  workflow_version: i.workflow_version || '', input_tokens: Number(i.input_tokens || 0),\n  output_tokens: Number(i.output_tokens || 0), reply_ms: i.reply_ms == null ? null : Number(i.reply_ms),\n} }];"
+      },
+      "position": [
+        224,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "executionOrder": "v1"
+  }
+}

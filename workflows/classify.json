@@ -1,0 +1,103 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "typesafe:evaluate",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "typesafe:evaluate": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "classify:normalise",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "classify:normalise",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "9ppS8VgN3zaFkt5Q",
+  "name": "classify",
+  "nodes": [
+    {
+      "id": "a90167a2-1a36-43b9-a5e7-1d0e3b6068e3",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "096819d2-4b52-434e-a85c-48480742c4bb",
+      "name": "classify:normalise",
+      "parameters": {
+        "jsCode": "// @lib rules\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['rules'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Rules applied in code to the classifier result (design sections 7 and 8).\n\n  const config = require('./config');\n\n  // Escape options that reset the unclear counter, raise it, or leave it alone (section 7).\n  const COUNTER_RAISED_BY = ['unclear', 'off_topic'];\n  const COUNTER_UNCHANGED_BY = ['repeat', 'booking_request'];\n\n  function isProbability(p) {\n    return typeof p === 'number' && Number.isFinite(p) && p >= 0 && p <= 1;\n  }\n\n  function isPickAnswer(a) {\n    return a !== null && typeof a === 'object' && typeof a.value === 'string' && isProbability(a.confidence);\n  }\n\n  // Throws if any question of the set has no usable field in the normalised result. A missing\n  // field is a failed call, never a probability of 0.\n  function checkComplete(result, questionSet) {\n    if (result === null || typeof result !== 'object' || result.ok !== true) {\n      throw new Error('classifier result is not ok');\n    }\n    for (const key of Object.keys(questionSet)) {\n      if (config.HAZARD_ORDER.includes(key)) {\n        if (!result.hazards || !isProbability(result.hazards[key])) throw new Error('missing field: hazards.' + key);\n      } else if (config.DRAFT_JEV_PROBLEMS.includes(key)) {\n        if (!result.problems || !isProbability(result.problems[key])) throw new Error('missing field: problems.' + key);\n      } else if (!isPickAnswer(result[key])) {\n        throw new Error('missing field: ' + key);\n      }\n    }\n  }\n\n  function fillMissing(result, questionSet) {\n    for (const key of Object.keys(questionSet)) {\n      if (config.HAZARD_ORDER.includes(key)) {\n        result.hazards = result.hazards || {};\n        if (!isProbability(result.hazards[key])) result.hazards[key] = 0;\n      } else if (config.DRAFT_JEV_PROBLEMS.includes(key)) {\n        result.problems = result.problems || {};\n        if (!isProbability(result.problems[key])) result.problems[key] = 0;\n      } else if (!isPickAnswer(result[key])) {\n        result[key] = { value: key === 'answer' ? 'unclear' : 'not_stated', confidence: 0 };\n      }\n    }\n  }\n\n  function failure(error) {\n    return { ok: false, error };\n  }\n\n  // Turns the node's Evaluate output into the normalised result. item.answers is keyed by question ID:\n  //   noul:   { type: 'noul', noul: 0.98 }\n  //   choice: { type: 'choice', choice: 'x', confidence: 0.76, probabilities: {...} }\n  // Returns { ok: true, hazards, answer, price_service, price_hours } (stage set, without the pick\n  // questions the set lacks), { ok: true, problems } (draft-check set), or { ok: false, error }\n  // when the item is unusable or any expected field is missing.\n  // enabled: the node's generated @guards list. Without 'missing_field' in it, a missing field is\n  // filled in (0 for a probability, 'unclear' or 'not_stated' for a pick) instead of failing the call:\n  // the behaviour the guard prevents, used only by the guard-removal run. Omitted means every guard is on.\n  function normalise(item, questionSet, enabled) {\n    if (item === null || typeof item !== 'object') return failure('no evaluate output');\n    if (item.error) return failure(String(item.error.message || item.error));\n    const answers = item.answers;\n    if (answers === null || typeof answers !== 'object') return failure('no answers in evaluate output');\n\n    const result = { ok: true };\n    for (const key of Object.keys(questionSet)) {\n      const a = answers[key];\n      if (a === null || typeof a !== 'object') continue;\n      if (config.HAZARD_ORDER.includes(key)) {\n        result.hazards = result.hazards || {};\n        if (typeof a.noul === 'number') result.hazards[key] = a.noul;\n      } else if (config.DRAFT_JEV_PROBLEMS.includes(key)) {\n        result.problems = result.problems || {};\n        if (typeof a.noul === 'number') result.problems[key] = a.noul;\n      } else if (typeof a.choice === 'string') {\n        const options = questionSet[key].criteria || {};\n        // An option the question never offered counts as missing.\n        if (Object.prototype.hasOwnProperty.call(options, a.choice)) {\n          result[key] = { value: a.choice, confidence: a.confidence };\n        }\n      }\n    }\n    if (Array.isArray(enabled) && !enabled.includes('missing_field')) fillMissing(result, questionSet);\n    try {\n      checkComplete(result, questionSet);\n    } catch (error) {\n      return failure(error.message);\n    }\n    return result;\n  }\n\n  // Decides what a classifier result means at a stage. Returns { route, reason, unclearInARow }:\n  //   a hazard:           route = the hazard name, reason 'hazard'\n  //   an escape option:   route = the option (low confidence counts as 'unclear'), reason 'escape'\n  //                       or 'low_confidence'\n  //   a stage answer:     route 'stage_answer', reason = the answer's option ID\n  //   two unclear/off_topic in a row, or a failed call: route 'handoff', reason 'unclear' or 'jev_unavailable'\n  // unclearInARow is the counter to store. The address stage asks hazards only, so its message is\n  // always a stage answer.\n  // enabled: the node's generated @guards list; a hazard is checked only while 'hazard_<name>' is in it.\n  // Omitted means every guard is on.\n  function route(result, stage, conversation, enabled) {\n    const before = Number((conversation && conversation.unclear_in_a_row) || 0);\n    if (!result || result.ok !== true) return { route: 'handoff', reason: 'jev_unavailable', unclearInARow: before };\n\n    for (const hazard of config.HAZARD_ORDER) {\n      if (Array.isArray(enabled) && !enabled.includes('hazard_' + hazard)) continue;\n      if (result.hazards[hazard] >= config.THRESHOLDS.hazard) {\n        return { route: hazard, reason: 'hazard', unclearInARow: before };\n      }\n    }\n    if (stage === 'address') return { route: 'stage_answer', reason: 'address_text', unclearInARow: 0 };\n\n    const lowConfidence = result.answer.confidence < config.THRESHOLDS.answerConfidence;\n    const option = lowConfidence ? 'unclear' : result.answer.value;\n    const isEscape = config.ESCAPE_OPTIONS.includes(option);\n\n    let unclearInARow = before;\n    if (COUNTER_RAISED_BY.includes(option)) unclearInARow = before + 1;\n    else if (!COUNTER_UNCHANGED_BY.includes(option)) unclearInARow = 0;\n\n    if (COUNTER_RAISED_BY.includes(option) && unclearInARow >= config.LIMITS.unclearInARow) {\n      return { route: 'handoff', reason: 'unclear', unclearInARow };\n    }\n    if (isEscape) return { route: option, reason: lowConfidence ? 'low_confidence' : 'escape', unclearInARow };\n    return { route: 'stage_answer', reason: option, unclearInARow };\n  }\n\n  module.exports = { checkComplete, normalise, route };\n  return module.exports;\n})();\nconst { checkComplete, normalise, route } = __lib['rules'];\n// @end-lib\nconst ENABLED_GUARDS = ['missing_field']; // @guards\nconst input = $('When Executed by Another Workflow').first().json;\nconst item = $input.first().json;\nreturn [{ json: { set: input.set, ...normalise(item, input.questions, ENABLED_GUARDS) } }];"
+      },
+      "position": [
+        448,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "credentials": {
+        "typeSafeAiApi": {
+          "name": "TypeSafe AI"
+        }
+      },
+      "id": "f0f4689e-41c4-4150-ae9e-9bd8333aa0f4",
+      "maxTries": 3,
+      "name": "typesafe:evaluate",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "cachedResultName": "jev-latest",
+          "mode": "list",
+          "value": "jev-latest"
+        },
+        "operation": "evaluate",
+        "options": {
+          "simplify": false,
+          "timeout": 4000
+        },
+        "questionsFormat": "json",
+        "questionsJson": "={{ JSON.stringify($json.questions) }}",
+        "stateFormat": "json",
+        "stateJson": "={{ JSON.stringify($json.state) }}"
+      },
+      "position": [
+        224,
+        0
+      ],
+      "retryOnFail": true,
+      "type": "@typesafe-ai/n8n-nodes-typesafe-ai.typeSafeAi",
+      "typeVersion": 1,
+      "waitBetweenTries": 1000
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

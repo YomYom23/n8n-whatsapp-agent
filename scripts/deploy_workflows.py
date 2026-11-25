@@ -145,15 +145,22 @@ def main():
         n8n_cli.n8n(args.instance, "rm", "-rf", CONTAINER_DIR, user="root")
     print("\n".join(l for l in out.splitlines() if "license SDK" not in l and l.strip()))
 
+    # n8n refuses to publish a workflow before the sub-workflows it calls, so publish in passes:
+    # each pass retries what failed, until a pass publishes nothing new.
+    pending = [wf for wf in staged if wl.has_trigger(wf)]
     failed = []
-    for wf in staged:
-        if not wl.has_trigger(wf):
-            continue
-        status, body = api.call("POST", "/workflows/%s/activate" % wf["id"])
-        if status >= 300:
-            failed.append("%s: %s %s" % (wf["name"], status, str(body)[:300]))
-        else:
-            print("published %s" % wf["name"])
+    while pending:
+        failed, retry = [], []
+        for wf in pending:
+            status, body = api.call("POST", "/workflows/%s/activate" % wf["id"])
+            if status >= 300:
+                failed.append("%s: %s %s" % (wf["name"], status, str(body)[:300]))
+                retry.append(wf)
+            else:
+                print("published %s" % wf["name"])
+        if len(retry) == len(pending):
+            break
+        pending = retry
     if failed:
         sys.exit("could not publish:\n  " + "\n  ".join(failed))
     if args.remove_guard:

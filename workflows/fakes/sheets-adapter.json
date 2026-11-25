@@ -1,0 +1,87 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "fake:call",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "fake:call": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "fake:result",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "fake:result",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "ZH0uq96AjSZJkI5i",
+  "name": "sheets-adapter",
+  "nodes": [
+    {
+      "id": "ffe69a9c-e988-498d-b22f-48c2979776ef",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3
+    },
+    {
+      "id": "748b6968-49ab-4e85-b3da-0194ccc95186",
+      "name": "fake:call",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "method": "POST",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "={{ $env.MOCK_URL }}/adapter/sheets"
+      },
+      "position": [
+        224,
+        0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5
+    },
+    {
+      "id": "bd189b8b-897d-42e3-83e6-524d657f330d",
+      "name": "fake:result",
+      "parameters": {
+        "jsCode": " const r = $input.first().json;\n if (r.error && r.ok === undefined) return [{ json: { ok: false, error: { kind: 'unavailable', message: String(r.error.message || r.error) } } }];\n return [{ json: r }];"
+      },
+      "position": [
+        416,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "executionOrder": "v1"
+  }
+}

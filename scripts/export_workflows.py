@@ -93,7 +93,9 @@ def main():
         if args.instance == "dryrun":
             dest = (FAKES if wl.is_adapter(name) or name in wl.DRYRUN_ONLY else WORKFLOWS) / wl.file_name(name)
             try:
-                out = wl.undo_dryrun_changes(out, read_json(dest))
+                # fake adapters call the mock by design (their URL is the mock's), so nothing to undo
+                if not wl.is_adapter(name):
+                    out = wl.undo_dryrun_changes(out, read_json(dest))
             except wl.DeployError as e:
                 sys.exit(str(e))
         else:

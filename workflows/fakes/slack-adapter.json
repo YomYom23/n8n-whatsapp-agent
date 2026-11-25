@@ -1,0 +1,87 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "fake:call",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "fake:call": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "fake:result",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "fake:result",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "1y7I33XeHXVkDq6P",
+  "name": "slack-adapter",
+  "nodes": [
+    {
+      "id": "3c10a8d3-4f32-401e-9bdd-452564b24729",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        -96,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3
+    },
+    {
+      "id": "a28ab2cc-9151-40a0-b5c1-154c7a071116",
+      "name": "fake:call",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "method": "POST",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "={{ $env.MOCK_URL }}/adapter/slack"
+      },
+      "position": [
+        128,
+        0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5
+    },
+    {
+      "id": "1598bfbc-824f-4109-ae89-59d6bfa3abae",
+      "name": "fake:result",
+      "parameters": {
+        "jsCode": " const r = $input.first().json;\n if (r.error && r.ok === undefined) return [{ json: { ok: false, error: { kind: 'unavailable', message: String(r.error.message || r.error) } } }];\n return [{ json: r }];"
+      },
+      "position": [
+        320,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,1911 @@
+{
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "clock:now",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "clock:now": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease: get",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "conversation": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: done",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "inbox: failed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "conversation:input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "conversation",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "event:switch": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "conversation:input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "conversation:input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "send_failed:log-input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "todo:P5",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "todo:P5",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "guard:dedup": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: mark duplicate",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "inbox: mark handling",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "holds?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "stuck: get",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: done": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease: get (renew)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: failed": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease: get (renew)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: mark duplicate": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease: get (renew)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: mark handling": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "event:switch",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: received": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox:oldest",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: same id": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "processor:pick",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox:oldest": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "none?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "lease: get": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease:decide",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "lease: get (renew)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease:renew",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "lease: read back": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease:check",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "lease: upsert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease: read back",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "lease: upsert (renew)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "loop:more",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "lease:check": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "holds?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "lease:decide": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "take?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "lease:renew": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease: upsert (renew)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "log: send_failed": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: done",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "loop:more": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "more?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "more?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: received",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "none?": {
+      "main": [
+        null,
+        [
+          {
+            "index": 0,
+            "node": "inbox: same id",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "processor:pick": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "guard:dedup",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "send_failed:log-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "log: send_failed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "stuck: get": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "stuck:find",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "inbox: received",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "stuck:find": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: mark stuck failed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "take?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "lease: upsert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "todo:P5": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: done",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "dOjGSp8TFtQg5kYs",
+  "name": "processor",
+  "nodes": [
+    {
+      "id": "6968db3f-0664-43dd-a41a-653c0e3b57e5",
+      "name": "Schedule Trigger",
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "ce71f7fc-48ca-435d-a6dc-aa3f0837b922",
+      "name": "clock:now",
+      "parameters": {
+        "jsCode": "return [{ json: { now: new Date().toISOString() } }];"
+      },
+      "position": [
+        220,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "6cfbf000-4743-414b-b8ab-e3ac4288a5aa",
+      "name": "conversation",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "conversation",
+          "mode": "list",
+          "value": "cPu4srfRdPZXZc19"
+        }
+      },
+      "position": [
+        4180,
+        100
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "be0de965-7db4-446c-bbcd-64145f8c8f0e",
+      "name": "conversation:input",
+      "parameters": {
+        "jsCode": "const p = $('processor:pick').first().json;\nreturn [{ json: { event: p.event, now: $('clock:now').first().json.now, received_at: p.row.received_at } }];"
+      },
+      "position": [
+        3960,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "e8c0aa9b-6261-46b1-b8f0-196cfb32adfd",
+      "name": "event:switch",
+      "parameters": {
+        "options": {},
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "60pk3jr9",
+                    "leftValue": "={{ $('processor:pick').first().json.event.kind }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "text"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "text",
+              "renameOutput": true
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "xnxtjt86",
+                    "leftValue": "={{ $('processor:pick').first().json.event.kind }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "unsupported"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "unsupported",
+              "renameOutput": true
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "91vuthlf",
+                    "leftValue": "={{ $('processor:pick').first().json.event.kind }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "send_failed"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "send_failed",
+              "renameOutput": true
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "6unexcjg",
+                    "leftValue": "={{ $('processor:pick').first().json.event.kind }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "owner_message"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "owner_message",
+              "renameOutput": true
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "903pxzt0",
+                    "leftValue": "={{ $('processor:pick').first().json.event.kind }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "owner_action"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "owner_action",
+              "renameOutput": true
+            }
+          ]
+        }
+      },
+      "position": [
+        3740,
+        200
+      ],
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2
+    },
+    {
+      "id": "344a06bc-58e2-4c0e-bd0e-3250c22a9345",
+      "name": "guard:dedup",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "73hruvjw",
+              "leftValue": "={{ $json.action === 'duplicate' }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        3300,
+        100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "45929989-bc25-4fa6-8afd-48cd2228a003",
+      "name": "holds?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "t4qb8rin",
+              "leftValue": "={{ $json.holds }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        1760,
+        -100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "id": "84d50486-5355-47ae-89f1-05b7ffa1fe7a",
+      "name": "inbox: done",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "external_id",
+              "id": "external_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "received_at",
+              "id": "received_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payload",
+              "id": "payload",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "status": "done"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $('processor:pick').first().json.row.id }}"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        4400,
+        200
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "id": "049e93e1-5e19-4b87-aa54-9550dd747b0b",
+      "name": "inbox: failed",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "external_id",
+              "id": "external_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "received_at",
+              "id": "received_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payload",
+              "id": "payload",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "status": "failed"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $('processor:pick').first().json.row.id }}"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        4400,
+        0
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "id": "cd07d81a-264a-4413-a8bc-95c7f6b86b17",
+      "name": "inbox: mark duplicate",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "external_id",
+              "id": "external_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "received_at",
+              "id": "received_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payload",
+              "id": "payload",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "status": "duplicate"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $('processor:pick').first().json.row.id }}"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        3520,
+        -100
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "id": "c85a0b17-c831-4258-9b85-39e8a0fa64b5",
+      "name": "inbox: mark handling",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "external_id",
+              "id": "external_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "received_at",
+              "id": "received_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payload",
+              "id": "payload",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "execution_id": "={{ $execution.id }}",
+            "status": "handling"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $('processor:pick').first().json.row.id }}"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        3520,
+        200
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "0e158ad1-9168-4dd4-abea-9441899c1783",
+      "name": "inbox: mark stuck failed",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "external_id",
+              "id": "external_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "received_at",
+              "id": "received_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payload",
+              "id": "payload",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "status": "failed"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        2420,
+        -300
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "id": "407e2f4f-d412-46d6-bc51-d499e0bcdaa3",
+      "name": "inbox: received",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "received"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row",
+        "returnAll": true
+      },
+      "position": [
+        2200,
+        0
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "id": "efff4bb7-7984-4ae6-ae28-809ae7b82c03",
+      "name": "inbox: same id",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "external_id",
+              "keyValue": "={{ $json.external_id }}"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row",
+        "returnAll": true
+      },
+      "position": [
+        2860,
+        100
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "d152a348-69ea-4ac0-a3c3-d17eaec38e1b",
+      "name": "inbox:oldest",
+      "parameters": {
+        "jsCode": "const rows = $input.all().map((i) => i.json).filter((r) => r.id);\nif (rows.length === 0) return [{ json: { none: true } }];\nrows.sort((a, b) => Number(a.id) - Number(b.id));\nreturn [{ json: { none: false, external_id: rows[0].external_id } }];"
+      },
+      "position": [
+        2420,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "90826541-d700-4eea-8591-fb3c9a9d7a40",
+      "name": "lease: get",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "processor_lease",
+          "mode": "list",
+          "value": "__table:processor_lease__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "name",
+              "keyValue": "processor"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row"
+      },
+      "position": [
+        440,
+        0
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "id": "d21d4529-de66-45a9-b198-996d3b3e9f09",
+      "name": "lease: get (renew)",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "processor_lease",
+          "mode": "list",
+          "value": "__table:processor_lease__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "name",
+              "keyValue": "processor"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row"
+      },
+      "position": [
+        4620,
+        100
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "id": "fe823e0b-c1a6-448f-bdea-d4658b696410",
+      "name": "lease: read back",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "processor_lease",
+          "mode": "list",
+          "value": "__table:processor_lease__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "name",
+              "keyValue": "processor"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row"
+      },
+      "position": [
+        1320,
+        -100
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "15e3a8e0-2dc2-413d-aced-98384fc6dc78",
+      "name": "lease: upsert",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "name",
+              "id": "name",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "holder",
+              "id": "holder",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "expires_at",
+              "id": "expires_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            }
+          ],
+          "value": {
+            "expires_at": "={{ $('lease:decide').first().json.expires_at }}",
+            "holder": "={{ $execution.id }}",
+            "name": "processor"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "processor_lease",
+          "mode": "list",
+          "value": "__table:processor_lease__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "name",
+              "keyValue": "processor"
+            }
+          ]
+        },
+        "operation": "upsert",
+        "resource": "row"
+      },
+      "position": [
+        1100,
+        -100
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "c53f3f79-e2f3-4f9b-a59d-ef8849ededdc",
+      "name": "lease: upsert (renew)",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "name",
+              "id": "name",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "holder",
+              "id": "holder",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "expires_at",
+              "id": "expires_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            }
+          ],
+          "value": {
+            "expires_at": "={{ $json.expires_at }}",
+            "holder": "={{ $execution.id }}",
+            "name": "processor"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "processor_lease",
+          "mode": "list",
+          "value": "__table:processor_lease__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "name",
+              "keyValue": "processor"
+            }
+          ]
+        },
+        "operation": "upsert",
+        "resource": "row"
+      },
+      "position": [
+        5060,
+        100
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "883cb6e0-f98e-46d8-bc39-bca72ea7f623",
+      "name": "lease:check",
+      "parameters": {
+        "jsCode": "// @lib inbox\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['inbox'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Branch B of design section 5: the processor's lease and its choice of the next inbox row.\n  // Pure: the caller reads the rows with Data table nodes and passes the clock in.\n  const { BRANCH_B } = require('./config');\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    if (value && typeof value.getTime === 'function') return value.getTime();\n    if (value === null || value === undefined || value === '') return NaN;\n    return new Date(value).getTime();\n  }\n\n  // Whether this execution may write itself into the lease: no row, no holder, an expired lease,\n  // or a lease it already holds. Returns { take, expires_at } (expires_at only when take is true).\n  function leaseDecision(leaseRow, executionId, now) {\n    const nowMs = toMillis(now);\n    if (!Number.isFinite(nowMs)) throw new Error('leaseDecision: bad now');\n    const holder = leaseRow && leaseRow.holder ? String(leaseRow.holder) : '';\n    const expires = leaseRow ? toMillis(leaseRow.expires_at) : NaN;\n    const free = !leaseRow || holder === '' || !Number.isFinite(expires) || expires <= nowMs || holder === String(executionId);\n    return free ? { take: true, expires_at: new Date(nowMs + BRANCH_B.leaseSeconds * 1000).toISOString() } : { take: false };\n  }\n\n  // Read-back check after writing the lease: continue only if this execution's ID is there.\n  function holdsLease(leaseRow, executionId) {\n    return Boolean(leaseRow) && String(leaseRow.holder || '') === String(executionId);\n  }\n\n  // Rows left in 'handling' by an execution that no longer holds the lease (marked failed, owner alerted).\n  function stuckRows(rows, executionId) {\n    return (rows || []).filter((r) => r.status === 'handling' && String(r.execution_id || '') !== String(executionId));\n  }\n\n  // The oldest received row (by row ID, which follows arrival order) and what to do with it:\n  // { row, action: 'duplicate' } if another row with the same external_id is handling or done,\n  // { row, action: 'handle' } otherwise, or null when nothing is waiting.\n  function nextAction(rows) {\n    const all = rows || [];\n    const waiting = all.filter((r) => r.status === 'received').sort((a, b) => Number(a.id) - Number(b.id));\n    if (waiting.length === 0) return null;\n    const row = waiting[0];\n    const seen = all.some(\n      (r) => r.id !== row.id && r.external_id === row.external_id && (r.status === 'handling' || r.status === 'done')\n    );\n    return { row, action: seen ? 'duplicate' : 'handle' };\n  }\n\n  // Whether the loop may take another row: stops after loopLimitSeconds so the next run can take over.\n  function keepLooping(startedAt, now) {\n    return toMillis(now) - toMillis(startedAt) < BRANCH_B.loopLimitSeconds * 1000;\n  }\n\n  module.exports = { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping };\n  return module.exports;\n})();\nconst { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping } = __lib['inbox'];\n// @end-lib\nreturn [{ json: { holds: holdsLease($input.first().json, $execution.id) } }];"
+      },
+      "position": [
+        1540,
+        -100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "da75be54-963d-4424-b8be-d4a5ce998ba7",
+      "name": "lease:decide",
+      "parameters": {
+        "jsCode": "// @lib inbox\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['inbox'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Branch B of design section 5: the processor's lease and its choice of the next inbox row.\n  // Pure: the caller reads the rows with Data table nodes and passes the clock in.\n  const { BRANCH_B } = require('./config');\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    if (value && typeof value.getTime === 'function') return value.getTime();\n    if (value === null || value === undefined || value === '') return NaN;\n    return new Date(value).getTime();\n  }\n\n  // Whether this execution may write itself into the lease: no row, no holder, an expired lease,\n  // or a lease it already holds. Returns { take, expires_at } (expires_at only when take is true).\n  function leaseDecision(leaseRow, executionId, now) {\n    const nowMs = toMillis(now);\n    if (!Number.isFinite(nowMs)) throw new Error('leaseDecision: bad now');\n    const holder = leaseRow && leaseRow.holder ? String(leaseRow.holder) : '';\n    const expires = leaseRow ? toMillis(leaseRow.expires_at) : NaN;\n    const free = !leaseRow || holder === '' || !Number.isFinite(expires) || expires <= nowMs || holder === String(executionId);\n    return free ? { take: true, expires_at: new Date(nowMs + BRANCH_B.leaseSeconds * 1000).toISOString() } : { take: false };\n  }\n\n  // Read-back check after writing the lease: continue only if this execution's ID is there.\n  function holdsLease(leaseRow, executionId) {\n    return Boolean(leaseRow) && String(leaseRow.holder || '') === String(executionId);\n  }\n\n  // Rows left in 'handling' by an execution that no longer holds the lease (marked failed, owner alerted).\n  function stuckRows(rows, executionId) {\n    return (rows || []).filter((r) => r.status === 'handling' && String(r.execution_id || '') !== String(executionId));\n  }\n\n  // The oldest received row (by row ID, which follows arrival order) and what to do with it:\n  // { row, action: 'duplicate' } if another row with the same external_id is handling or done,\n  // { row, action: 'handle' } otherwise, or null when nothing is waiting.\n  function nextAction(rows) {\n    const all = rows || [];\n    const waiting = all.filter((r) => r.status === 'received').sort((a, b) => Number(a.id) - Number(b.id));\n    if (waiting.length === 0) return null;\n    const row = waiting[0];\n    const seen = all.some(\n      (r) => r.id !== row.id && r.external_id === row.external_id && (r.status === 'handling' || r.status === 'done')\n    );\n    return { row, action: seen ? 'duplicate' : 'handle' };\n  }\n\n  // Whether the loop may take another row: stops after loopLimitSeconds so the next run can take over.\n  function keepLooping(startedAt, now) {\n    return toMillis(now) - toMillis(startedAt) < BRANCH_B.loopLimitSeconds * 1000;\n  }\n\n  module.exports = { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping };\n  return module.exports;\n})();\nconst { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping } = __lib['inbox'];\n// @end-lib\nconst row = $input.first().json;\nconst lease = row && row.name ? row : null;\nconst now = $('clock:now').first().json.now;\nreturn [{ json: { ...leaseDecision(lease, $execution.id, now), now, startedAt: now } }];"
+      },
+      "position": [
+        660,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "e5209c58-eed3-437f-a4d0-3f470f9400cf",
+      "name": "lease:renew",
+      "parameters": {
+        "jsCode": "// @lib inbox\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['inbox'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Branch B of design section 5: the processor's lease and its choice of the next inbox row.\n  // Pure: the caller reads the rows with Data table nodes and passes the clock in.\n  const { BRANCH_B } = require('./config');\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    if (value && typeof value.getTime === 'function') return value.getTime();\n    if (value === null || value === undefined || value === '') return NaN;\n    return new Date(value).getTime();\n  }\n\n  // Whether this execution may write itself into the lease: no row, no holder, an expired lease,\n  // or a lease it already holds. Returns { take, expires_at } (expires_at only when take is true).\n  function leaseDecision(leaseRow, executionId, now) {\n    const nowMs = toMillis(now);\n    if (!Number.isFinite(nowMs)) throw new Error('leaseDecision: bad now');\n    const holder = leaseRow && leaseRow.holder ? String(leaseRow.holder) : '';\n    const expires = leaseRow ? toMillis(leaseRow.expires_at) : NaN;\n    const free = !leaseRow || holder === '' || !Number.isFinite(expires) || expires <= nowMs || holder === String(executionId);\n    return free ? { take: true, expires_at: new Date(nowMs + BRANCH_B.leaseSeconds * 1000).toISOString() } : { take: false };\n  }\n\n  // Read-back check after writing the lease: continue only if this execution's ID is there.\n  function holdsLease(leaseRow, executionId) {\n    return Boolean(leaseRow) && String(leaseRow.holder || '') === String(executionId);\n  }\n\n  // Rows left in 'handling' by an execution that no longer holds the lease (marked failed, owner alerted).\n  function stuckRows(rows, executionId) {\n    return (rows || []).filter((r) => r.status === 'handling' && String(r.execution_id || '') !== String(executionId));\n  }\n\n  // The oldest received row (by row ID, which follows arrival order) and what to do with it:\n  // { row, action: 'duplicate' } if another row with the same external_id is handling or done,\n  // { row, action: 'handle' } otherwise, or null when nothing is waiting.\n  function nextAction(rows) {\n    const all = rows || [];\n    const waiting = all.filter((r) => r.status === 'received').sort((a, b) => Number(a.id) - Number(b.id));\n    if (waiting.length === 0) return null;\n    const row = waiting[0];\n    const seen = all.some(\n      (r) => r.id !== row.id && r.external_id === row.external_id && (r.status === 'handling' || r.status === 'done')\n    );\n    return { row, action: seen ? 'duplicate' : 'handle' };\n  }\n\n  // Whether the loop may take another row: stops after loopLimitSeconds so the next run can take over.\n  function keepLooping(startedAt, now) {\n    return toMillis(now) - toMillis(startedAt) < BRANCH_B.loopLimitSeconds * 1000;\n  }\n\n  module.exports = { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping };\n  return module.exports;\n})();\nconst { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping } = __lib['inbox'];\n// @end-lib\nconst l = $input.first().json;\nreturn [{ json: leaseDecision(l && l.name ? l : null, $execution.id, $('clock:now').first().json.now) }];"
+      },
+      "position": [
+        4840,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "92b66f46-ce14-448a-8354-d43d4d70fc6b",
+      "name": "log: send_failed",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "log",
+          "mode": "list",
+          "value": "MmzCFtBICmiFgEDP"
+        }
+      },
+      "position": [
+        4180,
+        300
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "92afefed-a2c5-42ed-8dd4-29cdf4a45a6a",
+      "name": "loop:more",
+      "parameters": {
+        "jsCode": "// @lib inbox\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['inbox'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Branch B of design section 5: the processor's lease and its choice of the next inbox row.\n  // Pure: the caller reads the rows with Data table nodes and passes the clock in.\n  const { BRANCH_B } = require('./config');\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    if (value && typeof value.getTime === 'function') return value.getTime();\n    if (value === null || value === undefined || value === '') return NaN;\n    return new Date(value).getTime();\n  }\n\n  // Whether this execution may write itself into the lease: no row, no holder, an expired lease,\n  // or a lease it already holds. Returns { take, expires_at } (expires_at only when take is true).\n  function leaseDecision(leaseRow, executionId, now) {\n    const nowMs = toMillis(now);\n    if (!Number.isFinite(nowMs)) throw new Error('leaseDecision: bad now');\n    const holder = leaseRow && leaseRow.holder ? String(leaseRow.holder) : '';\n    const expires = leaseRow ? toMillis(leaseRow.expires_at) : NaN;\n    const free = !leaseRow || holder === '' || !Number.isFinite(expires) || expires <= nowMs || holder === String(executionId);\n    return free ? { take: true, expires_at: new Date(nowMs + BRANCH_B.leaseSeconds * 1000).toISOString() } : { take: false };\n  }\n\n  // Read-back check after writing the lease: continue only if this execution's ID is there.\n  function holdsLease(leaseRow, executionId) {\n    return Boolean(leaseRow) && String(leaseRow.holder || '') === String(executionId);\n  }\n\n  // Rows left in 'handling' by an execution that no longer holds the lease (marked failed, owner alerted).\n  function stuckRows(rows, executionId) {\n    return (rows || []).filter((r) => r.status === 'handling' && String(r.execution_id || '') !== String(executionId));\n  }\n\n  // The oldest received row (by row ID, which follows arrival order) and what to do with it:\n  // { row, action: 'duplicate' } if another row with the same external_id is handling or done,\n  // { row, action: 'handle' } otherwise, or null when nothing is waiting.\n  function nextAction(rows) {\n    const all = rows || [];\n    const waiting = all.filter((r) => r.status === 'received').sort((a, b) => Number(a.id) - Number(b.id));\n    if (waiting.length === 0) return null;\n    const row = waiting[0];\n    const seen = all.some(\n      (r) => r.id !== row.id && r.external_id === row.external_id && (r.status === 'handling' || r.status === 'done')\n    );\n    return { row, action: seen ? 'duplicate' : 'handle' };\n  }\n\n  // Whether the loop may take another row: stops after loopLimitSeconds so the next run can take over.\n  function keepLooping(startedAt, now) {\n    return toMillis(now) - toMillis(startedAt) < BRANCH_B.loopLimitSeconds * 1000;\n  }\n\n  module.exports = { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping };\n  return module.exports;\n})();\nconst { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping } = __lib['inbox'];\n// @end-lib\nreturn [{ json: { more: keepLooping($('lease:decide').first().json.startedAt, new Date().toISOString()) } }];"
+      },
+      "position": [
+        5280,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "c0fa5d4a-1e9c-4073-a18c-10fd4a1513a5",
+      "name": "more?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "3odpbeqx",
+              "leftValue": "={{ $json.more }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        5500,
+        100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "6f76234f-5e27-4ea9-a769-97cb391aa52d",
+      "name": "none?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ll9ta15y",
+              "leftValue": "={{ $json.none }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        2640,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "49700094-07f3-4053-875c-ca1b6f2b2dc9",
+      "name": "processor:pick",
+      "parameters": {
+        "jsCode": "// @lib inbox\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['inbox'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Branch B of design section 5: the processor's lease and its choice of the next inbox row.\n  // Pure: the caller reads the rows with Data table nodes and passes the clock in.\n  const { BRANCH_B } = require('./config');\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    if (value && typeof value.getTime === 'function') return value.getTime();\n    if (value === null || value === undefined || value === '') return NaN;\n    return new Date(value).getTime();\n  }\n\n  // Whether this execution may write itself into the lease: no row, no holder, an expired lease,\n  // or a lease it already holds. Returns { take, expires_at } (expires_at only when take is true).\n  function leaseDecision(leaseRow, executionId, now) {\n    const nowMs = toMillis(now);\n    if (!Number.isFinite(nowMs)) throw new Error('leaseDecision: bad now');\n    const holder = leaseRow && leaseRow.holder ? String(leaseRow.holder) : '';\n    const expires = leaseRow ? toMillis(leaseRow.expires_at) : NaN;\n    const free = !leaseRow || holder === '' || !Number.isFinite(expires) || expires <= nowMs || holder === String(executionId);\n    return free ? { take: true, expires_at: new Date(nowMs + BRANCH_B.leaseSeconds * 1000).toISOString() } : { take: false };\n  }\n\n  // Read-back check after writing the lease: continue only if this execution's ID is there.\n  function holdsLease(leaseRow, executionId) {\n    return Boolean(leaseRow) && String(leaseRow.holder || '') === String(executionId);\n  }\n\n  // Rows left in 'handling' by an execution that no longer holds the lease (marked failed, owner alerted).\n  function stuckRows(rows, executionId) {\n    return (rows || []).filter((r) => r.status === 'handling' && String(r.execution_id || '') !== String(executionId));\n  }\n\n  // The oldest received row (by row ID, which follows arrival order) and what to do with it:\n  // { row, action: 'duplicate' } if another row with the same external_id is handling or done,\n  // { row, action: 'handle' } otherwise, or null when nothing is waiting.\n  function nextAction(rows) {\n    const all = rows || [];\n    const waiting = all.filter((r) => r.status === 'received').sort((a, b) => Number(a.id) - Number(b.id));\n    if (waiting.length === 0) return null;\n    const row = waiting[0];\n    const seen = all.some(\n      (r) => r.id !== row.id && r.external_id === row.external_id && (r.status === 'handling' || r.status === 'done')\n    );\n    return { row, action: seen ? 'duplicate' : 'handle' };\n  }\n\n  // Whether the loop may take another row: stops after loopLimitSeconds so the next run can take over.\n  function keepLooping(startedAt, now) {\n    return toMillis(now) - toMillis(startedAt) < BRANCH_B.loopLimitSeconds * 1000;\n  }\n\n  module.exports = { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping };\n  return module.exports;\n})();\nconst { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping } = __lib['inbox'];\n// @end-lib\nconst received = $('inbox: received').all().map((i) => i.json).filter((r) => r.id);\nconst same = $('inbox: same id').all().map((i) => i.json).filter((r) => r.id);\nconst byId = new Map([...received, ...same].map((r) => [r.id, r]));\nconst a = nextAction([...byId.values()]);\nreturn [{ json: { ...a, event: JSON.parse(a.row.payload || '{}') } }];"
+      },
+      "position": [
+        3080,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "a33b9dfb-1790-4316-823c-a3d0c39bf17c",
+      "name": "send_failed:log-input",
+      "parameters": {
+        "jsCode": "const p = $('processor:pick').first().json;\nconst e = p.event;\nreturn [{ json: { now: $('clock:now').first().json.now, direction: 'event', author: 'system', kind: 'send_failed', wa_id: e.wa_id, text: (e.error && e.error.title) || '' } }];"
+      },
+      "position": [
+        3960,
+        300
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "id": "7e5d058d-ccf7-4f44-af29-db33e8208e25",
+      "name": "stuck: get",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "handling"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row",
+        "returnAll": true
+      },
+      "position": [
+        1980,
+        -100
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "9b68dfe7-505f-4258-b38a-5a37b039014e",
+      "name": "stuck:find",
+      "parameters": {
+        "jsCode": "// @lib inbox\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['inbox'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Branch B of design section 5: the processor's lease and its choice of the next inbox row.\n  // Pure: the caller reads the rows with Data table nodes and passes the clock in.\n  const { BRANCH_B } = require('./config');\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    if (value && typeof value.getTime === 'function') return value.getTime();\n    if (value === null || value === undefined || value === '') return NaN;\n    return new Date(value).getTime();\n  }\n\n  // Whether this execution may write itself into the lease: no row, no holder, an expired lease,\n  // or a lease it already holds. Returns { take, expires_at } (expires_at only when take is true).\n  function leaseDecision(leaseRow, executionId, now) {\n    const nowMs = toMillis(now);\n    if (!Number.isFinite(nowMs)) throw new Error('leaseDecision: bad now');\n    const holder = leaseRow && leaseRow.holder ? String(leaseRow.holder) : '';\n    const expires = leaseRow ? toMillis(leaseRow.expires_at) : NaN;\n    const free = !leaseRow || holder === '' || !Number.isFinite(expires) || expires <= nowMs || holder === String(executionId);\n    return free ? { take: true, expires_at: new Date(nowMs + BRANCH_B.leaseSeconds * 1000).toISOString() } : { take: false };\n  }\n\n  // Read-back check after writing the lease: continue only if this execution's ID is there.\n  function holdsLease(leaseRow, executionId) {\n    return Boolean(leaseRow) && String(leaseRow.holder || '') === String(executionId);\n  }\n\n  // Rows left in 'handling' by an execution that no longer holds the lease (marked failed, owner alerted).\n  function stuckRows(rows, executionId) {\n    return (rows || []).filter((r) => r.status === 'handling' && String(r.execution_id || '') !== String(executionId));\n  }\n\n  // The oldest received row (by row ID, which follows arrival order) and what to do with it:\n  // { row, action: 'duplicate' } if another row with the same external_id is handling or done,\n  // { row, action: 'handle' } otherwise, or null when nothing is waiting.\n  function nextAction(rows) {\n    const all = rows || [];\n    const waiting = all.filter((r) => r.status === 'received').sort((a, b) => Number(a.id) - Number(b.id));\n    if (waiting.length === 0) return null;\n    const row = waiting[0];\n    const seen = all.some(\n      (r) => r.id !== row.id && r.external_id === row.external_id && (r.status === 'handling' || r.status === 'done')\n    );\n    return { row, action: seen ? 'duplicate' : 'handle' };\n  }\n\n  // Whether the loop may take another row: stops after loopLimitSeconds so the next run can take over.\n  function keepLooping(startedAt, now) {\n    return toMillis(now) - toMillis(startedAt) < BRANCH_B.loopLimitSeconds * 1000;\n  }\n\n  module.exports = { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping };\n  return module.exports;\n})();\nconst { leaseDecision, holdsLease, stuckRows, nextAction, keepLooping } = __lib['inbox'];\n// @end-lib\nconst rows = $input.all().map((i) => i.json).filter((r) => r.id);\nreturn stuckRows(rows, $execution.id).map((r) => ({ json: r }));"
+      },
+      "position": [
+        2200,
+        -300
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "d9174220-9ae6-4e5b-a909-b42f1abc88f1",
+      "name": "take?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "9s7t268u",
+              "leftValue": "={{ $json.take }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        880,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "47ad2bd1-1586-4e8b-88b7-d2595b358aab",
+      "name": "todo:P5",
+      "parameters": {},
+      "position": [
+        3960,
+        450
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none"
+  }
+}

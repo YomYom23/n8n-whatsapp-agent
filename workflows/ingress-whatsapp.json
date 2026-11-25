@@ -1,0 +1,509 @@
+{
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "handshake",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "clock:now",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "clock:now": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "ingress:verify",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "guard:sig_meta": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sig:log-input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "has events?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "handshake": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: handshake",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "has events?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "ingress:rows",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "respond: 200 (no events)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: insert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: 200",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "ingress:rows": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: insert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "ingress:verify": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "guard:sig_meta",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "log: sig_rejected": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: 401",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "sig:log-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "log: sig_rejected",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "EHm00UmFYNK6JwEi",
+  "name": "ingress-whatsapp",
+  "nodes": [
+    {
+      "id": "c086f9a4-bd00-4af8-ad97-28f24f3781a4",
+      "name": "Webhook",
+      "parameters": {
+        "httpMethod": [
+          "GET",
+          "POST"
+        ],
+        "multipleMethods": true,
+        "options": {
+          "rawBody": true
+        },
+        "path": "ingress-whatsapp",
+        "responseMode": "responseNode"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "37ddb639-951a-4479-8f6f-bfc68a7b6757"
+    },
+    {
+      "id": "5c6c92cc-3455-4350-8f72-4cfc1d475176",
+      "name": "clock:now",
+      "parameters": {
+        "jsCode": "return [{ json: { now: new Date().toISOString() } }];"
+      },
+      "position": [
+        220,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "b93fe56d-42fc-42c0-b224-3b797b8684d2",
+      "name": "guard:sig_meta",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "4dkv0br8",
+              "leftValue": "={{ !$json.sigOk }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        660,
+        100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "b27bf51e-f9ac-4411-8259-9f647d23e21f",
+      "name": "handshake",
+      "parameters": {
+        "jsCode": "const q = $input.first().json.query || {};\nconst mode = q['hub.mode'] || q.hub_mode;\nconst token = q['hub.verify_token'] || q.hub_verify_token;\nconst challenge = q['hub.challenge'] || q.hub_challenge;\nconst ok = mode === 'subscribe' && token === $env.META_VERIFY_TOKEN;\nreturn [{ json: { ok, challenge: ok ? String(challenge) : 'forbidden' } }];"
+      },
+      "position": [
+        220,
+        -200
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "712d75ff-6c37-4e09-9cb2-fa04e70b7ce4",
+      "name": "has events?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "za463a64",
+              "leftValue": "={{ $json.events.length > 0 }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        880,
+        200
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "16720a81-81d6-4a49-9184-ae634c7fcba2",
+      "name": "inbox: insert",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "external_id",
+              "id": "external_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "received_at",
+              "id": "received_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payload",
+              "id": "payload",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {}
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "operation": "insert",
+        "resource": "row"
+      },
+      "position": [
+        1320,
+        150
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "ce0ccbb0-61d8-4121-9058-91fe5b309291",
+      "name": "ingress:rows",
+      "parameters": {
+        "jsCode": "const v = $input.first().json;\nreturn v.events.map((e) => ({ json: { external_id: e.external_id, source: e.source, kind: e.kind,\n  wa_id: e.wa_id, slack_thread_ts: '', received_at: v.now, status: 'received', execution_id: '',\n  payload: JSON.stringify(e) } }));"
+      },
+      "position": [
+        1100,
+        150
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "a7f49579-5fa6-45bb-9a00-28ae56b2f724",
+      "name": "ingress:verify",
+      "parameters": {
+        "jsCode": "// @lib signatures, events\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['signatures'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Webhook signature checks (design section 4). Pure: the crypto module and the current time are passed in.\n  // Both functions return true or false and never throw on bad input.\n\n  const META_PREFIX = 'sha256=';\n  const SLACK_PREFIX = 'v0=';\n  // Slack refuses requests whose timestamp is more than 5 minutes away from now (past or future).\n  const SLACK_MAX_AGE_SECONDS = 300;\n\n  // No instanceof here: n8n runs Code nodes in a sandbox, so a Buffer made there comes from another\n  // realm and fails \"instanceof Uint8Array\". ArrayBuffer.isView works across realms.\n  function isBody(rawBody) {\n    return typeof rawBody === 'string' || (rawBody != null && ArrayBuffer.isView(rawBody));\n  }\n\n  // Compares two hex strings in constant time, after comparing lengths.\n  function safeEqualHex(expectedHex, givenHex, crypto) {\n    const expected = Buffer.from(expectedHex, 'utf8');\n    const given = Buffer.from(givenHex.toLowerCase(), 'utf8');\n    if (expected.length !== given.length) return false;\n    return crypto.timingSafeEqual(expected, given);\n  }\n\n  function nowMs(now) {\n    if (typeof now === 'number') return now;\n    if (now && typeof now.getTime === 'function') return now.getTime(); // a Date, from any realm\n    if (now && typeof now.toMillis === 'function') return now.toMillis();\n    return NaN;\n  }\n\n  // Meta: X-Hub-Signature-256 is \"sha256=\" + HMAC-SHA256 hex of the raw request bytes with the app secret.\n  // The check must run over the raw bytes: Meta escapes non-ASCII text as unicode escape sequences,\n  // so re-serialising the parsed body changes the bytes.\n  function verifyMeta(rawBody, header, secret, crypto) {\n    try {\n      if (!isBody(rawBody) || typeof header !== 'string' || typeof secret !== 'string' || !secret) return false;\n      if (!header.startsWith(META_PREFIX)) return false;\n      const given = header.slice(META_PREFIX.length);\n      const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');\n      return safeEqualHex(expected, given, crypto);\n    } catch (e) {\n      return false;\n    }\n  }\n\n  // Slack: X-Slack-Signature is \"v0=\" + HMAC-SHA256 hex of \"v0:<timestamp>:<raw body>\" with the signing secret.\n  // timestamp is X-Slack-Request-Timestamp (seconds); now is the current time in milliseconds (a Date also works).\n  function verifySlack(rawBody, timestamp, header, secret, now, crypto) {\n    try {\n      if (!isBody(rawBody) || typeof header !== 'string' || typeof secret !== 'string' || !secret) return false;\n      const ts = String(timestamp === undefined || timestamp === null ? '' : timestamp).trim();\n      if (!/^\\d{1,15}$/.test(ts)) return false;\n      const nowMillis = nowMs(now);\n      if (!Number.isFinite(nowMillis)) return false;\n      if (Math.abs(nowMillis / 1000 - Number(ts)) > SLACK_MAX_AGE_SECONDS) return false;\n      if (!header.startsWith(SLACK_PREFIX)) return false;\n      const given = header.slice(SLACK_PREFIX.length);\n      const expected = crypto\n        .createHmac('sha256', secret)\n        .update('v0:' + ts + ':')\n        .update(rawBody)\n        .digest('hex');\n      return safeEqualHex(expected, given, crypto);\n    } catch (e) {\n      return false;\n    }\n  }\n\n  module.exports = { verifyMeta, verifySlack };\n  return module.exports;\n})();\n__lib['events'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Turns webhook bodies into the internal event format (design section 4):\n  //   { source, external_id, wa_id, timestamp (ISO), kind, text, message_type?, error? }\n  // kind is 'text', 'unsupported' (images, voice notes, reactions, buttons and the rest) or\n  // 'send_failed' (a Meta status event with status 'failed'). Other status events are dropped.\n\n  function isoFromSeconds(seconds) {\n    const n = Number(seconds);\n    return Number.isFinite(n) && n > 0 ? new Date(n * 1000).toISOString() : null;\n  }\n\n  // body: the parsed Meta webhook body. Returns { events, dropped } where dropped counts the\n  // status events (sent, delivered, read) and changes for other fields that were skipped.\n  function metaEvents(body) {\n    const events = [];\n    let dropped = 0;\n    const entries = body && Array.isArray(body.entry) ? body.entry : [];\n    for (const entry of entries) {\n      for (const change of Array.isArray(entry.changes) ? entry.changes : []) {\n        const value = change && change.value;\n        if (!change || change.field !== 'messages' || !value) {\n          dropped++;\n          continue;\n        }\n        for (const m of Array.isArray(value.messages) ? value.messages : []) {\n          if (!m || !m.id || !m.from) {\n            dropped++;\n            continue;\n          }\n          const isText = m.type === 'text' && m.text && typeof m.text.body === 'string';\n          events.push({\n            source: 'meta',\n            external_id: String(m.id),\n            wa_id: String(m.from),\n            timestamp: isoFromSeconds(m.timestamp),\n            kind: isText ? 'text' : 'unsupported',\n            text: isText ? m.text.body : '',\n            message_type: String(m.type || 'unknown'),\n          });\n        }\n        for (const s of Array.isArray(value.statuses) ? value.statuses : []) {\n          if (!s || s.status !== 'failed' || !s.id) {\n            dropped++;\n            continue;\n          }\n          const err = Array.isArray(s.errors) && s.errors[0] ? s.errors[0] : {};\n          events.push({\n            source: 'meta',\n            // a message can fail only once, so its ID plus the status is unique\n            external_id: String(s.id) + ':failed',\n            wa_id: String(s.recipient_id || ''),\n            timestamp: isoFromSeconds(s.timestamp),\n            kind: 'send_failed',\n            text: '',\n            error: { code: err.code == null ? null : err.code, title: String(err.title || err.message || '') },\n          });\n        }\n      }\n    }\n    return { events, dropped };\n  }\n\n  const REPLAY_KINDS = ['text', 'unsupported', 'send_failed', 'owner_message', 'owner_action'];\n\n  // ingress-replay: the body is already an internal event. Returns the event, or null if a required\n  // field is missing or the kind is unknown. source defaults to 'meta', the path the event stands in for.\n  function replayEvent(body) {\n    if (!body || typeof body !== 'object') return null;\n    const { external_id: id, wa_id: waId, kind } = body;\n    if (typeof id !== 'string' || id === '' || typeof kind !== 'string' || !REPLAY_KINDS.includes(kind)) return null;\n    if ((kind === 'text' || kind === 'unsupported') && (typeof waId !== 'string' || waId === '')) return null;\n    return {\n      ...body,\n      source: typeof body.source === 'string' && body.source ? body.source : 'meta',\n      text: typeof body.text === 'string' ? body.text : '',\n      timestamp: typeof body.timestamp === 'string' ? body.timestamp : null,\n    };\n  }\n\n  module.exports = { metaEvents, replayEvent };\n  return module.exports;\n})();\nconst { verifyMeta, verifySlack } = __lib['signatures'];\nconst { metaEvents, replayEvent } = __lib['events'];\n// @end-lib\nconst crypto = require('crypto');\nconst req = $('Webhook').first();\nconst raw = Buffer.from(req.binary.data.data, 'base64');\nconst header = req.json.headers['x-hub-signature-256'];\nconst sigOk = verifyMeta(raw, header, $env.META_APP_SECRET, crypto);\nconst body = sigOk ? JSON.parse(raw.toString('utf8')) : null;\nconst { events } = sigOk ? metaEvents(body) : { events: [] };\nreturn [{ json: { sigOk, events, now: $('clock:now').first().json.now } }];"
+      },
+      "position": [
+        440,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "8bbe494a-51d2-4da1-9317-8bdfebfb0ac8",
+      "name": "log: sig_rejected",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "log",
+          "mode": "list",
+          "value": "MmzCFtBICmiFgEDP"
+        }
+      },
+      "position": [
+        1100,
+        -50
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "executeOnce": true,
+      "id": "551c7ba6-05a4-4ba0-b239-66f71c6fab3c",
+      "name": "respond: 200",
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        1540,
+        150
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "f67e03a4-01ea-4ab0-ae87-44bf5f5df020",
+      "name": "respond: 200 (no events)",
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        1100,
+        350
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "17e129a4-2b9a-4832-a245-a1d2b0bbed48",
+      "name": "respond: 401",
+      "parameters": {
+        "options": {
+          "responseCode": 401
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        1320,
+        -50
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "2c2b7691-cf7c-4305-9c35-9b3af81d09c6",
+      "name": "respond: handshake",
+      "parameters": {
+        "options": {
+          "responseCode": "={{ $json.ok ? 200 : 403 }}"
+        },
+        "respondWith": "text",
+        "responseBody": "={{ $json.challenge }}"
+      },
+      "position": [
+        440,
+        -200
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "bc081944-86da-418a-93cb-cde582ef0210",
+      "name": "sig:log-input",
+      "parameters": {
+        "jsCode": "return [{ json: { now: $json.now, direction: 'event', author: 'system', kind: 'sig_rejected', text: '' } }];"
+      },
+      "position": [
+        880,
+        -50
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

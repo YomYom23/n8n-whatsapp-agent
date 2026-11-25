@@ -1,0 +1,396 @@
+{
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "clock:now",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "bad event?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: 400",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "replay:row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "bad secret?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: 403",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "bad event?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "clock:now": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "replay:check",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: insert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: 200",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "replay:check": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "bad secret?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "replay:row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: insert",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "yh2jMwiRbowr6n3J",
+  "name": "ingress-replay",
+  "nodes": [
+    {
+      "id": "e22caf69-add9-45fe-9d98-918d0919c4cc",
+      "name": "Webhook",
+      "parameters": {
+        "httpMethod": "POST",
+        "options": {},
+        "path": "ingress-replay",
+        "responseMode": "responseNode"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "2613baf9-cfef-4f87-b1e2-7f262312ccf2"
+    },
+    {
+      "id": "7627cbac-af84-4a50-86f1-116bcb21282d",
+      "name": "bad event?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "wsph6u5v",
+              "leftValue": "={{ !$json.e }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        880,
+        50
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "10040a10-c4bc-4790-91c0-61a2188d91be",
+      "name": "bad secret?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "iwri9w3d",
+              "leftValue": "={{ !$json.okSecret }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        660,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "4f4faaef-693c-4495-aec2-1a64f17df642",
+      "name": "clock:now",
+      "parameters": {
+        "jsCode": "return [{ json: { now: new Date().toISOString() } }];"
+      },
+      "position": [
+        220,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "f1b2e226-f648-44a9-a60a-81167b209037",
+      "name": "inbox: insert",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "external_id",
+              "id": "external_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "received_at",
+              "id": "received_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payload",
+              "id": "payload",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {}
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "operation": "insert",
+        "resource": "row"
+      },
+      "position": [
+        1320,
+        150
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "0488be9b-61a2-46d5-8934-45ff8b209c67",
+      "name": "replay:check",
+      "parameters": {
+        "jsCode": "// @lib events\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['events'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Turns webhook bodies into the internal event format (design section 4):\n  //   { source, external_id, wa_id, timestamp (ISO), kind, text, message_type?, error? }\n  // kind is 'text', 'unsupported' (images, voice notes, reactions, buttons and the rest) or\n  // 'send_failed' (a Meta status event with status 'failed'). Other status events are dropped.\n\n  function isoFromSeconds(seconds) {\n    const n = Number(seconds);\n    return Number.isFinite(n) && n > 0 ? new Date(n * 1000).toISOString() : null;\n  }\n\n  // body: the parsed Meta webhook body. Returns { events, dropped } where dropped counts the\n  // status events (sent, delivered, read) and changes for other fields that were skipped.\n  function metaEvents(body) {\n    const events = [];\n    let dropped = 0;\n    const entries = body && Array.isArray(body.entry) ? body.entry : [];\n    for (const entry of entries) {\n      for (const change of Array.isArray(entry.changes) ? entry.changes : []) {\n        const value = change && change.value;\n        if (!change || change.field !== 'messages' || !value) {\n          dropped++;\n          continue;\n        }\n        for (const m of Array.isArray(value.messages) ? value.messages : []) {\n          if (!m || !m.id || !m.from) {\n            dropped++;\n            continue;\n          }\n          const isText = m.type === 'text' && m.text && typeof m.text.body === 'string';\n          events.push({\n            source: 'meta',\n            external_id: String(m.id),\n            wa_id: String(m.from),\n            timestamp: isoFromSeconds(m.timestamp),\n            kind: isText ? 'text' : 'unsupported',\n            text: isText ? m.text.body : '',\n            message_type: String(m.type || 'unknown'),\n          });\n        }\n        for (const s of Array.isArray(value.statuses) ? value.statuses : []) {\n          if (!s || s.status !== 'failed' || !s.id) {\n            dropped++;\n            continue;\n          }\n          const err = Array.isArray(s.errors) && s.errors[0] ? s.errors[0] : {};\n          events.push({\n            source: 'meta',\n            // a message can fail only once, so its ID plus the status is unique\n            external_id: String(s.id) + ':failed',\n            wa_id: String(s.recipient_id || ''),\n            timestamp: isoFromSeconds(s.timestamp),\n            kind: 'send_failed',\n            text: '',\n            error: { code: err.code == null ? null : err.code, title: String(err.title || err.message || '') },\n          });\n        }\n      }\n    }\n    return { events, dropped };\n  }\n\n  const REPLAY_KINDS = ['text', 'unsupported', 'send_failed', 'owner_message', 'owner_action'];\n\n  // ingress-replay: the body is already an internal event. Returns the event, or null if a required\n  // field is missing or the kind is unknown. source defaults to 'meta', the path the event stands in for.\n  function replayEvent(body) {\n    if (!body || typeof body !== 'object') return null;\n    const { external_id: id, wa_id: waId, kind } = body;\n    if (typeof id !== 'string' || id === '' || typeof kind !== 'string' || !REPLAY_KINDS.includes(kind)) return null;\n    if ((kind === 'text' || kind === 'unsupported') && (typeof waId !== 'string' || waId === '')) return null;\n    return {\n      ...body,\n      source: typeof body.source === 'string' && body.source ? body.source : 'meta',\n      text: typeof body.text === 'string' ? body.text : '',\n      timestamp: typeof body.timestamp === 'string' ? body.timestamp : null,\n    };\n  }\n\n  module.exports = { metaEvents, replayEvent };\n  return module.exports;\n})();\nconst { metaEvents, replayEvent } = __lib['events'];\n// @end-lib\nconst req = $('Webhook').first().json;\nconst okSecret = Boolean($env.REPLAY_SECRET) && req.headers['x-replay-secret'] === $env.REPLAY_SECRET;\nconst e = okSecret ? replayEvent(req.body) : null;\nconst now = $('clock:now').first().json.now;\nreturn [{ json: { okSecret, e, row: e && { external_id: e.external_id, source: e.source, kind: e.kind,\n  wa_id: e.wa_id || '', slack_thread_ts: e.slack_thread_ts || '', received_at: now, status: 'received',\n  execution_id: '', payload: JSON.stringify(e) } } }];"
+      },
+      "position": [
+        440,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "92a505a0-a47c-4d0a-88b7-18e48ee83e9e",
+      "name": "replay:row",
+      "parameters": {
+        "jsCode": "return [{ json: $('replay:check').first().json.row }];"
+      },
+      "position": [
+        1100,
+        150
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "1646da7f-554d-438c-8101-51c4a1571f80",
+      "name": "respond: 200",
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        1540,
+        150
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "26b38116-7ee3-4564-959f-9c78c9d8172b",
+      "name": "respond: 400",
+      "parameters": {
+        "options": {
+          "responseCode": 400
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        1100,
+        -50
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "0efc1e66-e82f-4929-a743-45be5909ceaa",
+      "name": "respond: 403",
+      "parameters": {
+        "options": {
+          "responseCode": 403
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        880,
+        -150
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

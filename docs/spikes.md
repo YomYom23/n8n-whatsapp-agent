@@ -43,6 +43,67 @@ Results for the spikes listed in [the design](designs/whatsapp-agent.md#open-que
 *   **The test number cannot send while the business is unverified.** On 2026-11-24 two sends from the API testing page, to an allow-listed and verified recipient, were accepted and then failed. Both `failed` status webhooks carried error **131031 "Business Account locked"** ("Business account has been locked."). WhatsApp Manager shows the test account as **Account Restricted: "Before you can begin messaging, you will need to verify your business."** Business Support Home lists no policy issues. Live delivery (headline 2, CUJ 5) is therefore blocked until the business is verified or another route is chosen.
 *   **Business verification:** submitted by the Author in Security Center on 2026-11-24. Meta accepts only official business documents for the legal name: incorporation papers, a business registration or licence, a government-issued business tax document, or a business bank statement. Personal ID and utility bills don't prove the legal name. Status on 2026-11-24: pending (`is_verified: false`). If verification fails, the fallback is the Twilio WhatsApp Sandbox for live delivery.
 
+## S1: Which Jev node
+
+**Question:** Which Jev node? It must accept options set per message, return a probability or confidence for every field in one call, fail on a missing field, take a second fixed question set (draft check), handle the `price_service` and `price_hours` fields, and allow its base URL to be changed.
+
+**Status:** Done, 2026-11-24
+
+**Node chosen:** `@typesafe-ai/n8n-nodes-typesafe-ai` **0.10.0** ("TypeSafe AI"), chosen by the Author. It is the official package: published from TypeSafe AI's GitHub repository with npm provenance, MIT licence, maintained by TypeSafe staff. Several unofficial nodes have similar names (`n8n-nodes-typesafe-ai` 0.1.1, `n8n-nodes-jev`, `n8n-nodes-ollaya`, `n8n-nodes-typesafe-system-one`), so install it by the full scoped name. Installed through **Settings → Community nodes** on n8n 2.49.5 and loads without problems (its README says it was tested with 2.40). Node type `@typesafe-ai/n8n-nodes-typesafe-ai.typeSafeAi`, version 1; credential type `typeSafeAiApi`.
+
+**What was tried**
+
+*   The package source, read without running it.
+*   `scratch/spikes/s1_probe.py` and `s1_baseurl.py` (not in git) against the live instance with the Author's TypeSafe key. Evaluate operation, model `jev-latest` (answered as `jev-1.14.0`), **Questions Format: Using Raw JSON** from an expression, **Simplify** off, **Timeout** 4000 ms.
+*   Stage set: three yes/no hazards (`wants_human`, `abusive`, `wrong_person`), `answer` (5 options), `price_service` (3 services plus `not_stated`), `price_hours` (1 to 8 plus `not_stated`). Six messages, including Portuguese with an emoji.
+
+**Result**
+
+| Requirement | Result |
+| --- | --- |
+| Options set per message | Pass. The questions object is built per item and passed through an expression. Choice questions take 2 to 255 options. |
+| A probability or confidence for every field in one call | Pass. One `POST /v1/systemone` per message with all six questions; every field answered in every call. Yes/no answers return `noul` (a probability). Choice answers return `choice`, `confidence` and, with Simplify off, `probabilities` for every option. |
+| Fail on a missing field | **Not in the node.** Evaluate copies whatever `answers` the API returns (a missing `answers` becomes `{}`); only Route fails on a missing answer. Covered by `checkComplete` in `lib/rules.js`, as the design already says. |
+| A second fixed question set (draft check) | Pass. A second node with a JSON state `{facts, customer, draft}`: `unsupported_fact` was 0.03 for a draft that kept to the facts and 0.99 for one that invented a price and a promise. |
+| `price_service` and `price_hours` | Pass, 16 of 16 expected picks, including the Portuguese message and "like five hours before I move out" (`move_out_clean` at confidence 0.6, `5` at 1.0). "I want to talk to a real person" gave `wants_human` 0.98. |
+| Base URL can be changed | Pass, **through the CLI only**. The credential's `baseUrl` field is hidden. The public API refuses it (`request.body.data is not allowed to have the additional property "baseUrl"`). `n8n import:credentials` with `{"apiKey", "baseUrl"}` in plain `data` accepts it, and the node then sent its request to that base URL (an n8n webhook standing in for the API). |
+| Latency | 2.2 to 2.3 s per call with six questions (762 input and 244 output tokens), inside the design's 4 s timeout. |
+
+**Branch chosen:** the TypeSafe AI node inside `classify`; no fallback needed.
+
+*   The dry-run instance's `classify` uses the real node with a credential whose `baseUrl` points at the mock server. `scripts/deploy_workflows.py` creates that credential with `n8n import:credentials`, not the public API.
+*   Pin `@typesafe-ai/n8n-nodes-typesafe-ai@0.10.0`. The live instance has it installed in the `n8n_data` volume through the editor; a fresh instance needs the same install.
+
+## S2: Meta ingress
+
+**Question:** The GET handshake; whether the Webhook node exposes the raw body; HMAC with emoji and non-ASCII text; `crypto` in Code nodes; the WhatsApp Trigger's behaviour; Meta's webhook timeout.
+
+**Status:** Done, 2026-11-24, except two items left for the Meta setup step (last two rows of the table).
+
+**What was tried**
+
+*   `scratch/spikes/s2_probe.py` (not in git) publishes a probe workflow at `/webhook/s2-meta`: a Webhook node (v2.2, **Allow Multiple HTTP Methods** GET and POST, **Respond: Using 'Respond to Webhook' Node**, option **Raw Body** on). GET goes to a Code node that checks `hub.verify_token` against `$env.META_VERIFY_TOKEN` and replies with the challenge or 403. POST replies 200 first, then a Code node computes HMAC-SHA256 over the raw bytes.
+*   Requests go through the ngrok tunnel and Caddy, as Meta's do.
+
+**Result**
+
+| Check | Result |
+| --- | --- |
+| GET handshake, right token / wrong token | Pass: 200 with the challenge / 403. **Meta's own verify request** (`facebookplatform/1.0`) passed on 2026-11-24 at 00:37 UTC when the callback URL was saved. Meta sends both `hub.mode` and `hub_mode` forms of the query keys. |
+| Raw body | Pass. With **Raw Body** on, the item has `binary.data` with the exact request bytes as inline base64 (no binary-data ID), next to the parsed `body`. Byte-identical for ASCII, raw UTF-8 emoji and accents, `\u`-escaped JSON and pretty-printed JSON. |
+| HMAC over the raw body | Pass for all four bodies; wrong and missing signatures refused. HMAC over `JSON.stringify(body)` fails for the `\u`-escaped and pretty-printed bodies, so the check must use the raw bytes. |
+| `crypto` and `$env` in Code nodes | Both work (`NODE_FUNCTION_ALLOW_BUILTIN=crypto`, `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`). |
+| Reply time | 0.13 to 0.16 s per POST through the tunnel. |
+| A real delivery from Meta | Pass. Two messages from the Author's phone to the test number arrived on 2026-11-25 at 01:34 UTC: a `text` and an `image`, each `field: messages`, user-agent `facebookexternalua`, with `X-Hub-Signature-256`. Both signatures verified against `META_APP_SECRET` over the raw body (inside n8n and again offline); HMAC over the re-serialised body failed for both. **Meta escapes non-ASCII text as `\u` sequences**, so its bodies are pure ASCII, and re-serialising changes the bytes. The probe replied in 30 and 52 ms as measured by ngrok. Raw bodies saved to `tests/captures/meta/` (git-ignored) as fixtures. |
+| WhatsApp Trigger behaviour, Meta's webhook timeout | Left for the Meta setup step and `docs/meta-setup.md`, as the design plans. Activating the WhatsApp Trigger re-registers the app's single callback URL, which would take it away from `/webhook/s2-meta`. The timeout is not measured: holding Meta's requests open on purpose risks Meta disabling the webhook. Ingress replies in well under a second, so the limit doesn't bind. |
+
+**Meta setup found along the way**
+
+*   Webhook delivery needs two subscriptions. The app-level callback URL and fields (`messages` among them) were set, but no message arrived until the WhatsApp account itself was subscribed to the app (`whatsapp_biz_subscribe_webhook`, 2026-11-24 00:53 UTC). WhatsApp Manager and the app dashboard don't make the second step obvious, so `docs/meta-setup.md` must list it.
+*   The app is in development mode (not published). Meta warns this may stop real webhooks, but deliveries from the test account arrived without publishing.
+
+**Branch chosen:** the signature check stays (no fallback). `ingress-whatsapp` uses Webhook v2.2 with **Raw Body** on, reads `binary.data.data` (inline base64) in a Code node, and checks HMAC-SHA256 over those bytes with `crypto`. `sig_meta` stays in the guard list, so M stays 32 unless spike 4 rules out `sig_slack`. The handshake must reply through **Respond to Webhook** with the challenge as plain text.
+
 ## S3: Ordering and data tables
 
 **Question:** With `N8N_CONCURRENCY_PRODUCTION_LIMIT=1`, does a Webhook set to respond immediately answer while an earlier execution is still running? Do sub-workflow executions count toward the limit? Do queued executions survive a restart? How do data tables behave on a duplicate value and on a `slack_thread_ts` filter, and which API can `setup_tables.py` use?

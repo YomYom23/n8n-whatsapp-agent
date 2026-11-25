@@ -82,7 +82,9 @@ class Api:
         env = load_env(REPO / "deploy" / "scripts.env")
         suffix = instance.upper()
         try:
-            self.base = env[f"N8N_API_URL_{suffix}"].rstrip("/")
+            # On Windows "localhost" tries ::1 first and waits ~2 s per request before falling back;
+            # Docker publishes the ports on 127.0.0.1 only.
+            self.base = env[f"N8N_API_URL_{suffix}"].rstrip("/").replace("//localhost", "//127.0.0.1")
             self.key = env[f"N8N_API_KEY_{suffix}"]
         except KeyError as e:
             sys.exit(f"deploy/scripts.env has no {e.args[0]}")

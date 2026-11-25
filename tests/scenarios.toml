@@ -1,0 +1,47 @@
+# Replay scenarios (design file 29). Run with: python tests/replay.py
+# Each scenario is tagged with the build step that enables it. Without --upto, the harness runs
+# every scenario up to current_step, so raise it as each step's workflows land.
+current_step = "P2"
+
+# --- P2: harness plumbing ------------------------------------------------------
+# No events. Proves the harness can load the mock, clear and count every table, and read calls.
+[[scenario]]
+name = "harness_smoke"
+step = "P2"
+now = "2026-12-01T15:00:00Z"
+
+[scenario.expect]
+sends = []
+slack_posts = 0
+hubspot_calls = 0
+rows = { conversations = 0, inbox = 0, do_not_contact = 0, pending_owner_messages = 0, message_log = 0, processor_lease = 0 }
+
+# --- P3: core conversation -------------------------------------------------------
+# The design's worked example: Haiku quotes a price that isn't on the list, so the draft
+# check blocks it (code problem price_mismatch, guard dc_price) and the customer gets the
+# not-in-facts line instead.
+[[scenario]]
+name = "price_mismatch_blocked"
+step = "P3"
+guards = ["dc_price"]
+now = "2026-12-01T15:00:00Z"
+facts = "tests/facts"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "how much is a deep clean?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "price_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = {} }]
+haiku = [{ text = "A deep clean is $95.", input_tokens = 900, output_tokens = 20 }]
+
+[scenario.expect]
+route = "price_question"
+sends = [{ kind = "normal", text_contains = "pass that to the team" }]
+problems = ["price_mismatch"]
+slack_posts = 1
+hubspot_calls = 0
+rows = { message_log = 2 }

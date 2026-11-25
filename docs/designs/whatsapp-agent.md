@@ -80,7 +80,7 @@ Each question about unverified platform behaviour is a numbered spike, run befor
 | 4 | Slack: URL verification; signing of JSON events and form-encoded button clicks over the raw body; retry headers; the fields that identify bot-authored posts and message subtypes; user IDs on clicks; whether one workflow can hold two Webhook triggers. | `ingress-slack-events`, `ingress-slack-interactivity` | Two triggers per workflow not allowed: one workflow per trigger (already the plan). |
 | 5 | Meta 24-hour window: does an out-of-window send fail at once (which error code) or later as a `failed` status event? | Section 10 backstop | None needed: the code check against `last_customer_at` is the primary rule; the result is recorded. |
 | 6 | HubSpot: search lag after create, phone search, custom pipeline stages on the free plan, private-app scopes. | `crm-sync`, `hubspot-adapter` | No custom stages: map Enquiry and Booked onto two default deal stages, named in the env file. |
-| 7 | Deployment: does `n8n import:workflow --separate` keep workflow IDs; can credential IDs be read by name from `n8n export:credentials`; can data-table IDs be listed by name through the API? | `scripts/deploy_workflows.py`, `scripts/export_workflows.py` | IDs not kept: deploy runs a second pass that rewrites Execute Workflow references from a name-to-ID map read after import. |
+| 7 | Deployment: does `n8n import:workflow --separate` keep workflow IDs; can credential IDs be read by name from `n8n export:credentials`; can data-table IDs be listed by name through the API? | `scripts/deploy_workflows.py`, `scripts/export_workflows.py` | IDs not kept: deploy runs a second pass that rewrites Execute Workflow references from a name-to-ID map read after import. **Result:** IDs are kept, but import unpublishes every workflow, so deploy publishes them again afterwards (`docs/spikes.md`). |
 
 ## Critical User Journeys (CUJs)
 
@@ -244,7 +244,7 @@ The WhatsApp Trigger node is not used in the live instance. It is set up once du
 
 ### 5. Ordering and duplicates
 
-Events must be handled one at a time, in arrival order, so customer messages, owner messages and clicks for the same customer never read and write the same conversation at once. Lead Bot's single worker did the same. Spike 3 decides between two branches.
+Events must be handled one at a time, in arrival order, so customer messages, owner messages and clicks for the same customer never read and write the same conversation at once. Lead Bot's single worker did the same. Spike 3 decides between two branches. **Spike 3 chose branch B** (2026-11-24, `docs/spikes.md`): a queued webhook gets no reply until its execution starts, and queued executions are lost on restart.
 
 **Branch A (the default): n8n's own queue.**
 

@@ -1,0 +1,4 @@
+service,aliases,unit,amount,duration_minutes,bookable
+Regular clean,regular cleaning;standard clean,hour,35,180,yes
+Deep clean,deep cleaning,fixed,120,240,yes
+Oven clean,oven cleaning,fixed,45,60,yes

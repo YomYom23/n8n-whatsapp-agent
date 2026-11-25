@@ -1,0 +1,53 @@
+# Dry-run instance: the same n8n image as live, plus the mock server, with no public URL.
+# Used by the replay harness (tests/replay.py). Runs beside the live instance, so it
+# uses different host ports: editor on 127.0.0.1:5679, mock control API on 127.0.0.1:8765.
+#
+# Start:  docker compose --env-file deploy/dryrun.env -f deploy/docker-compose.dryrun.yml up -d
+# Stop:   docker compose --env-file deploy/dryrun.env -f deploy/docker-compose.dryrun.yml down
+#
+# n8n reaches the mock server at http://mock:8765 on the private network (MOCK_URL).
+# The TypeSafe AI community node (@typesafe-ai/n8n-nodes-typesafe-ai@0.10.0) is installed
+# once through Settings > Community nodes; it persists in the n8n_dryrun_data volume.
+
+name: wa-agent-dryrun
+
+services:
+  n8n:
+    image: n8nio/n8n:2.49.5
+    restart: unless-stopped
+    env_file: dryrun.env
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: "5678"
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5679/
+      N8N_EDITOR_BASE_URL: http://localhost:5679
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      NODE_FUNCTION_ALLOW_BUILTIN: crypto
+      GENERIC_TIMEZONE: ${BUSINESS_TZ:-America/New_York}
+      TZ: ${BUSINESS_TZ:-America/New_York}
+    ports:
+      - "127.0.0.1:5679:5678"
+    volumes:
+      - n8n_dryrun_data:/home/node/.n8n
+    networks: [dryrun]
+    depends_on: [mock]
+
+  mock:
+    image: python:3.13-slim
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "-u", "tests/mock_server.py", "--host", "0.0.0.0", "--port", "8765"]
+    environment:
+      REPLAY_SECRET: ${REPLAY_SECRET}
+    volumes:
+      - ../tests:/app/tests:ro
+    ports:
+      - "127.0.0.1:8765:8765"
+    networks: [dryrun]
+
+networks:
+  dryrun:
+
+volumes:
+  n8n_dryrun_data:

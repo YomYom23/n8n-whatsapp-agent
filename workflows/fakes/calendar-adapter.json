@@ -1,0 +1,86 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "fake:call",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "fake:call": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "fake:result",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "fake:result",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "vjPuC1YcUU1dSQ4S",
+  "name": "calendar-adapter",
+  "nodes": [
+    {
+      "id": "f0a2d22e-8328-4c87-91dc-7b68789c05aa",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "5ad5478d-6e3f-46ad-a1bf-3a4be68a3b08",
+      "name": "fake:call",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "method": "POST",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "={{ $env.MOCK_URL }}/adapter/calendar"
+      },
+      "position": [
+        224,
+        0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2
+    },
+    {
+      "id": "dba4c310-d9e8-4d30-857d-fc65c0293306",
+      "name": "fake:result",
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nif (r.error && r.ok === undefined) return [{ json: { ok: false, error: { kind: 'unavailable', message: String(r.error.message || r.error) } } }];\nreturn [{ json: r }];"
+      },
+      "position": [
+        448,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

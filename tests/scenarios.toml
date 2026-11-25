@@ -1,7 +1,7 @@
 # Replay scenarios (design file 29). Run with: python tests/replay.py
 # Each scenario is tagged with the build step that enables it. Without --upto, the harness runs
 # every scenario up to current_step, so raise it as each step's workflows land.
-current_step = "P3"
+current_step = "P4"
 
 # --- P2: harness plumbing ------------------------------------------------------
 # No events. Proves the harness can load the mock, clear and count every table, and read calls.
@@ -603,3 +603,294 @@ sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
 problems = ["unknown_number"]
 slack_posts = 1
 rows = { message_log = 2 }
+
+# --- P4: booking --------------------------------------------------------------------
+# Scenario time: Tue 2026-12-01 10:00 New York. With 12 hours notice the first offered times are
+# Wed, Thu and Fri at 8 AM (slot-20261202T1300Z, slot-20261203T1300Z, slot-20261204T1300Z).
+
+# CUJ 2: service, address in the service area, then "2" books Thursday 8 AM.
+[[scenario]]
+name = "booking_deep_clean"
+step = "P4"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "12 Main St, New York NY 10001"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "2"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }]
+
+[scenario.expect]
+route = "number_pick"
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }, { kind = "normal", text_contains = "You're booked for Thursday December 3 at 8 AM" }]
+calls = { "calendar.create_event" = 1 }
+rows = { conversations = 1, message_log = 6 }
+
+
+# An address outside the service areas gets the out-of-area line and no times are looked up.
+[[scenario]]
+name = "booking_out_of_area"
+step = "P4"
+guards = ["zip_area"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "5 Elm St, Springfield 99999"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "don't clean in ZIP code 99999" }]
+calls = { "calendar.busy" = 0 }
+rows = { message_log = 4 }
+
+
+# No ZIP code twice: asked once more, then handed off as zip_not_found (the handoff itself is P5).
+[[scenario]]
+name = "booking_zip_missing_twice"
+step = "P4"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "Main Street"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "Main Street, near the park"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }, { hazards = {} }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "couldn't find a ZIP code" }]
+# the handoff is a stage reply (handoff:zip_not_found), so the logged route stays stage_answer
+calls = { "calendar.busy" = 0 }
+rows = { message_log = 5 }
+
+
+# The classifier names a slot that was never offered: the answer counts as missing and the
+# message goes to handoff (removing the guard lets it through to a fresh offer instead).
+[[scenario]]
+name = "booking_slot_not_offered"
+step = "P4"
+guards = ["offered_only"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "12 Main St, New York NY 10001"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "the one on new years eve"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }, { hazards = {}, answer = { value = "slot-20261231T1300Z", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "handoff"
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }]
+calls = { "calendar.create_event" = 0, "calendar.busy" = 1 }
+
+
+# "none" to the first times gets the later times once: the three days after the last offered day.
+[[scenario]]
+name = "booking_later_times"
+step = "P4"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "12 Main St, New York NY 10001"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "none of those work"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }, { hazards = {}, answer = { value = "none", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }, { kind = "normal", text_contains = "Here are some later times" }]
+calls = { "calendar.create_event" = 0 }
+
+
+# A retried booking: the event for this customer and slot already exists (its booking key), so it is
+# confirmed without creating another. The event's times are set far away so the slot is still offered.
+[[scenario]]
+name = "booking_retried"
+step = "P4"
+guards = ["book_already"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "12 Main St, New York NY 10001"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "2"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }]
+calendar = { events = { "0ba8259eb77d071dd948b9320a3f78ab7ea8f0380cd3a0b5984785a9a646e939" = { status = "confirmed", start = "2099-01-01T13:00:00Z", end = "2099-01-01T17:00:00Z" } } }
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }, { kind = "normal", text_contains = "You're booked for Thursday December 3 at 8 AM" }]
+calls = { "calendar.create_event" = 0 }
+
+
+# The customer picks Wednesday 8 AM ten hours before it starts, inside the 12-hour notice:
+# the slot is taken and fresh times are offered.
+[[scenario]]
+name = "booking_inside_notice"
+step = "P4"
+guards = ["book_allowed"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "12 Main St, New York NY 10001"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "1"
+clock = "2026-12-02T03:00:00Z"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }, { kind = "normal", text_contains = "Here are the next times we have open" }]
+calls = { "calendar.create_event" = 0 }
+
+
+# Two customers are offered the same times; the second books Wednesday first, so when the first
+# picks it too, it is no longer free and the first customer gets fresh times.
+[[scenario]]
+name = "booking_slot_taken"
+step = "P4"
+guards = ["book_free"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "12 Main St, New York NY 10001"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+from = "15550000002"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "12 Main St, New York NY 10001"
+from = "15550000002"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "1"
+from = "15550000002"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "1"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }, { hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }, { kind = "normal", text_contains = "address for the clean", to = "15550000002" }, { kind = "normal", text_contains = "Here are the next times", to = "15550000002" }, { kind = "normal", text_contains = "You're booked for Wednesday", to = "15550000002" }, { kind = "normal", text_contains = "Here are the next times", to = "15550000001" }]
+calls = { "calendar.create_event" = 1 }

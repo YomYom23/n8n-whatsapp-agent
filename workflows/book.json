@@ -1,0 +1,704 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "book:mode",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "book:decide": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "create?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "book:mode": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "confirm:reply",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "busy:input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "busy:input",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "busy failed?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "calendar:unavailable",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "mode is book?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "busy:input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "calendar: busy",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "calendar: busy": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "busy failed?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "calendar: create_event": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "create:check",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "calendar: get_event": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "book:decide",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "calendar: get_event (recheck)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "recheck:reply",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "calendar:unavailable": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "book:done",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "confirm:reply": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "book:done",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "create:check": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "recheck?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "create:input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "calendar: create_event",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "create?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "create:input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "book:done",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "get:input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "calendar: get_event",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "mode is book?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "get:input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "offer:build",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "offer:build": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "book:done",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "recheck:reply": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "book:done",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "recheck?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "calendar: get_event (recheck)",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "book:done",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "qIqYrauCo5wbPvEh",
+  "name": "book",
+  "nodes": [
+    {
+      "id": "235a70ee-cbf4-473f-b9a6-53a1fe509b5d",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "c5cd37af-ed30-452d-817e-b2867b4defde",
+      "name": "book:decide",
+      "parameters": {
+        "jsCode": "// @lib booking, slots\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['slots'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slot logic ported from Lead Bot (src/lead_bot/slots.py), with the design's changes (section 12):\n  // the earliest free start on each of the first N days that have one, durations from the service.\n  // Pure: the current time and Luxon's DateTime class are passed in.\n\n  const config = require('./config');\n\n  // Lead Bot's slot ID format: 'slot-%Y%m%dT%H%MZ', in UTC.\n  const SLOT_ID_RE = /^slot-(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})Z$/;\n\n  const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; // Luxon weekday 1..7\n  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n  const MONTH_NAMES = [\n    'January', 'February', 'March', 'April', 'May', 'June',\n    'July', 'August', 'September', 'October', 'November', 'December',\n  ];\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    const ms = value && typeof value.getTime === 'function' ? value.getTime() : new Date(value).getTime();\n    if (Number.isNaN(ms)) throw new Error('invalid time: ' + String(value));\n    return ms;\n  }\n\n  function pad(n) {\n    return String(n).padStart(2, '0');\n  }\n\n  // 'slot-20260310T140000Z' style ID for a start time (ms since epoch or Date).\n  function slotIdFor(start) {\n    const d = new Date(toMillis(start));\n    return 'slot-' + d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) +\n      'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + 'Z';\n  }\n\n  // The start (ms since epoch) a slot ID stands for, or null if it is not a slot ID.\n  function startFromSlotId(slotId) {\n    const m = SLOT_ID_RE.exec(String(slotId));\n    if (!m) return null;\n    const [y, mo, d, h, mi] = m.slice(1).map(Number);\n    const ms = Date.UTC(y, mo - 1, d, h, mi);\n    const check = new Date(ms);\n    // Reject impossible dates such as month 13 that Date.UTC would roll over.\n    if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d ||\n        check.getUTCHours() !== h || check.getUTCMinutes() !== mi) return null;\n    return ms;\n  }\n\n  // \"Monday October 5 at 9:30 AM\" from a Luxon DateTime already in the business zone.\n  // On the hour the minutes are left out (\"at 8 AM\"), as in Lead Bot.\n  function slotLabel(local) {\n    const hour12 = local.hour % 12 || 12;\n    const minutes = local.minute ? ':' + pad(local.minute) : '';\n    const ampm = local.hour < 12 ? 'AM' : 'PM';\n    const dayName = DAY_NAMES[local.weekday % 7];\n    return dayName + ' ' + MONTH_NAMES[local.month - 1] + ' ' + local.day + ' at ' + hour12 + minutes + ' ' + ampm;\n  }\n\n  function parseHm(text) {\n    const m = /^(\\d{1,2}):(\\d{2})$/.exec(String(text));\n    if (!m) throw new Error('bad time of day: ' + String(text));\n    return { hour: Number(m[1]), minute: Number(m[2]) };\n  }\n\n  function isFree(startMs, blockMs, busyMs) {\n    const end = startMs + blockMs;\n    // A period ending exactly at the start does not block it (end is exclusive).\n    return !busyMs.some((b) => b.start < end && startMs < b.end);\n  }\n\n  // The earliest free start on each of the first `count` days that have one, after `afterDay`\n  // (a 'YYYY-MM-DD' business-local date) if given. Returns [{ id, label, day }], day being the\n  // business-local 'YYYY-MM-DD'.\n  function earliestPerDay({\n    now,\n    hours,\n    busy = [],\n    durationMinutes,\n    gapMinutes = config.SLOTS.gapMinutes,\n    minNoticeHours = config.SLOTS.minNoticeHours,\n    daysAhead = config.SLOTS.daysAhead,\n    count = config.SLOTS.offered,\n    afterDay,\n    tz,\n    DateTime,\n  }) {\n    const nowMs = toMillis(now);\n    const earliestMs = nowMs + minNoticeHours * 3600000;\n    const blockMs = (durationMinutes + gapMinutes) * 60000;\n    const durationMs = durationMinutes * 60000;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    const today = DateTime.fromMillis(nowMs, { zone: tz }).startOf('day');\n    const chosen = [];\n\n    for (let offset = 0; offset <= daysAhead && chosen.length < count; offset++) {\n      const day = today.plus({ days: offset });\n      const dayKey = day.toFormat('yyyy-LL-dd');\n      if (afterDay && dayKey <= afterDay) continue;\n      const rows = hours.filter((r) => r.weekday === WEEKDAYS[day.weekday - 1]);\n      for (const row of rows) {\n        const o = parseHm(row.open);\n        const c = parseHm(row.close);\n        const closeMs = day.set({ hour: c.hour, minute: c.minute }).toMillis();\n        let startMs = day.set({ hour: o.hour, minute: o.minute }).toMillis();\n        let found = null;\n        // Each slot is a block of duration plus gap; the visit itself must end by closing time.\n        while (startMs + durationMs <= closeMs) {\n          if (startMs >= earliestMs && isFree(startMs, blockMs, busyMs)) {\n            found = startMs;\n            break;\n          }\n          startMs += blockMs;\n        }\n        if (found !== null) {\n          chosen.push({\n            id: slotIdFor(found),\n            label: slotLabel(DateTime.fromMillis(found, { zone: tz })),\n            day: dayKey,\n          });\n          break;\n        }\n      }\n    }\n    return chosen;\n  }\n\n  // True if the slot is a real slot ID that starts at or after now plus the minimum notice\n  // (not in the past and not inside the notice period).\n  // Booking check 3 (section 12): no busy period overlaps the slot's block (duration plus gap),\n  // the same block earliestPerDay uses. Returns false for an unreadable slot ID.\n  function slotIsFree({ slotId, durationMinutes, gapMinutes = config.SLOTS.gapMinutes, busy = [] }) {\n    const startMs = startFromSlotId(slotId);\n    if (startMs === null) return false;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    return isFree(startMs, (durationMinutes + gapMinutes) * 60000, busyMs);\n  }\n\n  function stillAllowed({ slotId, now, minNoticeHours = config.SLOTS.minNoticeHours }) {\n    const start = startFromSlotId(slotId);\n    if (start === null) return false;\n    return start >= toMillis(now) + minNoticeHours * 3600000;\n  }\n\n  module.exports = {\n    slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel };\n  return module.exports;\n})();\n__lib['texts'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every fixed customer line (design sections 6, 8, 9, 10, 11; file 18). Each entry is a function\n  // returning the text, so the build script and callers treat them all alike.\n\n  const NOT_IN_FACTS_LINE = \"I'll pass that to the team\";\n\n  const TEXTS = {\n    // Stage questions (section 9).\n    stage_new: (services) =>\n      'Which clean would you like?' +\n      (Array.isArray(services) && services.length > 0 ? ' We offer ' + joinList(services) + '.' : ''),\n    stage_address: () => \"What's the address for the clean, including the ZIP code?\",\n    stage_address_again: () =>\n      \"Sorry, I couldn't find a ZIP code in that. What's the address for the clean, including the ZIP code?\",\n    stage_offer: (labels) => numbered('Here are the next times we have open:', labels),\n    stage_offer_later: (labels) => numbered('Here are some later times.', labels),\n    stage_booked: () => '',\n    booked_confirmation: (label) => \"You're booked for \" + label + '. Thanks, see you then!',\n    book_prompt: () => 'Would you like to book a clean?',\n\n    // Gate and sending (sections 6, 10).\n    opt_out_confirmation: () => \"You're opted out and won't get any more messages from us. Reply START to turn them back on.\",\n    start_reply: () => 'Messages are back on. Reply STOP at any time to opt out.',\n    handoff_notice: () => \"Thanks, I'm passing this to a member of our team, who'll reply here\",\n    unsupported_kind: () => 'I can only read text messages here',\n\n    // Routes (section 8).\n    out_of_area: (zip) =>\n      zip\n        ? \"Sorry, we don't clean in ZIP code \" + zip + ' yet. If you have another address, send it and I will check.'\n        : \"Sorry, we don't clean in that area yet. If you have another address, send it and I will check.\",\n    prompt_injection: () => 'I can help with questions about our cleaning and with bookings',\n    off_topic: () => \"I'm the assistant for a cleaning company, so I can only help with our cleaning and bookings.\",\n    repeat: (lastQuestion) =>\n      lastQuestion ? 'Sure, here it is again. ' + lastQuestion : \"There's nothing more I need from you right now.\",\n    later: () => 'No problem. Message me whenever it suits you.',\n    not_in_facts: () => NOT_IN_FACTS_LINE,\n    draft_fallback: () => \"Sorry, I can't answer that one properly. \" + NOT_IN_FACTS_LINE,\n    wrong_person_apology: () => \"Sorry about that, we have the wrong number. We won't message you again.\",\n    facts_unavailable: () => \"Sorry, I can't look that up right now. \" + NOT_IN_FACTS_LINE,\n\n    // Owner's template button (section 11). Sent outside the 24-hour window.\n    template: () => 'We have an update on your enquiry. Reply here to see it.',\n  };\n\n  function joinList(items) {\n    if (items.length <= 1) return items.join('');\n    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];\n  }\n\n  function numbered(intro, labels) {\n    const list = (labels || []).map((l, i) => i + 1 + ') ' + l).join('\\n');\n    return intro + '\\n' + list + '\\nReply with the number of the one that works best, or \"none\" if none of these suit you.';\n  }\n\n  // The question a stage asks, for stage logic and for 'repeat'. vars: { services, labels, later }.\n  function stageQuestion(stage, vars) {\n    const v = vars || {};\n    switch (stage) {\n      case 'new':\n        return TEXTS.stage_new(v.services);\n      case 'address':\n        return TEXTS.stage_address();\n      case 'offer':\n        return v.later ? TEXTS.stage_offer_later(v.labels) : TEXTS.stage_offer(v.labels);\n      default:\n        return '';\n    }\n  }\n\n  function bookableNames(services) {\n    return (Array.isArray(services) ? services : [])\n      .filter((r) => r.bookable === true || String(r.bookable || '').trim().toLowerCase() === 'yes')\n      .map((r) => String(r.service || '').trim().toLowerCase())\n      .filter(Boolean);\n  }\n\n  // Appends the follow-up question named by stages.next's 'then' to a reply (section 8: the stage\n  // question is added after a writer draft or fixed line). Returns { text, question }, where question\n  // is the new last_bot_question (null: unchanged).\n  function withThen(text, then, lastBotQuestion) {\n    let follow = '';\n    let question = null;\n    if (then === 'ask_book') {\n      follow = TEXTS.book_prompt();\n      question = follow;\n    } else if (then === 'last_question' && lastBotQuestion) {\n      follow = lastBotQuestion;\n    }\n    const parts = [text, follow].map((s) => String(s || '').trim()).filter(Boolean);\n    return { text: parts.join('\\n\\n'), question };\n  }\n\n  // The customer text for a stages.next reply code that needs no other workflow.\n  //   ctx: { services: prices rows, zip, lastBotQuestion, then }\n  // Returns { text, kind, question } (kind 'normal' or 'opt_out_confirmation'; question is the new\n  // last_bot_question or null for unchanged; text '' means send nothing), or null for the codes other\n  // workflows produce: writer, offer_times, later_times, booked_confirmation.\n  function fixedReply(reply, ctx) {\n    const c = ctx || {};\n    const done = (text, question, kind) => ({ text, kind: kind || 'normal', question: question || null });\n    const thenDone = (text) => {\n      const w = withThen(text, c.then, c.lastBotQuestion);\n      return done(w.text, w.question);\n    };\n    if (typeof reply !== 'string') throw new Error('fixedReply: reply must be a string');\n    if (reply.startsWith('handoff:')) return done(TEXTS.handoff_notice());\n    if (reply === 'close:wrong_person') return done(TEXTS.wrong_person_apology());\n    if (reply.startsWith('close:')) return done('');\n    switch (reply) {\n      case 'none':\n        return done('');\n      case 'ask_service': {\n        const q = TEXTS.stage_new(bookableNames(c.services));\n        return done(q, q);\n      }\n      case 'ask_address':\n        return done(TEXTS.stage_address(), TEXTS.stage_address());\n      case 'ask_address_again':\n        return done(TEXTS.stage_address_again(), TEXTS.stage_address());\n      case 'out_of_area':\n        return done(TEXTS.out_of_area(c.zip));\n      case 'ask_book':\n        return done(TEXTS.book_prompt(), TEXTS.book_prompt());\n      case 'fixed:opt_out':\n        return done(TEXTS.opt_out_confirmation(), null, 'opt_out_confirmation');\n      case 'fixed:prompt_injection':\n        return done(TEXTS.prompt_injection());\n      case 'fixed:off_topic':\n        return thenDone(TEXTS.off_topic());\n      case 'fixed:later':\n        return done(TEXTS.later());\n      case 'fixed:repeat':\n        return done(TEXTS.repeat(c.lastBotQuestion));\n      case 'fixed:unclear':\n        // \"Ask the stage question again\" (section 8): the follow-up question is the whole reply.\n        return thenDone('');\n      case 'writer':\n      case 'offer_times':\n      case 'later_times':\n      case 'booked_confirmation':\n        return null;\n      default:\n        throw new Error('fixedReply: unknown reply code ' + reply);\n    }\n  }\n\n  module.exports = { TEXTS, stageQuestion, withThen, fixedReply, NOT_IN_FACTS_LINE };\n  return module.exports;\n})();\n__lib['booking'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Booking key, the result of the three checks, and the slot-taken path (design section 12).\n  // Pure: crypto and Luxon's DateTime are passed in.\n\n  const slots = require('./slots');\n  const { TEXTS } = require('./texts');\n\n  // Google event IDs allow a-v and 0-9; a SHA-256 hex digest (0-9, a-f) always fits.\n  function eventId(waId, slotId, crypto) {\n    return crypto.createHash('sha256').update('booking:' + waId + ':' + slotId).digest('hex');\n  }\n\n  // existing: the Google event fetched by its ID, or null/undefined if there is none\n  //           (an object with status 'cancelled' counts as cancelled).\n  // allowed: check 2 (not past, outside minimum notice). free: check 3 (no busy overlap).\n  // Check 1 comes first so our own event is never seen as busy.\n  // enabled: the node's @guards list (book_already, book_allowed, book_free); a check whose guard is\n  // missing is skipped, for the guard-removal run. Omitted means every guard is on.\n  function afterChecks({ existing, allowed, free, enabled }) {\n    const on = (id) => !Array.isArray(enabled) || enabled.includes(id);\n    if (existing && on('book_already')) return existing.status === 'cancelled' ? 'key_deleted' : 'already_booked';\n    if ((!allowed && on('book_allowed')) || (!free && on('book_free'))) return 'taken';\n    return 'book';\n  }\n\n  // Lead Bot's slot-taken path: fresh times once, then a handoff on the second time.\n  // The offered times are cleared so the next reply works out fresh ones from now.\n  function onTaken(conversation) {\n    const count = Number(conversation.slot_taken_count) || 0;\n    const updates = { slot_taken_count: count + 1 };\n    if (count + 1 > 1) return { reply: 'handoff:slots_exhausted', updates };\n    updates.offered_slots = '[]';\n    updates.last_offered_day = '';\n    return { reply: 'offer_times', updates };\n  }\n\n  // The service's booked length from the prices rows (section 12: duration_minutes, also for hourly).\n  function durationFor(services, serviceName) {\n    const want = String(serviceName || '').trim().toLowerCase();\n    const row = (services || []).find((r) => String(r.service || '').trim().toLowerCase() === want);\n    const minutes = row ? Number(row.duration_minutes) : NaN;\n    return Number.isFinite(minutes) && minutes > 0 ? minutes : null;\n  }\n\n  // Offer three times (mode 'offer') or the later times (mode 'later': after the last offered day).\n  // updates: column changes decided so far, kept and extended. Returns { action: 'send', text,\n  // question, updates } or { action: 'handoff', reason, updates } when no free time is left.\n  function offerReply({ mode, conversation, busy, hours, durationMinutes, now, tz, DateTime, updates }) {\n    const c = conversation || {};\n    const afterDay = mode === 'later' && c.last_offered_day ? String(c.last_offered_day).slice(0, 10) : undefined;\n    const found = slots.earliestPerDay({ now, hours, busy, durationMinutes, afterDay, tz, DateTime });\n    if (found.length === 0) return { action: 'handoff', reason: 'slots_exhausted', updates: {} };\n    const labels = found.map((s) => s.label);\n    const text = mode === 'later' ? TEXTS.stage_offer_later(labels) : TEXTS.stage_offer(labels);\n    return {\n      action: 'send', text, question: text,\n      updates: { ...(updates || {}), offered_slots: JSON.stringify(found), last_offered_day: found[found.length - 1].day },\n    };\n  }\n\n  // The confirmation once a slot is booked (or found already booked on a retry).\n  function bookedReply({ slotId, eventId: id, tz, DateTime, updates }) {\n    const start = slots.startFromSlotId(slotId);\n    const label = slots.slotLabel(DateTime.fromMillis(start, { zone: tz }));\n    return {\n      action: 'send', text: TEXTS.booked_confirmation(label), question: null,\n      updates: { ...(updates || {}), booked_event_id: id, booked_label: label },\n    };\n  }\n\n  module.exports = { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply };\n  return module.exports;\n})();\nconst { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply } = __lib['booking'];\nconst { slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel } = __lib['slots'];\n// @end-lib\nconst ENABLED_GUARDS = ['book_already', 'book_allowed', 'book_free']; // @guards\nconst crypto = require('crypto');\nconst i = $('When Executed by Another Workflow').first().json;\nconst c = i.conversation || {};\nconst got = $input.first().json;\nconst busy = $('calendar: busy').first().json.busy || [];\nconst tz = $env.BUSINESS_TZ;\nconst duration = durationFor(i.facts.prices, c.service);\nif (!duration) return [{ json: { decision: 'error', action: 'handoff', reason: 'unknown_service', updates: {} } }];\nif (!got.ok) return [{ json: { decision: 'error', action: 'handoff', reason: 'calendar_unavailable', updates: {} } }];\nconst id = eventId(i.wa_id, i.slot_id, crypto);\nconst existing = got.found ? { status: got.status } : null;\nconst allowed = stillAllowed({ slotId: i.slot_id, now: i.now });\nconst free = slotIsFree({ slotId: i.slot_id, durationMinutes: duration, busy });\nconst decision = afterChecks({ existing, allowed, free, enabled: ENABLED_GUARDS });\nconst startMs = startFromSlotId(i.slot_id);\nconst base = { decision, event_id: id, start: new Date(startMs).toISOString(), end: new Date(startMs + duration * 60000).toISOString() };\nif (decision === 'book') return [{ json: base }];\nlet reply;\nif (decision === 'already_booked') reply = bookedReply({ slotId: i.slot_id, eventId: id, tz, DateTime, updates: i.route_updates });\nelse if (decision === 'key_deleted') reply = { action: 'handoff', reason: 'booking_key_deleted', updates: {} };\nelse {\n  // taken: fresh times once, then hand off (section 12). The route's updates (stage booked) don't apply.\n  const t = onTaken(c);\n  reply = t.reply.startsWith('handoff:')\n    ? { action: 'handoff', reason: 'slots_exhausted', updates: t.updates }\n    : offerReply({ mode: 'offer', conversation: c, busy, hours: i.facts.hours, durationMinutes: duration, now: i.now, tz, DateTime, updates: t.updates });\n}\nreturn [{ json: { ...base, ...reply } }];"
+      },
+      "position": [
+        1792,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "bfde020e-00bd-4ad4-990d-9b7634748bec",
+      "name": "book:done",
+      "parameters": {},
+      "position": [
+        3600,
+        100
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    },
+    {
+      "id": "806cae6f-0379-490e-8feb-e34ef9fcd6c3",
+      "name": "book:mode",
+      "parameters": {
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "offer"
+        },
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "toyyguqb",
+                    "leftValue": "={{ $json.mode }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "confirm"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "confirm",
+              "renameOutput": true
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "s1ysi2wg",
+                    "leftValue": "={{ $json.mode }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "book"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "book",
+              "renameOutput": true
+            }
+          ]
+        }
+      },
+      "position": [
+        224,
+        0
+      ],
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2
+    },
+    {
+      "id": "99014a54-2e14-4ea4-b52d-fbca979d7c8b",
+      "name": "busy failed?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "klw4w4d3",
+              "leftValue": "={{ !$json.ok }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        896,
+        50
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "01e7ea3b-dab1-4cfe-ba7b-ecbf5e4180e6",
+      "name": "busy:input",
+      "parameters": {
+        "jsCode": "const i = $('When Executed by Another Workflow').first().json;\nconst from = new Date(Date.parse(i.now)).toISOString();\nconst to = new Date(Date.parse(i.now) + 16 * 86400000).toISOString(); // slots look 14 days ahead\nreturn [{ json: { op: 'busy', from, to } }];"
+      },
+      "position": [
+        448,
+        50
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "32b5acf6-0d4a-4c56-b627-56616579a421",
+      "name": "calendar: busy",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "calendar-adapter",
+          "mode": "list",
+          "value": "vjPuC1YcUU1dSQ4S"
+        }
+      },
+      "position": [
+        672,
+        50
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "fc8f8e21-8aef-4a06-8fa6-f0837f68c8f1",
+      "name": "calendar: create_event",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "calendar-adapter",
+          "mode": "list",
+          "value": "vjPuC1YcUU1dSQ4S"
+        }
+      },
+      "position": [
+        2464,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "db36d7a2-0865-43c9-80ac-e4a7a23d512d",
+      "name": "calendar: get_event",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "calendar-adapter",
+          "mode": "list",
+          "value": "vjPuC1YcUU1dSQ4S"
+        }
+      },
+      "position": [
+        1568,
+        100
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "aaa51ddc-aa7f-40ed-a00a-5002049c877e",
+      "name": "calendar: get_event (recheck)",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "calendar-adapter",
+          "mode": "list",
+          "value": "vjPuC1YcUU1dSQ4S"
+        }
+      },
+      "position": [
+        3136,
+        -100
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "9befc353-e6bb-4c8a-a795-bac39884b3e9",
+      "name": "calendar:unavailable",
+      "parameters": {
+        "jsCode": "return [{ json: { action: 'handoff', reason: 'calendar_unavailable', updates: {} } }];"
+      },
+      "position": [
+        1120,
+        -100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "124dfa1c-4519-4e88-8397-3cece0826dd6",
+      "name": "confirm:reply",
+      "parameters": {
+        "jsCode": "// @lib texts\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['texts'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every fixed customer line (design sections 6, 8, 9, 10, 11; file 18). Each entry is a function\n  // returning the text, so the build script and callers treat them all alike.\n\n  const NOT_IN_FACTS_LINE = \"I'll pass that to the team\";\n\n  const TEXTS = {\n    // Stage questions (section 9).\n    stage_new: (services) =>\n      'Which clean would you like?' +\n      (Array.isArray(services) && services.length > 0 ? ' We offer ' + joinList(services) + '.' : ''),\n    stage_address: () => \"What's the address for the clean, including the ZIP code?\",\n    stage_address_again: () =>\n      \"Sorry, I couldn't find a ZIP code in that. What's the address for the clean, including the ZIP code?\",\n    stage_offer: (labels) => numbered('Here are the next times we have open:', labels),\n    stage_offer_later: (labels) => numbered('Here are some later times.', labels),\n    stage_booked: () => '',\n    booked_confirmation: (label) => \"You're booked for \" + label + '. Thanks, see you then!',\n    book_prompt: () => 'Would you like to book a clean?',\n\n    // Gate and sending (sections 6, 10).\n    opt_out_confirmation: () => \"You're opted out and won't get any more messages from us. Reply START to turn them back on.\",\n    start_reply: () => 'Messages are back on. Reply STOP at any time to opt out.',\n    handoff_notice: () => \"Thanks, I'm passing this to a member of our team, who'll reply here\",\n    unsupported_kind: () => 'I can only read text messages here',\n\n    // Routes (section 8).\n    out_of_area: (zip) =>\n      zip\n        ? \"Sorry, we don't clean in ZIP code \" + zip + ' yet. If you have another address, send it and I will check.'\n        : \"Sorry, we don't clean in that area yet. If you have another address, send it and I will check.\",\n    prompt_injection: () => 'I can help with questions about our cleaning and with bookings',\n    off_topic: () => \"I'm the assistant for a cleaning company, so I can only help with our cleaning and bookings.\",\n    repeat: (lastQuestion) =>\n      lastQuestion ? 'Sure, here it is again. ' + lastQuestion : \"There's nothing more I need from you right now.\",\n    later: () => 'No problem. Message me whenever it suits you.',\n    not_in_facts: () => NOT_IN_FACTS_LINE,\n    draft_fallback: () => \"Sorry, I can't answer that one properly. \" + NOT_IN_FACTS_LINE,\n    wrong_person_apology: () => \"Sorry about that, we have the wrong number. We won't message you again.\",\n    facts_unavailable: () => \"Sorry, I can't look that up right now. \" + NOT_IN_FACTS_LINE,\n\n    // Owner's template button (section 11). Sent outside the 24-hour window.\n    template: () => 'We have an update on your enquiry. Reply here to see it.',\n  };\n\n  function joinList(items) {\n    if (items.length <= 1) return items.join('');\n    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];\n  }\n\n  function numbered(intro, labels) {\n    const list = (labels || []).map((l, i) => i + 1 + ') ' + l).join('\\n');\n    return intro + '\\n' + list + '\\nReply with the number of the one that works best, or \"none\" if none of these suit you.';\n  }\n\n  // The question a stage asks, for stage logic and for 'repeat'. vars: { services, labels, later }.\n  function stageQuestion(stage, vars) {\n    const v = vars || {};\n    switch (stage) {\n      case 'new':\n        return TEXTS.stage_new(v.services);\n      case 'address':\n        return TEXTS.stage_address();\n      case 'offer':\n        return v.later ? TEXTS.stage_offer_later(v.labels) : TEXTS.stage_offer(v.labels);\n      default:\n        return '';\n    }\n  }\n\n  function bookableNames(services) {\n    return (Array.isArray(services) ? services : [])\n      .filter((r) => r.bookable === true || String(r.bookable || '').trim().toLowerCase() === 'yes')\n      .map((r) => String(r.service || '').trim().toLowerCase())\n      .filter(Boolean);\n  }\n\n  // Appends the follow-up question named by stages.next's 'then' to a reply (section 8: the stage\n  // question is added after a writer draft or fixed line). Returns { text, question }, where question\n  // is the new last_bot_question (null: unchanged).\n  function withThen(text, then, lastBotQuestion) {\n    let follow = '';\n    let question = null;\n    if (then === 'ask_book') {\n      follow = TEXTS.book_prompt();\n      question = follow;\n    } else if (then === 'last_question' && lastBotQuestion) {\n      follow = lastBotQuestion;\n    }\n    const parts = [text, follow].map((s) => String(s || '').trim()).filter(Boolean);\n    return { text: parts.join('\\n\\n'), question };\n  }\n\n  // The customer text for a stages.next reply code that needs no other workflow.\n  //   ctx: { services: prices rows, zip, lastBotQuestion, then }\n  // Returns { text, kind, question } (kind 'normal' or 'opt_out_confirmation'; question is the new\n  // last_bot_question or null for unchanged; text '' means send nothing), or null for the codes other\n  // workflows produce: writer, offer_times, later_times, booked_confirmation.\n  function fixedReply(reply, ctx) {\n    const c = ctx || {};\n    const done = (text, question, kind) => ({ text, kind: kind || 'normal', question: question || null });\n    const thenDone = (text) => {\n      const w = withThen(text, c.then, c.lastBotQuestion);\n      return done(w.text, w.question);\n    };\n    if (typeof reply !== 'string') throw new Error('fixedReply: reply must be a string');\n    if (reply.startsWith('handoff:')) return done(TEXTS.handoff_notice());\n    if (reply === 'close:wrong_person') return done(TEXTS.wrong_person_apology());\n    if (reply.startsWith('close:')) return done('');\n    switch (reply) {\n      case 'none':\n        return done('');\n      case 'ask_service': {\n        const q = TEXTS.stage_new(bookableNames(c.services));\n        return done(q, q);\n      }\n      case 'ask_address':\n        return done(TEXTS.stage_address(), TEXTS.stage_address());\n      case 'ask_address_again':\n        return done(TEXTS.stage_address_again(), TEXTS.stage_address());\n      case 'out_of_area':\n        return done(TEXTS.out_of_area(c.zip));\n      case 'ask_book':\n        return done(TEXTS.book_prompt(), TEXTS.book_prompt());\n      case 'fixed:opt_out':\n        return done(TEXTS.opt_out_confirmation(), null, 'opt_out_confirmation');\n      case 'fixed:prompt_injection':\n        return done(TEXTS.prompt_injection());\n      case 'fixed:off_topic':\n        return thenDone(TEXTS.off_topic());\n      case 'fixed:later':\n        return done(TEXTS.later());\n      case 'fixed:repeat':\n        return done(TEXTS.repeat(c.lastBotQuestion));\n      case 'fixed:unclear':\n        // \"Ask the stage question again\" (section 8): the follow-up question is the whole reply.\n        return thenDone('');\n      case 'writer':\n      case 'offer_times':\n      case 'later_times':\n      case 'booked_confirmation':\n        return null;\n      default:\n        throw new Error('fixedReply: unknown reply code ' + reply);\n    }\n  }\n\n  module.exports = { TEXTS, stageQuestion, withThen, fixedReply, NOT_IN_FACTS_LINE };\n  return module.exports;\n})();\nconst { TEXTS, stageQuestion, withThen, fixedReply, NOT_IN_FACTS_LINE } = __lib['texts'];\n// @end-lib\nconst i = $('When Executed by Another Workflow').first().json;\nreturn [{ json: { action: 'send', text: TEXTS.booked_confirmation((i.conversation || {}).booked_label || ''), question: null, updates: {} } }];"
+      },
+      "position": [
+        448,
+        -250
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "9f018d9b-c1f0-4ee6-b7a9-2ded5f54e583",
+      "name": "create:check",
+      "parameters": {
+        "jsCode": "// @lib booking, slots\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['slots'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slot logic ported from Lead Bot (src/lead_bot/slots.py), with the design's changes (section 12):\n  // the earliest free start on each of the first N days that have one, durations from the service.\n  // Pure: the current time and Luxon's DateTime class are passed in.\n\n  const config = require('./config');\n\n  // Lead Bot's slot ID format: 'slot-%Y%m%dT%H%MZ', in UTC.\n  const SLOT_ID_RE = /^slot-(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})Z$/;\n\n  const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; // Luxon weekday 1..7\n  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n  const MONTH_NAMES = [\n    'January', 'February', 'March', 'April', 'May', 'June',\n    'July', 'August', 'September', 'October', 'November', 'December',\n  ];\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    const ms = value && typeof value.getTime === 'function' ? value.getTime() : new Date(value).getTime();\n    if (Number.isNaN(ms)) throw new Error('invalid time: ' + String(value));\n    return ms;\n  }\n\n  function pad(n) {\n    return String(n).padStart(2, '0');\n  }\n\n  // 'slot-20260310T140000Z' style ID for a start time (ms since epoch or Date).\n  function slotIdFor(start) {\n    const d = new Date(toMillis(start));\n    return 'slot-' + d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) +\n      'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + 'Z';\n  }\n\n  // The start (ms since epoch) a slot ID stands for, or null if it is not a slot ID.\n  function startFromSlotId(slotId) {\n    const m = SLOT_ID_RE.exec(String(slotId));\n    if (!m) return null;\n    const [y, mo, d, h, mi] = m.slice(1).map(Number);\n    const ms = Date.UTC(y, mo - 1, d, h, mi);\n    const check = new Date(ms);\n    // Reject impossible dates such as month 13 that Date.UTC would roll over.\n    if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d ||\n        check.getUTCHours() !== h || check.getUTCMinutes() !== mi) return null;\n    return ms;\n  }\n\n  // \"Monday October 5 at 9:30 AM\" from a Luxon DateTime already in the business zone.\n  // On the hour the minutes are left out (\"at 8 AM\"), as in Lead Bot.\n  function slotLabel(local) {\n    const hour12 = local.hour % 12 || 12;\n    const minutes = local.minute ? ':' + pad(local.minute) : '';\n    const ampm = local.hour < 12 ? 'AM' : 'PM';\n    const dayName = DAY_NAMES[local.weekday % 7];\n    return dayName + ' ' + MONTH_NAMES[local.month - 1] + ' ' + local.day + ' at ' + hour12 + minutes + ' ' + ampm;\n  }\n\n  function parseHm(text) {\n    const m = /^(\\d{1,2}):(\\d{2})$/.exec(String(text));\n    if (!m) throw new Error('bad time of day: ' + String(text));\n    return { hour: Number(m[1]), minute: Number(m[2]) };\n  }\n\n  function isFree(startMs, blockMs, busyMs) {\n    const end = startMs + blockMs;\n    // A period ending exactly at the start does not block it (end is exclusive).\n    return !busyMs.some((b) => b.start < end && startMs < b.end);\n  }\n\n  // The earliest free start on each of the first `count` days that have one, after `afterDay`\n  // (a 'YYYY-MM-DD' business-local date) if given. Returns [{ id, label, day }], day being the\n  // business-local 'YYYY-MM-DD'.\n  function earliestPerDay({\n    now,\n    hours,\n    busy = [],\n    durationMinutes,\n    gapMinutes = config.SLOTS.gapMinutes,\n    minNoticeHours = config.SLOTS.minNoticeHours,\n    daysAhead = config.SLOTS.daysAhead,\n    count = config.SLOTS.offered,\n    afterDay,\n    tz,\n    DateTime,\n  }) {\n    const nowMs = toMillis(now);\n    const earliestMs = nowMs + minNoticeHours * 3600000;\n    const blockMs = (durationMinutes + gapMinutes) * 60000;\n    const durationMs = durationMinutes * 60000;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    const today = DateTime.fromMillis(nowMs, { zone: tz }).startOf('day');\n    const chosen = [];\n\n    for (let offset = 0; offset <= daysAhead && chosen.length < count; offset++) {\n      const day = today.plus({ days: offset });\n      const dayKey = day.toFormat('yyyy-LL-dd');\n      if (afterDay && dayKey <= afterDay) continue;\n      const rows = hours.filter((r) => r.weekday === WEEKDAYS[day.weekday - 1]);\n      for (const row of rows) {\n        const o = parseHm(row.open);\n        const c = parseHm(row.close);\n        const closeMs = day.set({ hour: c.hour, minute: c.minute }).toMillis();\n        let startMs = day.set({ hour: o.hour, minute: o.minute }).toMillis();\n        let found = null;\n        // Each slot is a block of duration plus gap; the visit itself must end by closing time.\n        while (startMs + durationMs <= closeMs) {\n          if (startMs >= earliestMs && isFree(startMs, blockMs, busyMs)) {\n            found = startMs;\n            break;\n          }\n          startMs += blockMs;\n        }\n        if (found !== null) {\n          chosen.push({\n            id: slotIdFor(found),\n            label: slotLabel(DateTime.fromMillis(found, { zone: tz })),\n            day: dayKey,\n          });\n          break;\n        }\n      }\n    }\n    return chosen;\n  }\n\n  // True if the slot is a real slot ID that starts at or after now plus the minimum notice\n  // (not in the past and not inside the notice period).\n  // Booking check 3 (section 12): no busy period overlaps the slot's block (duration plus gap),\n  // the same block earliestPerDay uses. Returns false for an unreadable slot ID.\n  function slotIsFree({ slotId, durationMinutes, gapMinutes = config.SLOTS.gapMinutes, busy = [] }) {\n    const startMs = startFromSlotId(slotId);\n    if (startMs === null) return false;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    return isFree(startMs, (durationMinutes + gapMinutes) * 60000, busyMs);\n  }\n\n  function stillAllowed({ slotId, now, minNoticeHours = config.SLOTS.minNoticeHours }) {\n    const start = startFromSlotId(slotId);\n    if (start === null) return false;\n    return start >= toMillis(now) + minNoticeHours * 3600000;\n  }\n\n  module.exports = {\n    slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel };\n  return module.exports;\n})();\n__lib['texts'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every fixed customer line (design sections 6, 8, 9, 10, 11; file 18). Each entry is a function\n  // returning the text, so the build script and callers treat them all alike.\n\n  const NOT_IN_FACTS_LINE = \"I'll pass that to the team\";\n\n  const TEXTS = {\n    // Stage questions (section 9).\n    stage_new: (services) =>\n      'Which clean would you like?' +\n      (Array.isArray(services) && services.length > 0 ? ' We offer ' + joinList(services) + '.' : ''),\n    stage_address: () => \"What's the address for the clean, including the ZIP code?\",\n    stage_address_again: () =>\n      \"Sorry, I couldn't find a ZIP code in that. What's the address for the clean, including the ZIP code?\",\n    stage_offer: (labels) => numbered('Here are the next times we have open:', labels),\n    stage_offer_later: (labels) => numbered('Here are some later times.', labels),\n    stage_booked: () => '',\n    booked_confirmation: (label) => \"You're booked for \" + label + '. Thanks, see you then!',\n    book_prompt: () => 'Would you like to book a clean?',\n\n    // Gate and sending (sections 6, 10).\n    opt_out_confirmation: () => \"You're opted out and won't get any more messages from us. Reply START to turn them back on.\",\n    start_reply: () => 'Messages are back on. Reply STOP at any time to opt out.',\n    handoff_notice: () => \"Thanks, I'm passing this to a member of our team, who'll reply here\",\n    unsupported_kind: () => 'I can only read text messages here',\n\n    // Routes (section 8).\n    out_of_area: (zip) =>\n      zip\n        ? \"Sorry, we don't clean in ZIP code \" + zip + ' yet. If you have another address, send it and I will check.'\n        : \"Sorry, we don't clean in that area yet. If you have another address, send it and I will check.\",\n    prompt_injection: () => 'I can help with questions about our cleaning and with bookings',\n    off_topic: () => \"I'm the assistant for a cleaning company, so I can only help with our cleaning and bookings.\",\n    repeat: (lastQuestion) =>\n      lastQuestion ? 'Sure, here it is again. ' + lastQuestion : \"There's nothing more I need from you right now.\",\n    later: () => 'No problem. Message me whenever it suits you.',\n    not_in_facts: () => NOT_IN_FACTS_LINE,\n    draft_fallback: () => \"Sorry, I can't answer that one properly. \" + NOT_IN_FACTS_LINE,\n    wrong_person_apology: () => \"Sorry about that, we have the wrong number. We won't message you again.\",\n    facts_unavailable: () => \"Sorry, I can't look that up right now. \" + NOT_IN_FACTS_LINE,\n\n    // Owner's template button (section 11). Sent outside the 24-hour window.\n    template: () => 'We have an update on your enquiry. Reply here to see it.',\n  };\n\n  function joinList(items) {\n    if (items.length <= 1) return items.join('');\n    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];\n  }\n\n  function numbered(intro, labels) {\n    const list = (labels || []).map((l, i) => i + 1 + ') ' + l).join('\\n');\n    return intro + '\\n' + list + '\\nReply with the number of the one that works best, or \"none\" if none of these suit you.';\n  }\n\n  // The question a stage asks, for stage logic and for 'repeat'. vars: { services, labels, later }.\n  function stageQuestion(stage, vars) {\n    const v = vars || {};\n    switch (stage) {\n      case 'new':\n        return TEXTS.stage_new(v.services);\n      case 'address':\n        return TEXTS.stage_address();\n      case 'offer':\n        return v.later ? TEXTS.stage_offer_later(v.labels) : TEXTS.stage_offer(v.labels);\n      default:\n        return '';\n    }\n  }\n\n  function bookableNames(services) {\n    return (Array.isArray(services) ? services : [])\n      .filter((r) => r.bookable === true || String(r.bookable || '').trim().toLowerCase() === 'yes')\n      .map((r) => String(r.service || '').trim().toLowerCase())\n      .filter(Boolean);\n  }\n\n  // Appends the follow-up question named by stages.next's 'then' to a reply (section 8: the stage\n  // question is added after a writer draft or fixed line). Returns { text, question }, where question\n  // is the new last_bot_question (null: unchanged).\n  function withThen(text, then, lastBotQuestion) {\n    let follow = '';\n    let question = null;\n    if (then === 'ask_book') {\n      follow = TEXTS.book_prompt();\n      question = follow;\n    } else if (then === 'last_question' && lastBotQuestion) {\n      follow = lastBotQuestion;\n    }\n    const parts = [text, follow].map((s) => String(s || '').trim()).filter(Boolean);\n    return { text: parts.join('\\n\\n'), question };\n  }\n\n  // The customer text for a stages.next reply code that needs no other workflow.\n  //   ctx: { services: prices rows, zip, lastBotQuestion, then }\n  // Returns { text, kind, question } (kind 'normal' or 'opt_out_confirmation'; question is the new\n  // last_bot_question or null for unchanged; text '' means send nothing), or null for the codes other\n  // workflows produce: writer, offer_times, later_times, booked_confirmation.\n  function fixedReply(reply, ctx) {\n    const c = ctx || {};\n    const done = (text, question, kind) => ({ text, kind: kind || 'normal', question: question || null });\n    const thenDone = (text) => {\n      const w = withThen(text, c.then, c.lastBotQuestion);\n      return done(w.text, w.question);\n    };\n    if (typeof reply !== 'string') throw new Error('fixedReply: reply must be a string');\n    if (reply.startsWith('handoff:')) return done(TEXTS.handoff_notice());\n    if (reply === 'close:wrong_person') return done(TEXTS.wrong_person_apology());\n    if (reply.startsWith('close:')) return done('');\n    switch (reply) {\n      case 'none':\n        return done('');\n      case 'ask_service': {\n        const q = TEXTS.stage_new(bookableNames(c.services));\n        return done(q, q);\n      }\n      case 'ask_address':\n        return done(TEXTS.stage_address(), TEXTS.stage_address());\n      case 'ask_address_again':\n        return done(TEXTS.stage_address_again(), TEXTS.stage_address());\n      case 'out_of_area':\n        return done(TEXTS.out_of_area(c.zip));\n      case 'ask_book':\n        return done(TEXTS.book_prompt(), TEXTS.book_prompt());\n      case 'fixed:opt_out':\n        return done(TEXTS.opt_out_confirmation(), null, 'opt_out_confirmation');\n      case 'fixed:prompt_injection':\n        return done(TEXTS.prompt_injection());\n      case 'fixed:off_topic':\n        return thenDone(TEXTS.off_topic());\n      case 'fixed:later':\n        return done(TEXTS.later());\n      case 'fixed:repeat':\n        return done(TEXTS.repeat(c.lastBotQuestion));\n      case 'fixed:unclear':\n        // \"Ask the stage question again\" (section 8): the follow-up question is the whole reply.\n        return thenDone('');\n      case 'writer':\n      case 'offer_times':\n      case 'later_times':\n      case 'booked_confirmation':\n        return null;\n      default:\n        throw new Error('fixedReply: unknown reply code ' + reply);\n    }\n  }\n\n  module.exports = { TEXTS, stageQuestion, withThen, fixedReply, NOT_IN_FACTS_LINE };\n  return module.exports;\n})();\n__lib['booking'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Booking key, the result of the three checks, and the slot-taken path (design section 12).\n  // Pure: crypto and Luxon's DateTime are passed in.\n\n  const slots = require('./slots');\n  const { TEXTS } = require('./texts');\n\n  // Google event IDs allow a-v and 0-9; a SHA-256 hex digest (0-9, a-f) always fits.\n  function eventId(waId, slotId, crypto) {\n    return crypto.createHash('sha256').update('booking:' + waId + ':' + slotId).digest('hex');\n  }\n\n  // existing: the Google event fetched by its ID, or null/undefined if there is none\n  //           (an object with status 'cancelled' counts as cancelled).\n  // allowed: check 2 (not past, outside minimum notice). free: check 3 (no busy overlap).\n  // Check 1 comes first so our own event is never seen as busy.\n  // enabled: the node's @guards list (book_already, book_allowed, book_free); a check whose guard is\n  // missing is skipped, for the guard-removal run. Omitted means every guard is on.\n  function afterChecks({ existing, allowed, free, enabled }) {\n    const on = (id) => !Array.isArray(enabled) || enabled.includes(id);\n    if (existing && on('book_already')) return existing.status === 'cancelled' ? 'key_deleted' : 'already_booked';\n    if ((!allowed && on('book_allowed')) || (!free && on('book_free'))) return 'taken';\n    return 'book';\n  }\n\n  // Lead Bot's slot-taken path: fresh times once, then a handoff on the second time.\n  // The offered times are cleared so the next reply works out fresh ones from now.\n  function onTaken(conversation) {\n    const count = Number(conversation.slot_taken_count) || 0;\n    const updates = { slot_taken_count: count + 1 };\n    if (count + 1 > 1) return { reply: 'handoff:slots_exhausted', updates };\n    updates.offered_slots = '[]';\n    updates.last_offered_day = '';\n    return { reply: 'offer_times', updates };\n  }\n\n  // The service's booked length from the prices rows (section 12: duration_minutes, also for hourly).\n  function durationFor(services, serviceName) {\n    const want = String(serviceName || '').trim().toLowerCase();\n    const row = (services || []).find((r) => String(r.service || '').trim().toLowerCase() === want);\n    const minutes = row ? Number(row.duration_minutes) : NaN;\n    return Number.isFinite(minutes) && minutes > 0 ? minutes : null;\n  }\n\n  // Offer three times (mode 'offer') or the later times (mode 'later': after the last offered day).\n  // updates: column changes decided so far, kept and extended. Returns { action: 'send', text,\n  // question, updates } or { action: 'handoff', reason, updates } when no free time is left.\n  function offerReply({ mode, conversation, busy, hours, durationMinutes, now, tz, DateTime, updates }) {\n    const c = conversation || {};\n    const afterDay = mode === 'later' && c.last_offered_day ? String(c.last_offered_day).slice(0, 10) : undefined;\n    const found = slots.earliestPerDay({ now, hours, busy, durationMinutes, afterDay, tz, DateTime });\n    if (found.length === 0) return { action: 'handoff', reason: 'slots_exhausted', updates: {} };\n    const labels = found.map((s) => s.label);\n    const text = mode === 'later' ? TEXTS.stage_offer_later(labels) : TEXTS.stage_offer(labels);\n    return {\n      action: 'send', text, question: text,\n      updates: { ...(updates || {}), offered_slots: JSON.stringify(found), last_offered_day: found[found.length - 1].day },\n    };\n  }\n\n  // The confirmation once a slot is booked (or found already booked on a retry).\n  function bookedReply({ slotId, eventId: id, tz, DateTime, updates }) {\n    const start = slots.startFromSlotId(slotId);\n    const label = slots.slotLabel(DateTime.fromMillis(start, { zone: tz }));\n    return {\n      action: 'send', text: TEXTS.booked_confirmation(label), question: null,\n      updates: { ...(updates || {}), booked_event_id: id, booked_label: label },\n    };\n  }\n\n  module.exports = { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply };\n  return module.exports;\n})();\nconst { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply } = __lib['booking'];\nconst { slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel } = __lib['slots'];\n// @end-lib\nconst i = $('When Executed by Another Workflow').first().json;\nconst d = $('book:decide').first().json;\nconst r = $input.first().json;\nif (r.ok) return [{ json: bookedReply({ slotId: i.slot_id, eventId: d.event_id, tz: $env.BUSINESS_TZ, DateTime, updates: i.route_updates }) }];\n// A conflict means the event appeared since check 1, so check 1 runs again (section 12).\nif (r.error && r.error.kind === 'conflict') return [{ json: { recheck: true, op: 'get_event', event_id: d.event_id } }];\nreturn [{ json: { action: 'handoff', reason: 'calendar_unavailable', updates: {} } }];"
+      },
+      "position": [
+        2688,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "9b6a9c93-1120-4ae5-bb1f-9ad8e8a263c2",
+      "name": "create:input",
+      "parameters": {
+        "jsCode": "const i = $('When Executed by Another Workflow').first().json;\nconst d = $input.first().json;\nconst c = i.conversation || {};\nreturn [{ json: { op: 'create_event', event_id: d.event_id, start: d.start, end: d.end,\n  summary: (c.service || 'Clean') + ' (WhatsApp booking)', description: 'Booked over WhatsApp by ' + i.wa_id, location: c.address || '' } }];"
+      },
+      "position": [
+        2240,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "2c05388a-30be-425b-a0de-c6e6c2799069",
+      "name": "create?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cqg4hcjx",
+              "leftValue": "={{ $json.decision === 'book' }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        2016,
+        100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "252ada19-28eb-40b6-8f03-a86f5087494e",
+      "name": "get:input",
+      "parameters": {
+        "jsCode": "// @lib booking, slots\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['slots'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slot logic ported from Lead Bot (src/lead_bot/slots.py), with the design's changes (section 12):\n  // the earliest free start on each of the first N days that have one, durations from the service.\n  // Pure: the current time and Luxon's DateTime class are passed in.\n\n  const config = require('./config');\n\n  // Lead Bot's slot ID format: 'slot-%Y%m%dT%H%MZ', in UTC.\n  const SLOT_ID_RE = /^slot-(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})Z$/;\n\n  const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; // Luxon weekday 1..7\n  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n  const MONTH_NAMES = [\n    'January', 'February', 'March', 'April', 'May', 'June',\n    'July', 'August', 'September', 'October', 'November', 'December',\n  ];\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    const ms = value && typeof value.getTime === 'function' ? value.getTime() : new Date(value).getTime();\n    if (Number.isNaN(ms)) throw new Error('invalid time: ' + String(value));\n    return ms;\n  }\n\n  function pad(n) {\n    return String(n).padStart(2, '0');\n  }\n\n  // 'slot-20260310T140000Z' style ID for a start time (ms since epoch or Date).\n  function slotIdFor(start) {\n    const d = new Date(toMillis(start));\n    return 'slot-' + d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) +\n      'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + 'Z';\n  }\n\n  // The start (ms since epoch) a slot ID stands for, or null if it is not a slot ID.\n  function startFromSlotId(slotId) {\n    const m = SLOT_ID_RE.exec(String(slotId));\n    if (!m) return null;\n    const [y, mo, d, h, mi] = m.slice(1).map(Number);\n    const ms = Date.UTC(y, mo - 1, d, h, mi);\n    const check = new Date(ms);\n    // Reject impossible dates such as month 13 that Date.UTC would roll over.\n    if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d ||\n        check.getUTCHours() !== h || check.getUTCMinutes() !== mi) return null;\n    return ms;\n  }\n\n  // \"Monday October 5 at 9:30 AM\" from a Luxon DateTime already in the business zone.\n  // On the hour the minutes are left out (\"at 8 AM\"), as in Lead Bot.\n  function slotLabel(local) {\n    const hour12 = local.hour % 12 || 12;\n    const minutes = local.minute ? ':' + pad(local.minute) : '';\n    const ampm = local.hour < 12 ? 'AM' : 'PM';\n    const dayName = DAY_NAMES[local.weekday % 7];\n    return dayName + ' ' + MONTH_NAMES[local.month - 1] + ' ' + local.day + ' at ' + hour12 + minutes + ' ' + ampm;\n  }\n\n  function parseHm(text) {\n    const m = /^(\\d{1,2}):(\\d{2})$/.exec(String(text));\n    if (!m) throw new Error('bad time of day: ' + String(text));\n    return { hour: Number(m[1]), minute: Number(m[2]) };\n  }\n\n  function isFree(startMs, blockMs, busyMs) {\n    const end = startMs + blockMs;\n    // A period ending exactly at the start does not block it (end is exclusive).\n    return !busyMs.some((b) => b.start < end && startMs < b.end);\n  }\n\n  // The earliest free start on each of the first `count` days that have one, after `afterDay`\n  // (a 'YYYY-MM-DD' business-local date) if given. Returns [{ id, label, day }], day being the\n  // business-local 'YYYY-MM-DD'.\n  function earliestPerDay({\n    now,\n    hours,\n    busy = [],\n    durationMinutes,\n    gapMinutes = config.SLOTS.gapMinutes,\n    minNoticeHours = config.SLOTS.minNoticeHours,\n    daysAhead = config.SLOTS.daysAhead,\n    count = config.SLOTS.offered,\n    afterDay,\n    tz,\n    DateTime,\n  }) {\n    const nowMs = toMillis(now);\n    const earliestMs = nowMs + minNoticeHours * 3600000;\n    const blockMs = (durationMinutes + gapMinutes) * 60000;\n    const durationMs = durationMinutes * 60000;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    const today = DateTime.fromMillis(nowMs, { zone: tz }).startOf('day');\n    const chosen = [];\n\n    for (let offset = 0; offset <= daysAhead && chosen.length < count; offset++) {\n      const day = today.plus({ days: offset });\n      const dayKey = day.toFormat('yyyy-LL-dd');\n      if (afterDay && dayKey <= afterDay) continue;\n      const rows = hours.filter((r) => r.weekday === WEEKDAYS[day.weekday - 1]);\n      for (const row of rows) {\n        const o = parseHm(row.open);\n        const c = parseHm(row.close);\n        const closeMs = day.set({ hour: c.hour, minute: c.minute }).toMillis();\n        let startMs = day.set({ hour: o.hour, minute: o.minute }).toMillis();\n        let found = null;\n        // Each slot is a block of duration plus gap; the visit itself must end by closing time.\n        while (startMs + durationMs <= closeMs) {\n          if (startMs >= earliestMs && isFree(startMs, blockMs, busyMs)) {\n            found = startMs;\n            break;\n          }\n          startMs += blockMs;\n        }\n        if (found !== null) {\n          chosen.push({\n            id: slotIdFor(found),\n            label: slotLabel(DateTime.fromMillis(found, { zone: tz })),\n            day: dayKey,\n          });\n          break;\n        }\n      }\n    }\n    return chosen;\n  }\n\n  // True if the slot is a real slot ID that starts at or after now plus the minimum notice\n  // (not in the past and not inside the notice period).\n  // Booking check 3 (section 12): no busy period overlaps the slot's block (duration plus gap),\n  // the same block earliestPerDay uses. Returns false for an unreadable slot ID.\n  function slotIsFree({ slotId, durationMinutes, gapMinutes = config.SLOTS.gapMinutes, busy = [] }) {\n    const startMs = startFromSlotId(slotId);\n    if (startMs === null) return false;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    return isFree(startMs, (durationMinutes + gapMinutes) * 60000, busyMs);\n  }\n\n  function stillAllowed({ slotId, now, minNoticeHours = config.SLOTS.minNoticeHours }) {\n    const start = startFromSlotId(slotId);\n    if (start === null) return false;\n    return start >= toMillis(now) + minNoticeHours * 3600000;\n  }\n\n  module.exports = {\n    slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel };\n  return module.exports;\n})();\n__lib['texts'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every fixed customer line (design sections 6, 8, 9, 10, 11; file 18). Each entry is a function\n  // returning the text, so the build script and callers treat them all alike.\n\n  const NOT_IN_FACTS_LINE = \"I'll pass that to the team\";\n\n  const TEXTS = {\n    // Stage questions (section 9).\n    stage_new: (services) =>\n      'Which clean would you like?' +\n      (Array.isArray(services) && services.length > 0 ? ' We offer ' + joinList(services) + '.' : ''),\n    stage_address: () => \"What's the address for the clean, including the ZIP code?\",\n    stage_address_again: () =>\n      \"Sorry, I couldn't find a ZIP code in that. What's the address for the clean, including the ZIP code?\",\n    stage_offer: (labels) => numbered('Here are the next times we have open:', labels),\n    stage_offer_later: (labels) => numbered('Here are some later times.', labels),\n    stage_booked: () => '',\n    booked_confirmation: (label) => \"You're booked for \" + label + '. Thanks, see you then!',\n    book_prompt: () => 'Would you like to book a clean?',\n\n    // Gate and sending (sections 6, 10).\n    opt_out_confirmation: () => \"You're opted out and won't get any more messages from us. Reply START to turn them back on.\",\n    start_reply: () => 'Messages are back on. Reply STOP at any time to opt out.',\n    handoff_notice: () => \"Thanks, I'm passing this to a member of our team, who'll reply here\",\n    unsupported_kind: () => 'I can only read text messages here',\n\n    // Routes (section 8).\n    out_of_area: (zip) =>\n      zip\n        ? \"Sorry, we don't clean in ZIP code \" + zip + ' yet. If you have another address, send it and I will check.'\n        : \"Sorry, we don't clean in that area yet. If you have another address, send it and I will check.\",\n    prompt_injection: () => 'I can help with questions about our cleaning and with bookings',\n    off_topic: () => \"I'm the assistant for a cleaning company, so I can only help with our cleaning and bookings.\",\n    repeat: (lastQuestion) =>\n      lastQuestion ? 'Sure, here it is again. ' + lastQuestion : \"There's nothing more I need from you right now.\",\n    later: () => 'No problem. Message me whenever it suits you.',\n    not_in_facts: () => NOT_IN_FACTS_LINE,\n    draft_fallback: () => \"Sorry, I can't answer that one properly. \" + NOT_IN_FACTS_LINE,\n    wrong_person_apology: () => \"Sorry about that, we have the wrong number. We won't message you again.\",\n    facts_unavailable: () => \"Sorry, I can't look that up right now. \" + NOT_IN_FACTS_LINE,\n\n    // Owner's template button (section 11). Sent outside the 24-hour window.\n    template: () => 'We have an update on your enquiry. Reply here to see it.',\n  };\n\n  function joinList(items) {\n    if (items.length <= 1) return items.join('');\n    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];\n  }\n\n  function numbered(intro, labels) {\n    const list = (labels || []).map((l, i) => i + 1 + ') ' + l).join('\\n');\n    return intro + '\\n' + list + '\\nReply with the number of the one that works best, or \"none\" if none of these suit you.';\n  }\n\n  // The question a stage asks, for stage logic and for 'repeat'. vars: { services, labels, later }.\n  function stageQuestion(stage, vars) {\n    const v = vars || {};\n    switch (stage) {\n      case 'new':\n        return TEXTS.stage_new(v.services);\n      case 'address':\n        return TEXTS.stage_address();\n      case 'offer':\n        return v.later ? TEXTS.stage_offer_later(v.labels) : TEXTS.stage_offer(v.labels);\n      default:\n        return '';\n    }\n  }\n\n  function bookableNames(services) {\n    return (Array.isArray(services) ? services : [])\n      .filter((r) => r.bookable === true || String(r.bookable || '').trim().toLowerCase() === 'yes')\n      .map((r) => String(r.service || '').trim().toLowerCase())\n      .filter(Boolean);\n  }\n\n  // Appends the follow-up question named by stages.next's 'then' to a reply (section 8: the stage\n  // question is added after a writer draft or fixed line). Returns { text, question }, where question\n  // is the new last_bot_question (null: unchanged).\n  function withThen(text, then, lastBotQuestion) {\n    let follow = '';\n    let question = null;\n    if (then === 'ask_book') {\n      follow = TEXTS.book_prompt();\n      question = follow;\n    } else if (then === 'last_question' && lastBotQuestion) {\n      follow = lastBotQuestion;\n    }\n    const parts = [text, follow].map((s) => String(s || '').trim()).filter(Boolean);\n    return { text: parts.join('\\n\\n'), question };\n  }\n\n  // The customer text for a stages.next reply code that needs no other workflow.\n  //   ctx: { services: prices rows, zip, lastBotQuestion, then }\n  // Returns { text, kind, question } (kind 'normal' or 'opt_out_confirmation'; question is the new\n  // last_bot_question or null for unchanged; text '' means send nothing), or null for the codes other\n  // workflows produce: writer, offer_times, later_times, booked_confirmation.\n  function fixedReply(reply, ctx) {\n    const c = ctx || {};\n    const done = (text, question, kind) => ({ text, kind: kind || 'normal', question: question || null });\n    const thenDone = (text) => {\n      const w = withThen(text, c.then, c.lastBotQuestion);\n      return done(w.text, w.question);\n    };\n    if (typeof reply !== 'string') throw new Error('fixedReply: reply must be a string');\n    if (reply.startsWith('handoff:')) return done(TEXTS.handoff_notice());\n    if (reply === 'close:wrong_person') return done(TEXTS.wrong_person_apology());\n    if (reply.startsWith('close:')) return done('');\n    switch (reply) {\n      case 'none':\n        return done('');\n      case 'ask_service': {\n        const q = TEXTS.stage_new(bookableNames(c.services));\n        return done(q, q);\n      }\n      case 'ask_address':\n        return done(TEXTS.stage_address(), TEXTS.stage_address());\n      case 'ask_address_again':\n        return done(TEXTS.stage_address_again(), TEXTS.stage_address());\n      case 'out_of_area':\n        return done(TEXTS.out_of_area(c.zip));\n      case 'ask_book':\n        return done(TEXTS.book_prompt(), TEXTS.book_prompt());\n      case 'fixed:opt_out':\n        return done(TEXTS.opt_out_confirmation(), null, 'opt_out_confirmation');\n      case 'fixed:prompt_injection':\n        return done(TEXTS.prompt_injection());\n      case 'fixed:off_topic':\n        return thenDone(TEXTS.off_topic());\n      case 'fixed:later':\n        return done(TEXTS.later());\n      case 'fixed:repeat':\n        return done(TEXTS.repeat(c.lastBotQuestion));\n      case 'fixed:unclear':\n        // \"Ask the stage question again\" (section 8): the follow-up question is the whole reply.\n        return thenDone('');\n      case 'writer':\n      case 'offer_times':\n      case 'later_times':\n      case 'booked_confirmation':\n        return null;\n      default:\n        throw new Error('fixedReply: unknown reply code ' + reply);\n    }\n  }\n\n  module.exports = { TEXTS, stageQuestion, withThen, fixedReply, NOT_IN_FACTS_LINE };\n  return module.exports;\n})();\n__lib['booking'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Booking key, the result of the three checks, and the slot-taken path (design section 12).\n  // Pure: crypto and Luxon's DateTime are passed in.\n\n  const slots = require('./slots');\n  const { TEXTS } = require('./texts');\n\n  // Google event IDs allow a-v and 0-9; a SHA-256 hex digest (0-9, a-f) always fits.\n  function eventId(waId, slotId, crypto) {\n    return crypto.createHash('sha256').update('booking:' + waId + ':' + slotId).digest('hex');\n  }\n\n  // existing: the Google event fetched by its ID, or null/undefined if there is none\n  //           (an object with status 'cancelled' counts as cancelled).\n  // allowed: check 2 (not past, outside minimum notice). free: check 3 (no busy overlap).\n  // Check 1 comes first so our own event is never seen as busy.\n  // enabled: the node's @guards list (book_already, book_allowed, book_free); a check whose guard is\n  // missing is skipped, for the guard-removal run. Omitted means every guard is on.\n  function afterChecks({ existing, allowed, free, enabled }) {\n    const on = (id) => !Array.isArray(enabled) || enabled.includes(id);\n    if (existing && on('book_already')) return existing.status === 'cancelled' ? 'key_deleted' : 'already_booked';\n    if ((!allowed && on('book_allowed')) || (!free && on('book_free'))) return 'taken';\n    return 'book';\n  }\n\n  // Lead Bot's slot-taken path: fresh times once, then a handoff on the second time.\n  // The offered times are cleared so the next reply works out fresh ones from now.\n  function onTaken(conversation) {\n    const count = Number(conversation.slot_taken_count) || 0;\n    const updates = { slot_taken_count: count + 1 };\n    if (count + 1 > 1) return { reply: 'handoff:slots_exhausted', updates };\n    updates.offered_slots = '[]';\n    updates.last_offered_day = '';\n    return { reply: 'offer_times', updates };\n  }\n\n  // The service's booked length from the prices rows (section 12: duration_minutes, also for hourly).\n  function durationFor(services, serviceName) {\n    const want = String(serviceName || '').trim().toLowerCase();\n    const row = (services || []).find((r) => String(r.service || '').trim().toLowerCase() === want);\n    const minutes = row ? Number(row.duration_minutes) : NaN;\n    return Number.isFinite(minutes) && minutes > 0 ? minutes : null;\n  }\n\n  // Offer three times (mode 'offer') or the later times (mode 'later': after the last offered day).\n  // updates: column changes decided so far, kept and extended. Returns { action: 'send', text,\n  // question, updates } or { action: 'handoff', reason, updates } when no free time is left.\n  function offerReply({ mode, conversation, busy, hours, durationMinutes, now, tz, DateTime, updates }) {\n    const c = conversation || {};\n    const afterDay = mode === 'later' && c.last_offered_day ? String(c.last_offered_day).slice(0, 10) : undefined;\n    const found = slots.earliestPerDay({ now, hours, busy, durationMinutes, afterDay, tz, DateTime });\n    if (found.length === 0) return { action: 'handoff', reason: 'slots_exhausted', updates: {} };\n    const labels = found.map((s) => s.label);\n    const text = mode === 'later' ? TEXTS.stage_offer_later(labels) : TEXTS.stage_offer(labels);\n    return {\n      action: 'send', text, question: text,\n      updates: { ...(updates || {}), offered_slots: JSON.stringify(found), last_offered_day: found[found.length - 1].day },\n    };\n  }\n\n  // The confirmation once a slot is booked (or found already booked on a retry).\n  function bookedReply({ slotId, eventId: id, tz, DateTime, updates }) {\n    const start = slots.startFromSlotId(slotId);\n    const label = slots.slotLabel(DateTime.fromMillis(start, { zone: tz }));\n    return {\n      action: 'send', text: TEXTS.booked_confirmation(label), question: null,\n      updates: { ...(updates || {}), booked_event_id: id, booked_label: label },\n    };\n  }\n\n  module.exports = { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply };\n  return module.exports;\n})();\nconst { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply } = __lib['booking'];\nconst { slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel } = __lib['slots'];\n// @end-lib\nconst crypto = require('crypto');\nconst i = $('When Executed by Another Workflow').first().json;\nreturn [{ json: { op: 'get_event', event_id: eventId(i.wa_id, i.slot_id, crypto) } }];"
+      },
+      "position": [
+        1344,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "d4ddac20-d20c-47ba-aaba-485e3d475b60",
+      "name": "mode is book?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "oynftvzp",
+              "leftValue": "={{ $('When Executed by Another Workflow').first().json.mode === 'book' }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        1120,
+        150
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "f5037de0-0f34-4d2c-8c15-da85d5922318",
+      "name": "offer:build",
+      "parameters": {
+        "jsCode": "// @lib booking, slots\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['slots'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slot logic ported from Lead Bot (src/lead_bot/slots.py), with the design's changes (section 12):\n  // the earliest free start on each of the first N days that have one, durations from the service.\n  // Pure: the current time and Luxon's DateTime class are passed in.\n\n  const config = require('./config');\n\n  // Lead Bot's slot ID format: 'slot-%Y%m%dT%H%MZ', in UTC.\n  const SLOT_ID_RE = /^slot-(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})Z$/;\n\n  const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; // Luxon weekday 1..7\n  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n  const MONTH_NAMES = [\n    'January', 'February', 'March', 'April', 'May', 'June',\n    'July', 'August', 'September', 'October', 'November', 'December',\n  ];\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    const ms = value && typeof value.getTime === 'function' ? value.getTime() : new Date(value).getTime();\n    if (Number.isNaN(ms)) throw new Error('invalid time: ' + String(value));\n    return ms;\n  }\n\n  function pad(n) {\n    return String(n).padStart(2, '0');\n  }\n\n  // 'slot-20260310T140000Z' style ID for a start time (ms since epoch or Date).\n  function slotIdFor(start) {\n    const d = new Date(toMillis(start));\n    return 'slot-' + d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) +\n      'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + 'Z';\n  }\n\n  // The start (ms since epoch) a slot ID stands for, or null if it is not a slot ID.\n  function startFromSlotId(slotId) {\n    const m = SLOT_ID_RE.exec(String(slotId));\n    if (!m) return null;\n    const [y, mo, d, h, mi] = m.slice(1).map(Number);\n    const ms = Date.UTC(y, mo - 1, d, h, mi);\n    const check = new Date(ms);\n    // Reject impossible dates such as month 13 that Date.UTC would roll over.\n    if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d ||\n        check.getUTCHours() !== h || check.getUTCMinutes() !== mi) return null;\n    return ms;\n  }\n\n  // \"Monday October 5 at 9:30 AM\" from a Luxon DateTime already in the business zone.\n  // On the hour the minutes are left out (\"at 8 AM\"), as in Lead Bot.\n  function slotLabel(local) {\n    const hour12 = local.hour % 12 || 12;\n    const minutes = local.minute ? ':' + pad(local.minute) : '';\n    const ampm = local.hour < 12 ? 'AM' : 'PM';\n    const dayName = DAY_NAMES[local.weekday % 7];\n    return dayName + ' ' + MONTH_NAMES[local.month - 1] + ' ' + local.day + ' at ' + hour12 + minutes + ' ' + ampm;\n  }\n\n  function parseHm(text) {\n    const m = /^(\\d{1,2}):(\\d{2})$/.exec(String(text));\n    if (!m) throw new Error('bad time of day: ' + String(text));\n    return { hour: Number(m[1]), minute: Number(m[2]) };\n  }\n\n  function isFree(startMs, blockMs, busyMs) {\n    const end = startMs + blockMs;\n    // A period ending exactly at the start does not block it (end is exclusive).\n    return !busyMs.some((b) => b.start < end && startMs < b.end);\n  }\n\n  // The earliest free start on each of the first `count` days that have one, after `afterDay`\n  // (a 'YYYY-MM-DD' business-local date) if given. Returns [{ id, label, day }], day being the\n  // business-local 'YYYY-MM-DD'.\n  function earliestPerDay({\n    now,\n    hours,\n    busy = [],\n    durationMinutes,\n    gapMinutes = config.SLOTS.gapMinutes,\n    minNoticeHours = config.SLOTS.minNoticeHours,\n    daysAhead = config.SLOTS.daysAhead,\n    count = config.SLOTS.offered,\n    afterDay,\n    tz,\n    DateTime,\n  }) {\n    const nowMs = toMillis(now);\n    const earliestMs = nowMs + minNoticeHours * 3600000;\n    const blockMs = (durationMinutes + gapMinutes) * 60000;\n    const durationMs = durationMinutes * 60000;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    const today = DateTime.fromMillis(nowMs, { zone: tz }).startOf('day');\n    const chosen = [];\n\n    for (let offset = 0; offset <= daysAhead && chosen.length < count; offset++) {\n      const day = today.plus({ days: offset });\n      const dayKey = day.toFormat('yyyy-LL-dd');\n      if (afterDay && dayKey <= afterDay) continue;\n      const rows = hours.filter((r) => r.weekday === WEEKDAYS[day.weekday - 1]);\n      for (const row of rows) {\n        const o = parseHm(row.open);\n        const c = parseHm(row.close);\n        const closeMs = day.set({ hour: c.hour, minute: c.minute }).toMillis();\n        let startMs = day.set({ hour: o.hour, minute: o.minute }).toMillis();\n        let found = null;\n        // Each slot is a block of duration plus gap; the visit itself must end by closing time.\n        while (startMs + durationMs <= closeMs) {\n          if (startMs >= earliestMs && isFree(startMs, blockMs, busyMs)) {\n            found = startMs;\n            break;\n          }\n          startMs += blockMs;\n        }\n        if (found !== null) {\n          chosen.push({\n            id: slotIdFor(found),\n            label: slotLabel(DateTime.fromMillis(found, { zone: tz })),\n            day: dayKey,\n          });\n          break;\n        }\n      }\n    }\n    return chosen;\n  }\n\n  // True if the slot is a real slot ID that starts at or after now plus the minimum notice\n  // (not in the past and not inside the notice period).\n  // Booking check 3 (section 12): no busy period overlaps the slot's block (duration plus gap),\n  // the same block earliestPerDay uses. Returns false for an unreadable slot ID.\n  function slotIsFree({ slotId, durationMinutes, gapMinutes = config.SLOTS.gapMinutes, busy = [] }) {\n    const startMs = startFromSlotId(slotId);\n    if (startMs === null) return false;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    return isFree(startMs, (durationMinutes + gapMinutes) * 60000, busyMs);\n  }\n\n  function stillAllowed({ slotId, now, minNoticeHours = config.SLOTS.minNoticeHours }) {\n    const start = startFromSlotId(slotId);\n    if (start === null) return false;\n    return start >= toMillis(now) + minNoticeHours * 3600000;\n  }\n\n  module.exports = {\n    slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel };\n  return module.exports;\n})();\n__lib['texts'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every fixed customer line (design sections 6, 8, 9, 10, 11; file 18). Each entry is a function\n  // returning the text, so the build script and callers treat them all alike.\n\n  const NOT_IN_FACTS_LINE = \"I'll pass that to the team\";\n\n  const TEXTS = {\n    // Stage questions (section 9).\n    stage_new: (services) =>\n      'Which clean would you like?' +\n      (Array.isArray(services) && services.length > 0 ? ' We offer ' + joinList(services) + '.' : ''),\n    stage_address: () => \"What's the address for the clean, including the ZIP code?\",\n    stage_address_again: () =>\n      \"Sorry, I couldn't find a ZIP code in that. What's the address for the clean, including the ZIP code?\",\n    stage_offer: (labels) => numbered('Here are the next times we have open:', labels),\n    stage_offer_later: (labels) => numbered('Here are some later times.', labels),\n    stage_booked: () => '',\n    booked_confirmation: (label) => \"You're booked for \" + label + '. Thanks, see you then!',\n    book_prompt: () => 'Would you like to book a clean?',\n\n    // Gate and sending (sections 6, 10).\n    opt_out_confirmation: () => \"You're opted out and won't get any more messages from us. Reply START to turn them back on.\",\n    start_reply: () => 'Messages are back on. Reply STOP at any time to opt out.',\n    handoff_notice: () => \"Thanks, I'm passing this to a member of our team, who'll reply here\",\n    unsupported_kind: () => 'I can only read text messages here',\n\n    // Routes (section 8).\n    out_of_area: (zip) =>\n      zip\n        ? \"Sorry, we don't clean in ZIP code \" + zip + ' yet. If you have another address, send it and I will check.'\n        : \"Sorry, we don't clean in that area yet. If you have another address, send it and I will check.\",\n    prompt_injection: () => 'I can help with questions about our cleaning and with bookings',\n    off_topic: () => \"I'm the assistant for a cleaning company, so I can only help with our cleaning and bookings.\",\n    repeat: (lastQuestion) =>\n      lastQuestion ? 'Sure, here it is again. ' + lastQuestion : \"There's nothing more I need from you right now.\",\n    later: () => 'No problem. Message me whenever it suits you.',\n    not_in_facts: () => NOT_IN_FACTS_LINE,\n    draft_fallback: () => \"Sorry, I can't answer that one properly. \" + NOT_IN_FACTS_LINE,\n    wrong_person_apology: () => \"Sorry about that, we have the wrong number. We won't message you again.\",\n    facts_unavailable: () => \"Sorry, I can't look that up right now. \" + NOT_IN_FACTS_LINE,\n\n    // Owner's template button (section 11). Sent outside the 24-hour window.\n    template: () => 'We have an update on your enquiry. Reply here to see it.',\n  };\n\n  function joinList(items) {\n    if (items.length <= 1) return items.join('');\n    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];\n  }\n\n  function numbered(intro, labels) {\n    const list = (labels || []).map((l, i) => i + 1 + ') ' + l).join('\\n');\n    return intro + '\\n' + list + '\\nReply with the number of the one that works best, or \"none\" if none of these suit you.';\n  }\n\n  // The question a stage asks, for stage logic and for 'repeat'. vars: { services, labels, later }.\n  function stageQuestion(stage, vars) {\n    const v = vars || {};\n    switch (stage) {\n      case 'new':\n        return TEXTS.stage_new(v.services);\n      case 'address':\n        return TEXTS.stage_address();\n      case 'offer':\n        return v.later ? TEXTS.stage_offer_later(v.labels) : TEXTS.stage_offer(v.labels);\n      default:\n        return '';\n    }\n  }\n\n  function bookableNames(services) {\n    return (Array.isArray(services) ? services : [])\n      .filter((r) => r.bookable === true || String(r.bookable || '').trim().toLowerCase() === 'yes')\n      .map((r) => String(r.service || '').trim().toLowerCase())\n      .filter(Boolean);\n  }\n\n  // Appends the follow-up question named by stages.next's 'then' to a reply (section 8: the stage\n  // question is added after a writer draft or fixed line). Returns { text, question }, where question\n  // is the new last_bot_question (null: unchanged).\n  function withThen(text, then, lastBotQuestion) {\n    let follow = '';\n    let question = null;\n    if (then === 'ask_book') {\n      follow = TEXTS.book_prompt();\n      question = follow;\n    } else if (then === 'last_question' && lastBotQuestion) {\n      follow = lastBotQuestion;\n    }\n    const parts = [text, follow].map((s) => String(s || '').trim()).filter(Boolean);\n    return { text: parts.join('\\n\\n'), question };\n  }\n\n  // The customer text for a stages.next reply code that needs no other workflow.\n  //   ctx: { services: prices rows, zip, lastBotQuestion, then }\n  // Returns { text, kind, question } (kind 'normal' or 'opt_out_confirmation'; question is the new\n  // last_bot_question or null for unchanged; text '' means send nothing), or null for the codes other\n  // workflows produce: writer, offer_times, later_times, booked_confirmation.\n  function fixedReply(reply, ctx) {\n    const c = ctx || {};\n    const done = (text, question, kind) => ({ text, kind: kind || 'normal', question: question || null });\n    const thenDone = (text) => {\n      const w = withThen(text, c.then, c.lastBotQuestion);\n      return done(w.text, w.question);\n    };\n    if (typeof reply !== 'string') throw new Error('fixedReply: reply must be a string');\n    if (reply.startsWith('handoff:')) return done(TEXTS.handoff_notice());\n    if (reply === 'close:wrong_person') return done(TEXTS.wrong_person_apology());\n    if (reply.startsWith('close:')) return done('');\n    switch (reply) {\n      case 'none':\n        return done('');\n      case 'ask_service': {\n        const q = TEXTS.stage_new(bookableNames(c.services));\n        return done(q, q);\n      }\n      case 'ask_address':\n        return done(TEXTS.stage_address(), TEXTS.stage_address());\n      case 'ask_address_again':\n        return done(TEXTS.stage_address_again(), TEXTS.stage_address());\n      case 'out_of_area':\n        return done(TEXTS.out_of_area(c.zip));\n      case 'ask_book':\n        return done(TEXTS.book_prompt(), TEXTS.book_prompt());\n      case 'fixed:opt_out':\n        return done(TEXTS.opt_out_confirmation(), null, 'opt_out_confirmation');\n      case 'fixed:prompt_injection':\n        return done(TEXTS.prompt_injection());\n      case 'fixed:off_topic':\n        return thenDone(TEXTS.off_topic());\n      case 'fixed:later':\n        return done(TEXTS.later());\n      case 'fixed:repeat':\n        return done(TEXTS.repeat(c.lastBotQuestion));\n      case 'fixed:unclear':\n        // \"Ask the stage question again\" (section 8): the follow-up question is the whole reply.\n        return thenDone('');\n      case 'writer':\n      case 'offer_times':\n      case 'later_times':\n      case 'booked_confirmation':\n        return null;\n      default:\n        throw new Error('fixedReply: unknown reply code ' + reply);\n    }\n  }\n\n  module.exports = { TEXTS, stageQuestion, withThen, fixedReply, NOT_IN_FACTS_LINE };\n  return module.exports;\n})();\n__lib['booking'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Booking key, the result of the three checks, and the slot-taken path (design section 12).\n  // Pure: crypto and Luxon's DateTime are passed in.\n\n  const slots = require('./slots');\n  const { TEXTS } = require('./texts');\n\n  // Google event IDs allow a-v and 0-9; a SHA-256 hex digest (0-9, a-f) always fits.\n  function eventId(waId, slotId, crypto) {\n    return crypto.createHash('sha256').update('booking:' + waId + ':' + slotId).digest('hex');\n  }\n\n  // existing: the Google event fetched by its ID, or null/undefined if there is none\n  //           (an object with status 'cancelled' counts as cancelled).\n  // allowed: check 2 (not past, outside minimum notice). free: check 3 (no busy overlap).\n  // Check 1 comes first so our own event is never seen as busy.\n  // enabled: the node's @guards list (book_already, book_allowed, book_free); a check whose guard is\n  // missing is skipped, for the guard-removal run. Omitted means every guard is on.\n  function afterChecks({ existing, allowed, free, enabled }) {\n    const on = (id) => !Array.isArray(enabled) || enabled.includes(id);\n    if (existing && on('book_already')) return existing.status === 'cancelled' ? 'key_deleted' : 'already_booked';\n    if ((!allowed && on('book_allowed')) || (!free && on('book_free'))) return 'taken';\n    return 'book';\n  }\n\n  // Lead Bot's slot-taken path: fresh times once, then a handoff on the second time.\n  // The offered times are cleared so the next reply works out fresh ones from now.\n  function onTaken(conversation) {\n    const count = Number(conversation.slot_taken_count) || 0;\n    const updates = { slot_taken_count: count + 1 };\n    if (count + 1 > 1) return { reply: 'handoff:slots_exhausted', updates };\n    updates.offered_slots = '[]';\n    updates.last_offered_day = '';\n    return { reply: 'offer_times', updates };\n  }\n\n  // The service's booked length from the prices rows (section 12: duration_minutes, also for hourly).\n  function durationFor(services, serviceName) {\n    const want = String(serviceName || '').trim().toLowerCase();\n    const row = (services || []).find((r) => String(r.service || '').trim().toLowerCase() === want);\n    const minutes = row ? Number(row.duration_minutes) : NaN;\n    return Number.isFinite(minutes) && minutes > 0 ? minutes : null;\n  }\n\n  // Offer three times (mode 'offer') or the later times (mode 'later': after the last offered day).\n  // updates: column changes decided so far, kept and extended. Returns { action: 'send', text,\n  // question, updates } or { action: 'handoff', reason, updates } when no free time is left.\n  function offerReply({ mode, conversation, busy, hours, durationMinutes, now, tz, DateTime, updates }) {\n    const c = conversation || {};\n    const afterDay = mode === 'later' && c.last_offered_day ? String(c.last_offered_day).slice(0, 10) : undefined;\n    const found = slots.earliestPerDay({ now, hours, busy, durationMinutes, afterDay, tz, DateTime });\n    if (found.length === 0) return { action: 'handoff', reason: 'slots_exhausted', updates: {} };\n    const labels = found.map((s) => s.label);\n    const text = mode === 'later' ? TEXTS.stage_offer_later(labels) : TEXTS.stage_offer(labels);\n    return {\n      action: 'send', text, question: text,\n      updates: { ...(updates || {}), offered_slots: JSON.stringify(found), last_offered_day: found[found.length - 1].day },\n    };\n  }\n\n  // The confirmation once a slot is booked (or found already booked on a retry).\n  function bookedReply({ slotId, eventId: id, tz, DateTime, updates }) {\n    const start = slots.startFromSlotId(slotId);\n    const label = slots.slotLabel(DateTime.fromMillis(start, { zone: tz }));\n    return {\n      action: 'send', text: TEXTS.booked_confirmation(label), question: null,\n      updates: { ...(updates || {}), booked_event_id: id, booked_label: label },\n    };\n  }\n\n  module.exports = { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply };\n  return module.exports;\n})();\nconst { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply } = __lib['booking'];\nconst { slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel } = __lib['slots'];\n// @end-lib\nconst i = $('When Executed by Another Workflow').first().json;\nconst c = i.conversation || {};\nconst duration = durationFor(i.facts.prices, c.service);\nif (!duration) return [{ json: { action: 'handoff', reason: 'unknown_service', updates: {} } }];\nreturn [{ json: offerReply({ mode: i.mode, conversation: c, busy: $('calendar: busy').first().json.busy || [], hours: i.facts.hours,\n  durationMinutes: duration, now: i.now, tz: $env.BUSINESS_TZ, DateTime, updates: i.route_updates }) }];"
+      },
+      "position": [
+        1344,
+        300
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "cf092432-fbbc-4791-a304-253b7c8ca545",
+      "name": "recheck:reply",
+      "parameters": {
+        "jsCode": "// @lib booking, slots\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['slots'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slot logic ported from Lead Bot (src/lead_bot/slots.py), with the design's changes (section 12):\n  // the earliest free start on each of the first N days that have one, durations from the service.\n  // Pure: the current time and Luxon's DateTime class are passed in.\n\n  const config = require('./config');\n\n  // Lead Bot's slot ID format: 'slot-%Y%m%dT%H%MZ', in UTC.\n  const SLOT_ID_RE = /^slot-(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})Z$/;\n\n  const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; // Luxon weekday 1..7\n  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n  const MONTH_NAMES = [\n    'January', 'February', 'March', 'April', 'May', 'June',\n    'July', 'August', 'September', 'October', 'November', 'December',\n  ];\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    const ms = value && typeof value.getTime === 'function' ? value.getTime() : new Date(value).getTime();\n    if (Number.isNaN(ms)) throw new Error('invalid time: ' + String(value));\n    return ms;\n  }\n\n  function pad(n) {\n    return String(n).padStart(2, '0');\n  }\n\n  // 'slot-20260310T140000Z' style ID for a start time (ms since epoch or Date).\n  function slotIdFor(start) {\n    const d = new Date(toMillis(start));\n    return 'slot-' + d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) +\n      'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + 'Z';\n  }\n\n  // The start (ms since epoch) a slot ID stands for, or null if it is not a slot ID.\n  function startFromSlotId(slotId) {\n    const m = SLOT_ID_RE.exec(String(slotId));\n    if (!m) return null;\n    const [y, mo, d, h, mi] = m.slice(1).map(Number);\n    const ms = Date.UTC(y, mo - 1, d, h, mi);\n    const check = new Date(ms);\n    // Reject impossible dates such as month 13 that Date.UTC would roll over.\n    if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d ||\n        check.getUTCHours() !== h || check.getUTCMinutes() !== mi) return null;\n    return ms;\n  }\n\n  // \"Monday October 5 at 9:30 AM\" from a Luxon DateTime already in the business zone.\n  // On the hour the minutes are left out (\"at 8 AM\"), as in Lead Bot.\n  function slotLabel(local) {\n    const hour12 = local.hour % 12 || 12;\n    const minutes = local.minute ? ':' + pad(local.minute) : '';\n    const ampm = local.hour < 12 ? 'AM' : 'PM';\n    const dayName = DAY_NAMES[local.weekday % 7];\n    return dayName + ' ' + MONTH_NAMES[local.month - 1] + ' ' + local.day + ' at ' + hour12 + minutes + ' ' + ampm;\n  }\n\n  function parseHm(text) {\n    const m = /^(\\d{1,2}):(\\d{2})$/.exec(String(text));\n    if (!m) throw new Error('bad time of day: ' + String(text));\n    return { hour: Number(m[1]), minute: Number(m[2]) };\n  }\n\n  function isFree(startMs, blockMs, busyMs) {\n    const end = startMs + blockMs;\n    // A period ending exactly at the start does not block it (end is exclusive).\n    return !busyMs.some((b) => b.start < end && startMs < b.end);\n  }\n\n  // The earliest free start on each of the first `count` days that have one, after `afterDay`\n  // (a 'YYYY-MM-DD' business-local date) if given. Returns [{ id, label, day }], day being the\n  // business-local 'YYYY-MM-DD'.\n  function earliestPerDay({\n    now,\n    hours,\n    busy = [],\n    durationMinutes,\n    gapMinutes = config.SLOTS.gapMinutes,\n    minNoticeHours = config.SLOTS.minNoticeHours,\n    daysAhead = config.SLOTS.daysAhead,\n    count = config.SLOTS.offered,\n    afterDay,\n    tz,\n    DateTime,\n  }) {\n    const nowMs = toMillis(now);\n    const earliestMs = nowMs + minNoticeHours * 3600000;\n    const blockMs = (durationMinutes + gapMinutes) * 60000;\n    const durationMs = durationMinutes * 60000;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    const today = DateTime.fromMillis(nowMs, { zone: tz }).startOf('day');\n    const chosen = [];\n\n    for (let offset = 0; offset <= daysAhead && chosen.length < count; offset++) {\n      const day = today.plus({ days: offset });\n      const dayKey = day.toFormat('yyyy-LL-dd');\n      if (afterDay && dayKey <= afterDay) continue;\n      const rows = hours.filter((r) => r.weekday === WEEKDAYS[day.weekday - 1]);\n      for (const row of rows) {\n        const o = parseHm(row.open);\n        const c = parseHm(row.close);\n        const closeMs = day.set({ hour: c.hour, minute: c.minute }).toMillis();\n        let startMs = day.set({ hour: o.hour, minute: o.minute }).toMillis();\n        let found = null;\n        // Each slot is a block of duration plus gap; the visit itself must end by closing time.\n        while (startMs + durationMs <= closeMs) {\n          if (startMs >= earliestMs && isFree(startMs, blockMs, busyMs)) {\n            found = startMs;\n            break;\n          }\n          startMs += blockMs;\n        }\n        if (found !== null) {\n          chosen.push({\n            id: slotIdFor(found),\n            label: slotLabel(DateTime.fromMillis(found, { zone: tz })),\n            day: dayKey,\n          });\n          break;\n        }\n      }\n    }\n    return chosen;\n  }\n\n  // True if the slot is a real slot ID that starts at or after now plus the minimum notice\n  // (not in the past and not inside the notice period).\n  // Booking check 3 (section 12): no busy period overlaps the slot's block (duration plus gap),\n  // the same block earliestPerDay uses. Returns false for an unreadable slot ID.\n  function slotIsFree({ slotId, durationMinutes, gapMinutes = config.SLOTS.gapMinutes, busy = [] }) {\n    const startMs = startFromSlotId(slotId);\n    if (startMs === null) return false;\n    const busyMs = busy.map((b) => ({ start: toMillis(b.start), end: toMillis(b.end) }));\n    return isFree(startMs, (durationMinutes + gapMinutes) * 60000, busyMs);\n  }\n\n  function stillAllowed({ slotId, now, minNoticeHours = config.SLOTS.minNoticeHours }) {\n    const start = startFromSlotId(slotId);\n    if (start === null) return false;\n    return start >= toMillis(now) + minNoticeHours * 3600000;\n  }\n\n  module.exports = {\n    slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel };\n  return module.exports;\n})();\n__lib['texts'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every fixed customer line (design sections 6, 8, 9, 10, 11; file 18). Each entry is a function\n  // returning the text, so the build script and callers treat them all alike.\n\n  const NOT_IN_FACTS_LINE = \"I'll pass that to the team\";\n\n  const TEXTS = {\n    // Stage questions (section 9).\n    stage_new: (services) =>\n      'Which clean would you like?' +\n      (Array.isArray(services) && services.length > 0 ? ' We offer ' + joinList(services) + '.' : ''),\n    stage_address: () => \"What's the address for the clean, including the ZIP code?\",\n    stage_address_again: () =>\n      \"Sorry, I couldn't find a ZIP code in that. What's the address for the clean, including the ZIP code?\",\n    stage_offer: (labels) => numbered('Here are the next times we have open:', labels),\n    stage_offer_later: (labels) => numbered('Here are some later times.', labels),\n    stage_booked: () => '',\n    booked_confirmation: (label) => \"You're booked for \" + label + '. Thanks, see you then!',\n    book_prompt: () => 'Would you like to book a clean?',\n\n    // Gate and sending (sections 6, 10).\n    opt_out_confirmation: () => \"You're opted out and won't get any more messages from us. Reply START to turn them back on.\",\n    start_reply: () => 'Messages are back on. Reply STOP at any time to opt out.',\n    handoff_notice: () => \"Thanks, I'm passing this to a member of our team, who'll reply here\",\n    unsupported_kind: () => 'I can only read text messages here',\n\n    // Routes (section 8).\n    out_of_area: (zip) =>\n      zip\n        ? \"Sorry, we don't clean in ZIP code \" + zip + ' yet. If you have another address, send it and I will check.'\n        : \"Sorry, we don't clean in that area yet. If you have another address, send it and I will check.\",\n    prompt_injection: () => 'I can help with questions about our cleaning and with bookings',\n    off_topic: () => \"I'm the assistant for a cleaning company, so I can only help with our cleaning and bookings.\",\n    repeat: (lastQuestion) =>\n      lastQuestion ? 'Sure, here it is again. ' + lastQuestion : \"There's nothing more I need from you right now.\",\n    later: () => 'No problem. Message me whenever it suits you.',\n    not_in_facts: () => NOT_IN_FACTS_LINE,\n    draft_fallback: () => \"Sorry, I can't answer that one properly. \" + NOT_IN_FACTS_LINE,\n    wrong_person_apology: () => \"Sorry about that, we have the wrong number. We won't message you again.\",\n    facts_unavailable: () => \"Sorry, I can't look that up right now. \" + NOT_IN_FACTS_LINE,\n\n    // Owner's template button (section 11). Sent outside the 24-hour window.\n    template: () => 'We have an update on your enquiry. Reply here to see it.',\n  };\n\n  function joinList(items) {\n    if (items.length <= 1) return items.join('');\n    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];\n  }\n\n  function numbered(intro, labels) {\n    const list = (labels || []).map((l, i) => i + 1 + ') ' + l).join('\\n');\n    return intro + '\\n' + list + '\\nReply with the number of the one that works best, or \"none\" if none of these suit you.';\n  }\n\n  // The question a stage asks, for stage logic and for 'repeat'. vars: { services, labels, later }.\n  function stageQuestion(stage, vars) {\n    const v = vars || {};\n    switch (stage) {\n      case 'new':\n        return TEXTS.stage_new(v.services);\n      case 'address':\n        return TEXTS.stage_address();\n      case 'offer':\n        return v.later ? TEXTS.stage_offer_later(v.labels) : TEXTS.stage_offer(v.labels);\n      default:\n        return '';\n    }\n  }\n\n  function bookableNames(services) {\n    return (Array.isArray(services) ? services : [])\n      .filter((r) => r.bookable === true || String(r.bookable || '').trim().toLowerCase() === 'yes')\n      .map((r) => String(r.service || '').trim().toLowerCase())\n      .filter(Boolean);\n  }\n\n  // Appends the follow-up question named by stages.next's 'then' to a reply (section 8: the stage\n  // question is added after a writer draft or fixed line). Returns { text, question }, where question\n  // is the new last_bot_question (null: unchanged).\n  function withThen(text, then, lastBotQuestion) {\n    let follow = '';\n    let question = null;\n    if (then === 'ask_book') {\n      follow = TEXTS.book_prompt();\n      question = follow;\n    } else if (then === 'last_question' && lastBotQuestion) {\n      follow = lastBotQuestion;\n    }\n    const parts = [text, follow].map((s) => String(s || '').trim()).filter(Boolean);\n    return { text: parts.join('\\n\\n'), question };\n  }\n\n  // The customer text for a stages.next reply code that needs no other workflow.\n  //   ctx: { services: prices rows, zip, lastBotQuestion, then }\n  // Returns { text, kind, question } (kind 'normal' or 'opt_out_confirmation'; question is the new\n  // last_bot_question or null for unchanged; text '' means send nothing), or null for the codes other\n  // workflows produce: writer, offer_times, later_times, booked_confirmation.\n  function fixedReply(reply, ctx) {\n    const c = ctx || {};\n    const done = (text, question, kind) => ({ text, kind: kind || 'normal', question: question || null });\n    const thenDone = (text) => {\n      const w = withThen(text, c.then, c.lastBotQuestion);\n      return done(w.text, w.question);\n    };\n    if (typeof reply !== 'string') throw new Error('fixedReply: reply must be a string');\n    if (reply.startsWith('handoff:')) return done(TEXTS.handoff_notice());\n    if (reply === 'close:wrong_person') return done(TEXTS.wrong_person_apology());\n    if (reply.startsWith('close:')) return done('');\n    switch (reply) {\n      case 'none':\n        return done('');\n      case 'ask_service': {\n        const q = TEXTS.stage_new(bookableNames(c.services));\n        return done(q, q);\n      }\n      case 'ask_address':\n        return done(TEXTS.stage_address(), TEXTS.stage_address());\n      case 'ask_address_again':\n        return done(TEXTS.stage_address_again(), TEXTS.stage_address());\n      case 'out_of_area':\n        return done(TEXTS.out_of_area(c.zip));\n      case 'ask_book':\n        return done(TEXTS.book_prompt(), TEXTS.book_prompt());\n      case 'fixed:opt_out':\n        return done(TEXTS.opt_out_confirmation(), null, 'opt_out_confirmation');\n      case 'fixed:prompt_injection':\n        return done(TEXTS.prompt_injection());\n      case 'fixed:off_topic':\n        return thenDone(TEXTS.off_topic());\n      case 'fixed:later':\n        return done(TEXTS.later());\n      case 'fixed:repeat':\n        return done(TEXTS.repeat(c.lastBotQuestion));\n      case 'fixed:unclear':\n        // \"Ask the stage question again\" (section 8): the follow-up question is the whole reply.\n        return thenDone('');\n      case 'writer':\n      case 'offer_times':\n      case 'later_times':\n      case 'booked_confirmation':\n        return null;\n      default:\n        throw new Error('fixedReply: unknown reply code ' + reply);\n    }\n  }\n\n  module.exports = { TEXTS, stageQuestion, withThen, fixedReply, NOT_IN_FACTS_LINE };\n  return module.exports;\n})();\n__lib['booking'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Booking key, the result of the three checks, and the slot-taken path (design section 12).\n  // Pure: crypto and Luxon's DateTime are passed in.\n\n  const slots = require('./slots');\n  const { TEXTS } = require('./texts');\n\n  // Google event IDs allow a-v and 0-9; a SHA-256 hex digest (0-9, a-f) always fits.\n  function eventId(waId, slotId, crypto) {\n    return crypto.createHash('sha256').update('booking:' + waId + ':' + slotId).digest('hex');\n  }\n\n  // existing: the Google event fetched by its ID, or null/undefined if there is none\n  //           (an object with status 'cancelled' counts as cancelled).\n  // allowed: check 2 (not past, outside minimum notice). free: check 3 (no busy overlap).\n  // Check 1 comes first so our own event is never seen as busy.\n  // enabled: the node's @guards list (book_already, book_allowed, book_free); a check whose guard is\n  // missing is skipped, for the guard-removal run. Omitted means every guard is on.\n  function afterChecks({ existing, allowed, free, enabled }) {\n    const on = (id) => !Array.isArray(enabled) || enabled.includes(id);\n    if (existing && on('book_already')) return existing.status === 'cancelled' ? 'key_deleted' : 'already_booked';\n    if ((!allowed && on('book_allowed')) || (!free && on('book_free'))) return 'taken';\n    return 'book';\n  }\n\n  // Lead Bot's slot-taken path: fresh times once, then a handoff on the second time.\n  // The offered times are cleared so the next reply works out fresh ones from now.\n  function onTaken(conversation) {\n    const count = Number(conversation.slot_taken_count) || 0;\n    const updates = { slot_taken_count: count + 1 };\n    if (count + 1 > 1) return { reply: 'handoff:slots_exhausted', updates };\n    updates.offered_slots = '[]';\n    updates.last_offered_day = '';\n    return { reply: 'offer_times', updates };\n  }\n\n  // The service's booked length from the prices rows (section 12: duration_minutes, also for hourly).\n  function durationFor(services, serviceName) {\n    const want = String(serviceName || '').trim().toLowerCase();\n    const row = (services || []).find((r) => String(r.service || '').trim().toLowerCase() === want);\n    const minutes = row ? Number(row.duration_minutes) : NaN;\n    return Number.isFinite(minutes) && minutes > 0 ? minutes : null;\n  }\n\n  // Offer three times (mode 'offer') or the later times (mode 'later': after the last offered day).\n  // updates: column changes decided so far, kept and extended. Returns { action: 'send', text,\n  // question, updates } or { action: 'handoff', reason, updates } when no free time is left.\n  function offerReply({ mode, conversation, busy, hours, durationMinutes, now, tz, DateTime, updates }) {\n    const c = conversation || {};\n    const afterDay = mode === 'later' && c.last_offered_day ? String(c.last_offered_day).slice(0, 10) : undefined;\n    const found = slots.earliestPerDay({ now, hours, busy, durationMinutes, afterDay, tz, DateTime });\n    if (found.length === 0) return { action: 'handoff', reason: 'slots_exhausted', updates: {} };\n    const labels = found.map((s) => s.label);\n    const text = mode === 'later' ? TEXTS.stage_offer_later(labels) : TEXTS.stage_offer(labels);\n    return {\n      action: 'send', text, question: text,\n      updates: { ...(updates || {}), offered_slots: JSON.stringify(found), last_offered_day: found[found.length - 1].day },\n    };\n  }\n\n  // The confirmation once a slot is booked (or found already booked on a retry).\n  function bookedReply({ slotId, eventId: id, tz, DateTime, updates }) {\n    const start = slots.startFromSlotId(slotId);\n    const label = slots.slotLabel(DateTime.fromMillis(start, { zone: tz }));\n    return {\n      action: 'send', text: TEXTS.booked_confirmation(label), question: null,\n      updates: { ...(updates || {}), booked_event_id: id, booked_label: label },\n    };\n  }\n\n  module.exports = { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply };\n  return module.exports;\n})();\nconst { eventId, afterChecks, onTaken, durationFor, offerReply, bookedReply } = __lib['booking'];\nconst { slotIsFree, earliestPerDay, stillAllowed, slotIdFor, startFromSlotId, slotLabel } = __lib['slots'];\n// @end-lib\nconst i = $('When Executed by Another Workflow').first().json;\nconst d = $('book:decide').first().json;\nconst r = $input.first().json;\nif (r.ok && r.found && r.status !== 'cancelled') {\n  return [{ json: bookedReply({ slotId: i.slot_id, eventId: d.event_id, tz: $env.BUSINESS_TZ, DateTime, updates: i.route_updates }) }];\n}\nreturn [{ json: { action: 'handoff', reason: r.ok && r.found ? 'booking_key_deleted' : 'calendar_unavailable', updates: {} } }];"
+      },
+      "position": [
+        3360,
+        -100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "cfe76131-2042-4e7f-93c9-0a97fc5a08dd",
+      "name": "recheck?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "dxsexzqy",
+              "leftValue": "={{ $json.recheck === true }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        2912,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

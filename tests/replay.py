@@ -12,6 +12,8 @@ ingress-replay, wait until n8n is idle, then check what happened against [scenar
     python tests/replay.py --remove-guards       # guard-removal run (needs scripts/deploy_workflows.py)
     python tests/replay.py --list                # show the selected scenarios and exit
 
+An event may set clock = "<ISO time>" to move the mock's scenario clock before it is sent.
+
 Reads deploy/scripts.env (N8N_API_URL_DRYRUN, N8N_API_KEY_DRYRUN) and deploy/dryrun.env
 (META_APP_SECRET, SLACK_SIGNING_SECRET, REPLAY_SECRET). Exit code 0 only when every selected
 scenario passed (and, for --remove-guards, every guard caused a failure when removed).
@@ -85,6 +87,11 @@ class Mock:
         if status != 200:
             raise HarnessError(f"mock /_scenario -> {status}: {out}")
 
+    def set_clock(self, now):
+        status, out = http("POST", MOCK_BASE + "/_clock", {"now": now}, self.h)
+        if status != 200:
+            raise HarnessError(f"mock /_clock -> {status}: {out}")
+
     def calls(self):
         status, out = http("GET", MOCK_BASE + "/_calls", headers=self.h)
         if status != 200:
@@ -155,7 +162,7 @@ def build_meta(ev, scenario):
     for i, m in enumerate(value.get("messages", [])):
         m["from"] = wa_id
         m["id"] = ev.get("message_id", f"wamid.REPLAY.{scenario['name']}.{ev['_index']}.{i}")
-        m["timestamp"] = str(int(_ts(scenario["now"])))
+        m["timestamp"] = str(int(_ts(ev.get("clock", scenario["now"]))))
         if "text" in ev and m.get("type") == "text":
             m["text"]["body"] = ev["text"]
     return meta_serialise(body), "application/json"
@@ -197,7 +204,7 @@ def send_event(ev, scenario, env):
         headers = {"X-Replay-Secret": env["REPLAY_SECRET"]}
     else:
         raw, ctype = (build_meta if src == "meta" else build_slack)(ev, scenario)
-        headers = sign(ev, raw, env, scenario["now"])
+        headers = sign(ev, raw, env, ev.get("clock", scenario["now"]))
     headers["Content-Type"] = ctype
     status, out = http("POST", N8N_BASE + WEBHOOKS[src], headers=headers, raw=raw)
     if status == 404:
@@ -297,6 +304,8 @@ def run_scenario(sc, inst, mock, env, tier):
     mock.load(mock_body(sc, tier))
     for i, ev in enumerate(sc.get("event") or []):
         ev = {**ev, "_index": i}
+        if "clock" in ev:  # move the scenario clock before this event (minimum notice, 24-hour window)
+            mock.set_clock(ev["clock"])
         status = send_event(ev, sc, env)
         if "status" in ev and status != ev["status"]:
             return [f"event {i}: webhook answered {status}, expected {ev['status']}"]

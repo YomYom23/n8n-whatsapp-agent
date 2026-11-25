@@ -47,3 +47,559 @@ problems = ["price_mismatch", "unknown_number"]
 slack_posts = 1
 hubspot_calls = 0
 rows = { message_log = 2 }
+
+# --- P3: gate ---------------------------------------------------------------------
+
+# A body signed with the wrong secret is refused with 401, logged as sig_rejected and never stored.
+[[scenario]]
+name = "sig_meta_wrong_signature"
+step = "P3"
+guards = ["sig_meta"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "wrong"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello"
+status = 401
+
+[scenario.expect]
+sends = []
+rows = { inbox = 0, message_log = 1 }
+
+
+# Meta delivers the same message twice: the second inbox row is marked duplicate and not handled again
+# (removing the guard makes a second classify call, which the script has no answer for).
+[[scenario]]
+name = "dedup_same_message_twice"
+step = "P3"
+guards = ["dedup"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hi"
+message_id = "wamid.REPLAY.dedup.1"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hi"
+message_id = "wamid.REPLAY.dedup.1"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "stage_answer"
+sends = [{ kind = "normal", text_contains = "book" }]
+rows = { inbox = 2, message_log = 2 }
+
+
+# STOP adds the number to do_not_contact and sends the opt-out confirmation, without asking the classifier.
+[[scenario]]
+name = "keyword_stop"
+step = "P3"
+guards = ["keyword_stop"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "STOP"
+
+[scenario.expect]
+route = "keyword_stop"
+sends = [{ kind = "normal", text_contains = "opted out" }]
+rows = { do_not_contact = 1, message_log = 2 }
+
+
+# After STOP, a later message is logged with route dnc and gets no reply.
+[[scenario]]
+name = "dnc_message_ignored"
+step = "P3"
+guards = ["dnc"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "STOP"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello again"
+
+[scenario.expect]
+route = "dnc"
+sends = [{ kind = "normal", text_contains = "opted out" }]
+rows = { do_not_contact = 1, message_log = 3 }
+
+
+# An explicit opt-out phrase that is not the STOP keyword opts the number out too.
+[[scenario]]
+name = "optout_phrase"
+step = "P3"
+guards = ["optout_phrase"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "please stop messaging me"
+
+[scenario.expect]
+route = "optout_phrase"
+sends = [{ kind = "normal", text_contains = "opted out" }]
+rows = { do_not_contact = 1, message_log = 2 }
+
+
+# START after STOP removes the number from do_not_contact and confirms.
+[[scenario]]
+name = "keyword_start_after_stop"
+step = "P3"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "STOP"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "START"
+
+[scenario.expect]
+route = "keyword_start"
+sends = [{ kind = "normal", text_contains = "opted out" }, { kind = "normal" }]
+rows = { do_not_contact = 0, message_log = 4 }
+
+
+# --- P3: hazards and classifier ----------------------------------------------------
+
+# The classifier hears an opt-out the gate missed: opted out with source classifier.
+[[scenario]]
+name = "hazard_opt_out"
+step = "P3"
+guards = ["hazard_opt_out"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello"
+
+[scenario.script]
+jev.stage = [{ hazards = { opt_out = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "opt_out"
+sends = [{ kind = "normal", text_contains = "opted out" }]
+rows = { message_log = 2, do_not_contact = 1 }
+
+
+# Wrong person: the close workflow (P5) sends the apology, so P3 only logs the route.
+[[scenario]]
+name = "hazard_wrong_person"
+step = "P3"
+guards = ["hazard_wrong_person"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello"
+
+[scenario.script]
+jev.stage = [{ hazards = { wrong_person = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "wrong_person"
+sends = []
+rows = { message_log = 1 }
+
+
+# Abusive: closed without a reply (the close itself is P5).
+[[scenario]]
+name = "hazard_abusive"
+step = "P3"
+guards = ["hazard_abusive"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello"
+
+[scenario.script]
+jev.stage = [{ hazards = { abusive = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "abusive"
+sends = []
+rows = { message_log = 1 }
+
+
+# Prompt injection gets the fixed deflection line.
+[[scenario]]
+name = "hazard_prompt_injection"
+step = "P3"
+guards = ["hazard_prompt_injection"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello"
+
+[scenario.script]
+jev.stage = [{ hazards = { prompt_injection = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "prompt_injection"
+sends = [{ kind = "normal", text_contains = "I can help with questions" }]
+rows = { message_log = 2 }
+
+
+# Wants a human: the handoff workflow (P5) sends the notice, so P3 only logs the route.
+[[scenario]]
+name = "hazard_wants_human"
+step = "P3"
+guards = ["hazard_wants_human"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello"
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "wants_human"
+sends = []
+rows = { message_log = 1 }
+
+
+# The classifier answer leaves out a hazard: the call counts as failed and the message goes to handoff
+# (removing the guard fills the gap with 0 and the bot replies instead).
+[[scenario]]
+name = "classifier_missing_field"
+step = "P3"
+guards = ["missing_field"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "just_asking", confidence = 0.9 }, omit = ["abusive"] }]
+
+[scenario.expect]
+route = "handoff"
+sends = []
+rows = { message_log = 1 }
+
+
+# The facts sheet cannot be read: the customer gets the holding line and the owner is alerted.
+[[scenario]]
+name = "sheets_unavailable"
+step = "P3"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "how much is a deep clean?"
+
+[scenario.script]
+sheets = { unavailable = true }
+
+[scenario.expect]
+route = "facts_unavailable"
+sends = [{ kind = "normal", text_contains = "can't look that up" }]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
+# --- P3: answers and draft checks --------------------------------------------------
+
+# A correct price from the list passes every check and is sent as written.
+[[scenario]]
+name = "price_answer_ok"
+step = "P3"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "how much is a deep clean?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "price_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = {} }]
+haiku = [{ text = "A deep clean is $120.", input_tokens = 900, output_tokens = 20 }]
+
+[scenario.expect]
+route = "price_question"
+sends = [{ kind = "normal", text_contains = "$120" }]
+problems = []
+slack_posts = 0
+rows = { message_log = 2 }
+
+
+# Each planted draft below trips exactly one draft-check problem; the customer gets the fallback line.
+[[scenario]]
+name = "draft_unsupported_fact"
+step = "P3"
+guards = ["dc_unsupported_fact"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = { unsupported_fact = 0.9 } }]
+haiku = [{ text = "A deep clean covers inside the fridge, baseboards and window sills.", input_tokens = 900, output_tokens = 40 }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["unsupported_fact"]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
+# Jev: the draft says something was booked or changed.
+[[scenario]]
+name = "draft_claims_action"
+step = "P3"
+guards = ["dc_claims_action"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = { claims_action = 0.9 } }]
+haiku = [{ text = "A deep clean covers inside the fridge, baseboards and window sills.", input_tokens = 900, output_tokens = 40 }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["claims_action"]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
+# Jev: the draft guarantees an outcome.
+[[scenario]]
+name = "draft_promise"
+step = "P3"
+guards = ["dc_promise"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = { promise = 0.9 } }]
+haiku = [{ text = "A deep clean covers inside the fridge, baseboards and window sills.", input_tokens = 900, output_tokens = 40 }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["promise"]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
+# Jev: the draft talks about its instructions.
+[[scenario]]
+name = "draft_leaks_rules"
+step = "P3"
+guards = ["dc_leaks_rules"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = { leaks_rules = 0.9 } }]
+haiku = [{ text = "A deep clean covers inside the fridge, baseboards and window sills.", input_tokens = 900, output_tokens = 40 }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["leaks_rules"]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
+# Jev: the draft is off brand.
+[[scenario]]
+name = "draft_off_brand"
+step = "P3"
+guards = ["dc_off_brand"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = { off_brand = 0.9 } }]
+haiku = [{ text = "A deep clean covers inside the fridge, baseboards and window sills.", input_tokens = 900, output_tokens = 40 }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["off_brand"]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
+# Code: the writer returned an empty draft.
+[[scenario]]
+name = "draft_empty"
+step = "P3"
+guards = ["dc_empty"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = {} }]
+haiku = [{ text = "", input_tokens = 900, output_tokens = 40 }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["empty"]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
+# Code: the draft is over 600 characters (every number in it is in the facts).
+[[scenario]]
+name = "draft_too_long"
+step = "P3"
+guards = ["dc_too_long"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = {} }]
+haiku = [{ text = "A regular clean covers dusting, vacuuming and mopping all floors, wiping kitchen surfaces and appliance exteriors, cleaning bathrooms and emptying bins. A regular clean covers dusting, vacuuming and mopping all floors, wiping kitchen surfaces and appliance exteriors, cleaning bathrooms and emptying bins. A regular clean covers dusting, vacuuming and mopping all floors, wiping kitchen surfaces and appliance exteriors, cleaning bathrooms and emptying bins. A regular clean covers dusting, vacuuming and mopping all floors, wiping kitchen surfaces and appliance exteriors, cleaning bathrooms and emptying bins. A regular clean covers dusting, vacuuming and mopping all floors, wiping kitchen surfaces and appliance exteriors, cleaning bathrooms and emptying bins.", input_tokens = 900, output_tokens = 40 }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["too_long"]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
+# Code: only code may promise a follow-up.
+[[scenario]]
+name = "draft_promises_follow_up"
+step = "P3"
+guards = ["dc_follow_up"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = {} }]
+haiku = [{ text = "Good question, I'll pass this to our team and someone will get back to you.", input_tokens = 900, output_tokens = 40 }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["promises_follow_up"]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
+# Code: a number that is not in the facts and not a money amount.
+[[scenario]]
+name = "draft_unknown_number"
+step = "P3"
+guards = ["dc_unknown_number"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = {} }]
+haiku = [{ text = "We have 7 cleaners on the team.", input_tokens = 900, output_tokens = 40 }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["unknown_number"]
+slack_posts = 1
+rows = { message_log = 2 }

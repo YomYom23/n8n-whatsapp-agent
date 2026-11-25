@@ -1,7 +1,7 @@
 # Replay scenarios (design file 29). Run with: python tests/replay.py
 # Each scenario is tagged with the build step that enables it. Without --upto, the harness runs
 # every scenario up to current_step, so raise it as each step's workflows land.
-current_step = "P4"
+current_step = "P5"
 
 # --- P2: harness plumbing ------------------------------------------------------
 # No events. Proves the harness can load the mock, clear and count every table, and read calls.
@@ -211,7 +211,7 @@ sends = [{ kind = "normal", text_contains = "opted out" }]
 rows = { message_log = 2, do_not_contact = 1 }
 
 
-# Wrong person: the close workflow (P5) sends the apology, so P3 only logs the route.
+# Wrong person: one apology, the conversation is closed and the owner gets the close alert.
 [[scenario]]
 name = "hazard_wrong_person"
 step = "P3"
@@ -229,11 +229,12 @@ jev.stage = [{ hazards = { wrong_person = 0.9 }, answer = { value = "just_asking
 
 [scenario.expect]
 route = "wrong_person"
-sends = []
-rows = { message_log = 1 }
+sends = [{ kind = "normal", text_contains = "wrong number" }]
+slack_posts = 1
+rows = { message_log = 2 }
 
 
-# Abusive: closed without a reply (the close itself is P5).
+# Abusive: closed without a reply; the owner gets the close alert.
 [[scenario]]
 name = "hazard_abusive"
 step = "P3"
@@ -252,6 +253,7 @@ jev.stage = [{ hazards = { abusive = 0.9 }, answer = { value = "just_asking", co
 [scenario.expect]
 route = "abusive"
 sends = []
+slack_posts = 1
 rows = { message_log = 1 }
 
 
@@ -277,7 +279,7 @@ sends = [{ kind = "normal", text_contains = "I can help with questions" }]
 rows = { message_log = 2 }
 
 
-# Wants a human: the handoff workflow (P5) sends the notice, so P3 only logs the route.
+# Wants a human: the customer gets the handoff notice and a Slack thread opens.
 [[scenario]]
 name = "hazard_wants_human"
 step = "P3"
@@ -295,8 +297,9 @@ jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking"
 
 [scenario.expect]
 route = "wants_human"
-sends = []
-rows = { message_log = 1 }
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 1
+rows = { message_log = 2 }
 
 
 # The classifier answer leaves out a hazard: the call counts as failed and the message goes to handoff
@@ -318,8 +321,9 @@ jev.stage = [{ hazards = {}, answer = { value = "just_asking", confidence = 0.9 
 
 [scenario.expect]
 route = "handoff"
-sends = []
-rows = { message_log = 1 }
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 1
+rows = { message_log = 2 }
 
 
 # The facts sheet cannot be read: the customer gets the holding line and the owner is alerted.
@@ -698,10 +702,11 @@ text = "Main Street, near the park"
 jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }, { hazards = {} }]
 
 [scenario.expect]
-sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "couldn't find a ZIP code" }]
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "couldn't find a ZIP code" }, { kind = "normal", text_contains = "passing this to a member of our team" }]
 # the handoff is a stage reply (handoff:zip_not_found), so the logged route stays stage_answer
 calls = { "calendar.busy" = 0 }
-rows = { message_log = 5 }
+slack_posts = 1
+rows = { message_log = 6 }
 
 
 # The classifier names a slot that was never offered: the answer counts as missing and the
@@ -735,8 +740,9 @@ jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 }
 
 [scenario.expect]
 route = "handoff"
-sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }]
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }, { kind = "normal", text_contains = "passing this to a member of our team" }]
 calls = { "calendar.create_event" = 0, "calendar.busy" = 1 }
+slack_posts = 1
 
 
 # "none" to the first times gets the later times once: the three days after the last offered day.
@@ -894,3 +900,391 @@ jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 }
 [scenario.expect]
 sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }, { kind = "normal", text_contains = "address for the clean", to = "15550000002" }, { kind = "normal", text_contains = "Here are the next times", to = "15550000002" }, { kind = "normal", text_contains = "You're booked for Wednesday", to = "15550000002" }, { kind = "normal", text_contains = "Here are the next times", to = "15550000001" }]
 calls = { "calendar.create_event" = 1 }
+
+
+# --- P5: handoff, relay, release and close --------------------------------------------
+# The handoff post is the scenario's first Slack post, so its ts is 1732480000.000001: the thread
+# the Slack fixtures reply in and click on.
+
+# While the owner has the conversation, a customer message goes into the thread and gets no reply
+# (removing the guard sends it to the classifier, which the script has no answer for).
+[[scenario]]
+name = "handoff_customer_message_posted"
+step = "P5"
+guards = ["human_owned"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello?"
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "human_owned"
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 2
+rows = { message_log = 3 }
+
+# The owner's thread reply reaches the customer as plain text and gets a tick reaction.
+[[scenario]]
+name = "owner_reply_relayed"
+step = "P5"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Hi, this is Sam. Thursday at <https://example.com|our site> works.", event_id = "Ev0P50001", "event.ts" = "1764601201.000100" }
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }, { kind = "normal", text_contains = "Thursday at our site (https://example.com) works" }]
+slack_posts = 1
+calls = { "slack.react" = 1 }
+
+# A thread message starting with // is a note for the team and is never sent.
+[[scenario]]
+name = "owner_team_note_not_sent"
+step = "P5"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "// checking the calendar first", event_id = "Ev0P50002", "event.ts" = "1764601202.000100" }
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 1
+calls = { "slack.react" = 0 }
+
+# A thread reply from someone not on SLACK_ALLOWED_USERS is ignored and logged.
+[[scenario]]
+name = "owner_not_allowed_ignored"
+step = "P5"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "I can help", event_id = "Ev0P50003", "event.ts" = "1764601203.000100", "event.user" = "USOMEONE01" }
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 1
+calls = { "slack.react" = 0 }
+rows = { message_log = 3 }
+
+# CUJ 3: handoff during the offer, two customer messages in the thread, the owner replies and
+# presses Return to bot. The offered times are cleared, so "2" is not a pick: the bot offers fresh times.
+[[scenario]]
+name = "owner_return_to_bot_fresh_times"
+step = "P5"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "12 Main St, New York NY 10001"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "is anyone there?"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Hi, yes, Thursday is still open.", event_id = "Ev0P50004", "event.ts" = "1764601204.000100" }
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "return_to_bot", "actions.0.action_ts" = "1764601305.000200" }
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "2"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }, { hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }, { hazards = {}, answer = { value = "booking_request", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }, { kind = "normal", text_contains = "passing this to a member of our team" }, { kind = "normal", text_contains = "Thursday is still open" }, { kind = "normal", text_contains = "Here are the next times we have open" }]
+slack_posts = 4
+calls = { "slack.react" = 1, "calendar.create_event" = 0 }
+
+# A second Return to bot click on a conversation already back with the bot does nothing.
+[[scenario]]
+name = "owner_return_to_bot_twice"
+step = "P5"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "return_to_bot", "actions.0.action_ts" = "1764601306.000200" }
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "return_to_bot", "actions.0.action_ts" = "1764601307.000200" }
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 2
+rows = { message_log = 4 }
+
+# After Return to bot, a thread reply is not sent and the thread is told.
+[[scenario]]
+name = "owner_reply_after_release_not_sent"
+step = "P5"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "return_to_bot", "actions.0.action_ts" = "1764601308.000200" }
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Sorry, one more thing", event_id = "Ev0P50009", "event.ts" = "1764601209.000100" }
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 3
+calls = { "slack.react" = 0 }
+
+# CUJ 4: STOP during a handoff opts out, confirms once and tells the thread. The owner's later
+# reply is not sent and the thread says why (removing send_dnc sends it).
+[[scenario]]
+name = "stop_during_handoff"
+step = "P5"
+guards = ["send_dnc"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "STOP"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Hi, are you still there?", event_id = "Ev0P50010", "event.ts" = "1764601210.000100" }
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "keyword_stop"
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }, { kind = "normal", text_contains = "opted out" }]
+slack_posts = 3
+calls = { "slack.react" = 0 }
+rows = { do_not_contact = 1 }
+
+# Mark as booked moves the conversation to booked and notes it in the thread.
+[[scenario]]
+name = "mark_as_booked"
+step = "P5"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "mark_booked", "actions.0.action_ts" = "1764601311.000200" }
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 2
+rows = { message_log = 3 }
+
+# CUJ 8: a wrong number gets one apology and is closed. A later message is posted under the close
+# alert with no reply (removing the guard sends it to the classifier). After Reopen the bot answers again.
+[[scenario]]
+name = "wrong_number_closed_and_reopened"
+step = "P5"
+guards = ["closed"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "sorry, wrong number, I was looking for my dentist"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello?"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "reopen", "actions.0.action_ts" = "1764601312.000200" }
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hi, how much is a deep clean?"
+
+[scenario.script]
+jev.stage = [{ hazards = { wrong_person = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }, { hazards = {}, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "closed"
+sends = [{ kind = "normal", text_contains = "wrong number" }, { kind = "normal", text_contains = "book" }]
+slack_posts = 3
+
+# A Slack event signed with the wrong secret is refused with 401, logged and never stored.
+[[scenario]]
+name = "sig_slack_wrong_signature"
+step = "P5"
+guards = ["sig_slack"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "wrong"
+fixture = "tests/fixtures/slack/thread_message.json"
+status = 401
+
+
+[scenario.expect]
+sends = []
+rows = { inbox = 0, message_log = 1 }
+
+# START during a handoff takes the number off the list, but the bot's reply is not sent while the
+# owner has the conversation (removing send_human_owned sends it).
+[[scenario]]
+name = "start_during_handoff_not_sent"
+step = "P5"
+guards = ["send_human_owned"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "START"
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "keyword_start"
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 1

@@ -71,7 +71,7 @@
         [
           {
             "index": 0,
-            "node": "todo:P5 (booking handoff)",
+            "node": "handoff:input (booking)",
             "type": "main"
           }
         ],
@@ -101,6 +101,28 @@
           {
             "index": 0,
             "node": "route:decide",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "close": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "stage:save",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "close:input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "close",
             "type": "main"
           }
         ]
@@ -301,7 +323,7 @@
         [
           {
             "index": 0,
-            "node": "todo:P5 (closed)",
+            "node": "thread:input (closed)",
             "type": "main"
           }
         ],
@@ -337,7 +359,7 @@
         [
           {
             "index": 0,
-            "node": "todo:P5 (human_owned)",
+            "node": "thread:input (human_owned)",
             "type": "main"
           }
         ],
@@ -381,6 +403,50 @@
           {
             "index": 0,
             "node": "conversations: touch",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "handoff": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "stage:save",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "handoff (booking)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "stage:save",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "handoff:input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "handoff",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "handoff:input (booking)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "handoff (booking)",
             "type": "main"
           }
         ]
@@ -609,14 +675,14 @@
         [
           {
             "index": 0,
-            "node": "todo:P5 (handoff)",
+            "node": "handoff:input",
             "type": "main"
           }
         ],
         [
           {
             "index": 0,
-            "node": "todo:P5 (close)",
+            "node": "close:input",
             "type": "main"
           }
         ],
@@ -678,7 +744,7 @@
         [
           {
             "index": 0,
-            "node": "route: keyword_stop",
+            "node": "stop: in thread? (keyword)",
             "type": "main"
           }
         ]
@@ -689,7 +755,7 @@
         [
           {
             "index": 0,
-            "node": "route: optout_phrase",
+            "node": "stop: in thread? (phrase)",
             "type": "main"
           }
         ]
@@ -827,6 +893,50 @@
         ]
       ]
     },
+    "slack: close thread post": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "route: closed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "slack: opt-out note (keyword)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "route: keyword_stop",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "slack: opt-out note (phrase)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "route: optout_phrase",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "slack: thread post": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "route: human_owned",
+            "type": "main"
+          }
+        ]
+      ]
+    },
     "stage:save": {
       "main": [
         [
@@ -838,56 +948,81 @@
         ]
       ]
     },
-    "todo:P5 (booking handoff)": {
+    "stop: in thread? (keyword)": {
       "main": [
         [
           {
             "index": 0,
-            "node": "log:input",
+            "node": "stop:note (keyword)",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "route: keyword_stop",
             "type": "main"
           }
         ]
       ]
     },
-    "todo:P5 (close)": {
+    "stop: in thread? (phrase)": {
       "main": [
         [
           {
             "index": 0,
-            "node": "log:input",
+            "node": "stop:note (phrase)",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "route: optout_phrase",
             "type": "main"
           }
         ]
       ]
     },
-    "todo:P5 (closed)": {
+    "stop:note (keyword)": {
       "main": [
         [
           {
             "index": 0,
-            "node": "route: closed",
+            "node": "slack: opt-out note (keyword)",
             "type": "main"
           }
         ]
       ]
     },
-    "todo:P5 (handoff)": {
+    "stop:note (phrase)": {
       "main": [
         [
           {
             "index": 0,
-            "node": "log:input",
+            "node": "slack: opt-out note (phrase)",
             "type": "main"
           }
         ]
       ]
     },
-    "todo:P5 (human_owned)": {
+    "thread:input (closed)": {
       "main": [
         [
           {
             "index": 0,
-            "node": "route: human_owned",
+            "node": "slack: close thread post",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "thread:input (human_owned)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "slack: thread post",
             "type": "main"
           }
         ]
@@ -1093,6 +1228,42 @@
       ],
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2
+    },
+    {
+      "id": "1b30c2fc-69de-441d-aa5b-c7a329cf4871",
+      "name": "close",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "close",
+          "mode": "list",
+          "value": "ieoEgWN9loZoVo1Q"
+        }
+      },
+      "position": [
+        5500,
+        400
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "cc9cd1e4-681a-4fc9-bd21-146144d490e1",
+      "name": "close:input",
+      "parameters": {
+        "jsCode": "const g = $('gate:check').first().json;\nconst d = $('route:decide').first().json;\nreturn [{ json: { wa_id: g.event.wa_id, reason: d.reply.slice('close:'.length), now: g.now, received_at: g.received_at,\n  route: d.route, stage: g.conv.stage, classifier: $('classifier').first().json,\n  facts_version: $('facts').first().json.version || '', customer_text: g.text || '' } }];"
+      },
+      "position": [
+        5280,
+        400
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
     },
     {
       "id": "b7538200-f477-498f-8143-5d333f1873b8",
@@ -2923,6 +3094,78 @@
       "typeVersion": 2.2
     },
     {
+      "id": "d811709a-9da3-44e6-aabe-92260be372be",
+      "name": "handoff",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "handoff",
+          "mode": "list",
+          "value": "1Qkj1jyQqzleF9mA"
+        }
+      },
+      "position": [
+        5500,
+        200
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "121b89fb-b286-40d9-94c3-412c4b27517b",
+      "name": "handoff (booking)",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "handoff",
+          "mode": "list",
+          "value": "1Qkj1jyQqzleF9mA"
+        }
+      },
+      "position": [
+        7280,
+        750
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "f2758478-6ec9-43bc-beec-a95dca3a6c6b",
+      "name": "handoff:input",
+      "parameters": {
+        "jsCode": "const g = $('gate:check').first().json;\nconst d = $('route:decide').first().json;\nlet classifier = '';\ntry { classifier = $('classifier').first().json; } catch (e) {}\nreturn [{ json: { wa_id: g.event.wa_id, reason: d.reply.startsWith('handoff:') ? d.reply.slice(8) : (d.reason || 'unclear'),\n  now: g.now, received_at: g.received_at, route: d.route, stage: g.conv.stage, classifier,\n  facts_version: $('facts').first().json.version || '', customer_text: g.text || '' } }];"
+      },
+      "position": [
+        5280,
+        200
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "ef612da4-c528-45d5-8c4d-70e5c02491c8",
+      "name": "handoff:input (booking)",
+      "parameters": {
+        "jsCode": "const g = $('gate:check').first().json;\nconst d = $('route:decide').first().json;\nconst b = $('book').first().json;\nreturn [{ json: { wa_id: g.event.wa_id, reason: b.reason || 'slots_exhausted', now: g.now, received_at: g.received_at,\n  route: d.route, stage: g.conv.stage, classifier: $('classifier').first().json,\n  facts_version: $('facts').first().json.version || '', customer_text: g.text || '' } }];"
+      },
+      "position": [
+        7060,
+        750
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
       "alwaysOutputData": true,
       "executeOnce": true,
       "id": "ab03a298-500a-4371-bcb3-bc33b6991843",
@@ -3819,6 +4062,98 @@
       "typeVersion": 2
     },
     {
+      "id": "5db747a7-b411-4d52-8619-3c0efad1cb35",
+      "name": "slack: close thread post",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "slack-adapter",
+          "mode": "list",
+          "value": "1y7I33XeHXVkDq6P"
+        }
+      },
+      "position": [
+        2860,
+        300
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "3c4a7277-9a32-4d7e-a80e-e90c89146c1d",
+      "name": "slack: opt-out note (keyword)",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "slack-adapter",
+          "mode": "list",
+          "value": "1y7I33XeHXVkDq6P"
+        }
+      },
+      "position": [
+        2200,
+        -1000
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "04c4434f-1fc1-4646-91af-c9aa3db2dcd1",
+      "name": "slack: opt-out note (phrase)",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "slack-adapter",
+          "mode": "list",
+          "value": "1y7I33XeHXVkDq6P"
+        }
+      },
+      "position": [
+        2860,
+        -1200
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "80484f12-b2bb-4765-b0bc-b6feee6a2ade",
+      "name": "slack: thread post",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "slack-adapter",
+          "mode": "list",
+          "value": "1y7I33XeHXVkDq6P"
+        }
+      },
+      "position": [
+        2640,
+        -300
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
       "id": "dfc2b6f9-c3f4-4453-9b25-009e1a8fc466",
       "name": "stage:save",
       "parameters": {
@@ -3832,59 +4167,126 @@
       "typeVersion": 2
     },
     {
-      "id": "c8fea574-6993-49fa-87f3-6295aa148ff8",
-      "name": "todo:P5 (booking handoff)",
-      "parameters": {},
+      "id": "c04e740e-7b0f-4e98-8bc0-1f8c5f83474d",
+      "name": "stop: in thread? (keyword)",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "h9dncy87",
+              "leftValue": "={{ Boolean($('gate:check').first().json.conv.human_owned) && Boolean($('gate:check').first().json.conv.slack_thread_ts) }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
       "position": [
-        7060,
-        750
+        2090,
+        -850
       ],
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
     },
     {
-      "id": "e8d353be-a883-4cda-8f3a-1b14144574fa",
-      "name": "todo:P5 (close)",
-      "parameters": {},
+      "id": "2b637d46-5856-479f-bf6b-a0e3ef68b436",
+      "name": "stop: in thread? (phrase)",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "9sq4dgtp",
+              "leftValue": "={{ Boolean($('gate:check').first().json.conv.human_owned) && Boolean($('gate:check').first().json.conv.slack_thread_ts) }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
       "position": [
-        5280,
-        350
+        2750,
+        -1050
       ],
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
     },
     {
-      "id": "4bc2617f-49ac-4bc1-a622-dc541c57bf87",
-      "name": "todo:P5 (closed)",
-      "parameters": {},
+      "id": "ee986a87-108a-401d-8b94-260532ea1171",
+      "name": "stop:note (keyword)",
+      "parameters": {
+        "jsCode": "// @lib slack_text\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['mask'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Masks a WhatsApp number for Slack posts and the Sheets log (design sections 11 and 15).\n\n  const MASK_CHAR = '*';\n  const KEEP_DIGITS = 4;\n\n  // Keeps only the last 4 digits. Non-digits (such as a leading +) are dropped first.\n  // A number with 4 digits or fewer is masked completely, so nothing leaks from a short value.\n  function maskNumber(waId) {\n    if (waId === null || waId === undefined) return '';\n    const digits = String(waId).replace(/\\D/g, '');\n    if (digits.length <= KEEP_DIGITS) return MASK_CHAR.repeat(digits.length);\n    return MASK_CHAR.repeat(digits.length - KEEP_DIGITS) + digits.slice(-KEEP_DIGITS);\n  }\n\n  module.exports = { maskNumber };\n  return module.exports;\n})();\n__lib['slack_text'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slack text helpers (design section 11): owner mrkdwn to plain text, escaping customer text,\n  // the // team note rule, and the Block Kit posts for handoff and close alerts.\n\n  const { LIMITS } = require('./config');\n  const { maskNumber } = require('./mask');\n\n  // Stable action IDs. The interactivity workflow routes on these, so they must not change.\n  const ACTION_IDS = {\n    RETURN_TO_BOT: 'return_to_bot',\n    MARK_BOOKED: 'mark_booked',\n    REOPEN: 'reopen',\n    SEND_TEMPLATE: 'send_template',\n    DISCARD_WAITING: 'discard_waiting',\n  };\n\n  // Not in config.js: each quoted history message is cut to this many characters (a Slack section holds 3000).\n  const HISTORY_TEXT_MAX_CHARS = 300;\n\n  const HANDOFF_REASON_LABELS = {\n    wants_human: 'Customer asked for a person',\n    unclear: 'Bot could not understand the customer',\n    jev_unavailable: 'AI service unavailable',\n    change_booking: 'Customer wants to change a booking',\n    slots_exhausted: 'No times left to offer',\n    booking_key_deleted: 'Booking calendar entry was deleted',\n    unknown_stage: 'Conversation in an unknown stage',\n    zip_not_found: 'ZIP code not found after asking',\n  };\n\n  const CLOSE_REASON_LABELS = {\n    wrong_person: 'Wrong person',\n    abusive: 'Abusive messages',\n  };\n\n  const AUTHOR_LABELS = { customer: 'Customer', bot: 'Bot', owner: 'Owner', system: 'System' };\n\n  // Escapes customer text so it cannot trigger mentions (<!channel>) or disguised links.\n  function escapeForSlack(text) {\n    if (text === null || text === undefined) return '';\n    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  }\n\n  // Turns one <...> token of Slack mrkdwn into plain text.\n  function plainToken(inner) {\n    const bar = inner.indexOf('|');\n    const target = bar === -1 ? inner : inner.slice(0, bar);\n    const label = bar === -1 ? '' : inner.slice(bar + 1);\n    if (target.startsWith('@')) return ''; // user mention: nothing sensible for a customer\n    if (target.startsWith('#')) return label ? '#' + label : '';\n    if (target.startsWith('!')) return label && !/^(here|channel|everyone)$/.test(target.slice(1)) ? label : '';\n    if (/^(mailto|tel):/i.test(target)) return label || target.replace(/^(mailto|tel):/i, '');\n    if (!label || label === target) return target;\n    return label + ' (' + target + ')';\n  }\n\n  // Slack mrkdwn from the owner to plain text for the customer.\n  // Links, mentions, special mentions and the three HTML entities (&amp; last, so &amp;lt; stays &lt;).\n  function toPlain(text) {\n    if (text === null || text === undefined) return '';\n    return String(text)\n      .replace(/<([^<>]+)>/g, (m, inner) => plainToken(inner))\n      .replace(/&lt;/g, '<')\n      .replace(/&gt;/g, '>')\n      .replace(/&amp;/g, '&')\n      .replace(/[ \\t]{2,}/g, ' ')\n      .replace(/[ \\t]+\\n/g, '\\n')\n      .trim();\n  }\n\n  // A thread message starting with // is a note for the team and is never sent to the customer.\n  function isTeamNote(text) {\n    if (text === null || text === undefined) return false;\n    return String(text).trim().startsWith('//');\n  }\n\n  function truncate(text, max) {\n    return text.length > max ? text.slice(0, max - 3) + '...' : text;\n  }\n\n  function quote(text) {\n    return text\n      .split('\\n')\n      .map((line) => '> ' + line)\n      .join('\\n');\n  }\n\n  function button(label, actionId, value, style) {\n    const b = { type: 'button', text: { type: 'plain_text', text: label }, action_id: actionId };\n    if (value !== undefined && value !== null && value !== '') b.value = String(value);\n    if (style) b.style = style;\n    return b;\n  }\n\n  function sectionBlock(mrkdwn) {\n    return { type: 'section', text: { type: 'mrkdwn', text: mrkdwn } };\n  }\n\n  function slotLabels(offeredSlots) {\n    if (!Array.isArray(offeredSlots)) return [];\n    return offeredSlots.map((s) => (s && typeof s === 'object' ? s.label : s)).filter((l) => l);\n  }\n\n  // The first post of a handoff thread.\n  // { waId, reason, stage, offeredSlots: [{ id, label }], history: [{ author, text }], episode } -> { text, blocks }\n  // Customer-originated text is escaped. The number is masked except its last 4 digits.\n  function handoffPost({ waId, reason, stage, offeredSlots, history, episode } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = HANDOFF_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Handoff: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage: ' + escapeForSlack(stage || 'unknown'),\n    ];\n    const slots = slotLabels(offeredSlots);\n    if (slots.length) lines.push('Offered times: ' + slots.map(escapeForSlack).join('; '));\n\n    const recent = Array.isArray(history) ? history.slice(-LIMITS.historyMessages) : [];\n    if (recent.length) {\n      lines.push('', 'Last messages:');\n      for (const m of recent) {\n        const author = AUTHOR_LABELS[m && m.author] || escapeForSlack((m && m.author) || 'Unknown');\n        const body = truncate(escapeForSlack(m && m.text), HISTORY_TEXT_MAX_CHARS);\n        lines.push(author + ':', quote(body));\n      }\n    }\n    lines.push('', 'Reply in this thread to message the customer. Start a reply with // for a note that is not sent.');\n\n    return {\n      text: 'Handoff (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        {\n          type: 'actions',\n          elements: [\n            button('Return to bot', ACTION_IDS.RETURN_TO_BOT, episode, 'primary'),\n            button('Mark as booked', ACTION_IDS.MARK_BOOKED, episode),\n          ],\n        },\n      ],\n    };\n  }\n\n  // The alert posted when a conversation is closed (wrong_person or abusive), with a Reopen button.\n  // { waId, reason, stageBeforeClose } -> { text, blocks }\n  function closeAlertPost({ waId, reason, stageBeforeClose } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = CLOSE_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Conversation closed: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage before closing: ' + escapeForSlack(stageBeforeClose || 'unknown'),\n      '',\n      'Later messages from this customer are posted in this thread and get no reply. Reopen to put the conversation back.',\n    ];\n    return {\n      text: 'Conversation closed (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        { type: 'actions', elements: [button('Reopen', ACTION_IDS.REOPEN)] },\n      ],\n    };\n  }\n\n  // What a customer message looks like in the owner's thread (gate steps 5 and 6). Text is escaped;\n  // a non-text message is shown as \"[customer sent an image]\" and so on.\n  const MESSAGE_TYPE_LABELS = {\n    image: 'an image', audio: 'a voice note', voice: 'a voice note', video: 'a video', document: 'a document',\n    sticker: 'a sticker', reaction: 'a reaction', location: 'a location', contacts: 'a contact card',\n    button: 'a button reply', interactive: 'a button reply',\n  };\n  function customerThreadText(event) {\n    const e = event || {};\n    if (e.kind === 'text') return 'Customer: ' + escapeForSlack(e.text);\n    return 'Customer: [customer sent ' + (MESSAGE_TYPE_LABELS[e.message_type] || 'a message that cannot be shown here') + ']';\n  }\n\n  // Thread notes posted by owner-relay, owner-release and the gate.\n  const NOTES = {\n    back_with_bot: 'This conversation is back with the bot, so that message was not sent.',\n    not_sent_dnc: 'Not sent: the customer has opted out.',\n    not_sent: (reason) => 'Not sent (' + reason + ').',\n    customer_opted_out: 'The customer opted out. Nothing more will be sent to them.',\n    release_refused: (n) => 'Return to bot refused: ' + n + ' owner message' + (n === 1 ? ' is' : 's are') +\n      ' waiting. Send the template or discard them first.',\n    marked_booked: 'Marked as booked.',\n    reopened: (stage) => 'Reopened. Bot resumes at: ' + stage,\n    not_built: (action) => 'The ' + action + ' button is not available yet.',\n    template_sent: 'Template sent. The waiting messages go out when the customer replies.',\n    template_already_sent: 'The template was already sent for these waiting messages.',\n    template_not_sent_dnc: 'Template not sent: the customer has opted out.',\n    template_not_sent: (reason) => 'Template not sent (' + reason + ').',\n    nothing_waiting: 'No owner messages are waiting.',\n    discarded: (n) => 'Discarded ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n    waiting_sent: (n) => 'The customer replied: sent ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n  };\n\n  // Posted in the thread when an owner message is kept as waiting (outside the 24-hour window).\n  // count: how many owner messages are now waiting.\n  function waitingPost({ count } = {}) {\n    const n = Number(count) || 1;\n    const text = 'Not sent yet: the customer last wrote more than 24 hours ago, so WhatsApp only allows the ' +\n      'approved template. ' + n + ' owner message' + (n === 1 ? ' is' : 's are') + ' waiting and will be sent ' +\n      'when the customer replies.';\n    return {\n      text,\n      blocks: [\n        sectionBlock(text),\n        {\n          type: 'actions',\n          elements: [\n            button('Send template', ACTION_IDS.SEND_TEMPLATE, undefined, 'primary'),\n            button('Discard waiting messages', ACTION_IDS.DISCARD_WAITING),\n          ],\n        },\n      ],\n    };\n  }\n\n  module.exports = {\n    customerThreadText,\n    NOTES,\n    waitingPost,\n    ACTION_IDS,\n    toPlain,\n    escapeForSlack,\n    isTeamNote,\n    handoffPost,\n    closeAlertPost,\n  };\n  return module.exports;\n})();\nconst { customerThreadText, NOTES, waitingPost, ACTION_IDS, toPlain, escapeForSlack, isTeamNote, handoffPost, closeAlertPost } = __lib['slack_text'];\n// @end-lib\nconst g = $('gate:check').first().json;\nreturn [{ json: { op: 'post', channel: g.conv.slack_channel || $env.SLACK_CHANNEL_ID, thread_ts: g.conv.slack_thread_ts, text: NOTES.customer_opted_out } }];"
+      },
       "position": [
-        2860,
-        300
+        2090,
+        -1000
       ],
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
     },
     {
-      "id": "b03cf62a-c82b-414c-9ef3-ba70f0955f9b",
-      "name": "todo:P5 (handoff)",
-      "parameters": {},
+      "id": "df5770c2-0f03-4d1f-9b30-af2d43754244",
+      "name": "stop:note (phrase)",
+      "parameters": {
+        "jsCode": "// @lib slack_text\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['mask'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Masks a WhatsApp number for Slack posts and the Sheets log (design sections 11 and 15).\n\n  const MASK_CHAR = '*';\n  const KEEP_DIGITS = 4;\n\n  // Keeps only the last 4 digits. Non-digits (such as a leading +) are dropped first.\n  // A number with 4 digits or fewer is masked completely, so nothing leaks from a short value.\n  function maskNumber(waId) {\n    if (waId === null || waId === undefined) return '';\n    const digits = String(waId).replace(/\\D/g, '');\n    if (digits.length <= KEEP_DIGITS) return MASK_CHAR.repeat(digits.length);\n    return MASK_CHAR.repeat(digits.length - KEEP_DIGITS) + digits.slice(-KEEP_DIGITS);\n  }\n\n  module.exports = { maskNumber };\n  return module.exports;\n})();\n__lib['slack_text'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slack text helpers (design section 11): owner mrkdwn to plain text, escaping customer text,\n  // the // team note rule, and the Block Kit posts for handoff and close alerts.\n\n  const { LIMITS } = require('./config');\n  const { maskNumber } = require('./mask');\n\n  // Stable action IDs. The interactivity workflow routes on these, so they must not change.\n  const ACTION_IDS = {\n    RETURN_TO_BOT: 'return_to_bot',\n    MARK_BOOKED: 'mark_booked',\n    REOPEN: 'reopen',\n    SEND_TEMPLATE: 'send_template',\n    DISCARD_WAITING: 'discard_waiting',\n  };\n\n  // Not in config.js: each quoted history message is cut to this many characters (a Slack section holds 3000).\n  const HISTORY_TEXT_MAX_CHARS = 300;\n\n  const HANDOFF_REASON_LABELS = {\n    wants_human: 'Customer asked for a person',\n    unclear: 'Bot could not understand the customer',\n    jev_unavailable: 'AI service unavailable',\n    change_booking: 'Customer wants to change a booking',\n    slots_exhausted: 'No times left to offer',\n    booking_key_deleted: 'Booking calendar entry was deleted',\n    unknown_stage: 'Conversation in an unknown stage',\n    zip_not_found: 'ZIP code not found after asking',\n  };\n\n  const CLOSE_REASON_LABELS = {\n    wrong_person: 'Wrong person',\n    abusive: 'Abusive messages',\n  };\n\n  const AUTHOR_LABELS = { customer: 'Customer', bot: 'Bot', owner: 'Owner', system: 'System' };\n\n  // Escapes customer text so it cannot trigger mentions (<!channel>) or disguised links.\n  function escapeForSlack(text) {\n    if (text === null || text === undefined) return '';\n    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  }\n\n  // Turns one <...> token of Slack mrkdwn into plain text.\n  function plainToken(inner) {\n    const bar = inner.indexOf('|');\n    const target = bar === -1 ? inner : inner.slice(0, bar);\n    const label = bar === -1 ? '' : inner.slice(bar + 1);\n    if (target.startsWith('@')) return ''; // user mention: nothing sensible for a customer\n    if (target.startsWith('#')) return label ? '#' + label : '';\n    if (target.startsWith('!')) return label && !/^(here|channel|everyone)$/.test(target.slice(1)) ? label : '';\n    if (/^(mailto|tel):/i.test(target)) return label || target.replace(/^(mailto|tel):/i, '');\n    if (!label || label === target) return target;\n    return label + ' (' + target + ')';\n  }\n\n  // Slack mrkdwn from the owner to plain text for the customer.\n  // Links, mentions, special mentions and the three HTML entities (&amp; last, so &amp;lt; stays &lt;).\n  function toPlain(text) {\n    if (text === null || text === undefined) return '';\n    return String(text)\n      .replace(/<([^<>]+)>/g, (m, inner) => plainToken(inner))\n      .replace(/&lt;/g, '<')\n      .replace(/&gt;/g, '>')\n      .replace(/&amp;/g, '&')\n      .replace(/[ \\t]{2,}/g, ' ')\n      .replace(/[ \\t]+\\n/g, '\\n')\n      .trim();\n  }\n\n  // A thread message starting with // is a note for the team and is never sent to the customer.\n  function isTeamNote(text) {\n    if (text === null || text === undefined) return false;\n    return String(text).trim().startsWith('//');\n  }\n\n  function truncate(text, max) {\n    return text.length > max ? text.slice(0, max - 3) + '...' : text;\n  }\n\n  function quote(text) {\n    return text\n      .split('\\n')\n      .map((line) => '> ' + line)\n      .join('\\n');\n  }\n\n  function button(label, actionId, value, style) {\n    const b = { type: 'button', text: { type: 'plain_text', text: label }, action_id: actionId };\n    if (value !== undefined && value !== null && value !== '') b.value = String(value);\n    if (style) b.style = style;\n    return b;\n  }\n\n  function sectionBlock(mrkdwn) {\n    return { type: 'section', text: { type: 'mrkdwn', text: mrkdwn } };\n  }\n\n  function slotLabels(offeredSlots) {\n    if (!Array.isArray(offeredSlots)) return [];\n    return offeredSlots.map((s) => (s && typeof s === 'object' ? s.label : s)).filter((l) => l);\n  }\n\n  // The first post of a handoff thread.\n  // { waId, reason, stage, offeredSlots: [{ id, label }], history: [{ author, text }], episode } -> { text, blocks }\n  // Customer-originated text is escaped. The number is masked except its last 4 digits.\n  function handoffPost({ waId, reason, stage, offeredSlots, history, episode } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = HANDOFF_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Handoff: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage: ' + escapeForSlack(stage || 'unknown'),\n    ];\n    const slots = slotLabels(offeredSlots);\n    if (slots.length) lines.push('Offered times: ' + slots.map(escapeForSlack).join('; '));\n\n    const recent = Array.isArray(history) ? history.slice(-LIMITS.historyMessages) : [];\n    if (recent.length) {\n      lines.push('', 'Last messages:');\n      for (const m of recent) {\n        const author = AUTHOR_LABELS[m && m.author] || escapeForSlack((m && m.author) || 'Unknown');\n        const body = truncate(escapeForSlack(m && m.text), HISTORY_TEXT_MAX_CHARS);\n        lines.push(author + ':', quote(body));\n      }\n    }\n    lines.push('', 'Reply in this thread to message the customer. Start a reply with // for a note that is not sent.');\n\n    return {\n      text: 'Handoff (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        {\n          type: 'actions',\n          elements: [\n            button('Return to bot', ACTION_IDS.RETURN_TO_BOT, episode, 'primary'),\n            button('Mark as booked', ACTION_IDS.MARK_BOOKED, episode),\n          ],\n        },\n      ],\n    };\n  }\n\n  // The alert posted when a conversation is closed (wrong_person or abusive), with a Reopen button.\n  // { waId, reason, stageBeforeClose } -> { text, blocks }\n  function closeAlertPost({ waId, reason, stageBeforeClose } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = CLOSE_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Conversation closed: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage before closing: ' + escapeForSlack(stageBeforeClose || 'unknown'),\n      '',\n      'Later messages from this customer are posted in this thread and get no reply. Reopen to put the conversation back.',\n    ];\n    return {\n      text: 'Conversation closed (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        { type: 'actions', elements: [button('Reopen', ACTION_IDS.REOPEN)] },\n      ],\n    };\n  }\n\n  // What a customer message looks like in the owner's thread (gate steps 5 and 6). Text is escaped;\n  // a non-text message is shown as \"[customer sent an image]\" and so on.\n  const MESSAGE_TYPE_LABELS = {\n    image: 'an image', audio: 'a voice note', voice: 'a voice note', video: 'a video', document: 'a document',\n    sticker: 'a sticker', reaction: 'a reaction', location: 'a location', contacts: 'a contact card',\n    button: 'a button reply', interactive: 'a button reply',\n  };\n  function customerThreadText(event) {\n    const e = event || {};\n    if (e.kind === 'text') return 'Customer: ' + escapeForSlack(e.text);\n    return 'Customer: [customer sent ' + (MESSAGE_TYPE_LABELS[e.message_type] || 'a message that cannot be shown here') + ']';\n  }\n\n  // Thread notes posted by owner-relay, owner-release and the gate.\n  const NOTES = {\n    back_with_bot: 'This conversation is back with the bot, so that message was not sent.',\n    not_sent_dnc: 'Not sent: the customer has opted out.',\n    not_sent: (reason) => 'Not sent (' + reason + ').',\n    customer_opted_out: 'The customer opted out. Nothing more will be sent to them.',\n    release_refused: (n) => 'Return to bot refused: ' + n + ' owner message' + (n === 1 ? ' is' : 's are') +\n      ' waiting. Send the template or discard them first.',\n    marked_booked: 'Marked as booked.',\n    reopened: (stage) => 'Reopened. Bot resumes at: ' + stage,\n    not_built: (action) => 'The ' + action + ' button is not available yet.',\n    template_sent: 'Template sent. The waiting messages go out when the customer replies.',\n    template_already_sent: 'The template was already sent for these waiting messages.',\n    template_not_sent_dnc: 'Template not sent: the customer has opted out.',\n    template_not_sent: (reason) => 'Template not sent (' + reason + ').',\n    nothing_waiting: 'No owner messages are waiting.',\n    discarded: (n) => 'Discarded ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n    waiting_sent: (n) => 'The customer replied: sent ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n  };\n\n  // Posted in the thread when an owner message is kept as waiting (outside the 24-hour window).\n  // count: how many owner messages are now waiting.\n  function waitingPost({ count } = {}) {\n    const n = Number(count) || 1;\n    const text = 'Not sent yet: the customer last wrote more than 24 hours ago, so WhatsApp only allows the ' +\n      'approved template. ' + n + ' owner message' + (n === 1 ? ' is' : 's are') + ' waiting and will be sent ' +\n      'when the customer replies.';\n    return {\n      text,\n      blocks: [\n        sectionBlock(text),\n        {\n          type: 'actions',\n          elements: [\n            button('Send template', ACTION_IDS.SEND_TEMPLATE, undefined, 'primary'),\n            button('Discard waiting messages', ACTION_IDS.DISCARD_WAITING),\n          ],\n        },\n      ],\n    };\n  }\n\n  module.exports = {\n    customerThreadText,\n    NOTES,\n    waitingPost,\n    ACTION_IDS,\n    toPlain,\n    escapeForSlack,\n    isTeamNote,\n    handoffPost,\n    closeAlertPost,\n  };\n  return module.exports;\n})();\nconst { customerThreadText, NOTES, waitingPost, ACTION_IDS, toPlain, escapeForSlack, isTeamNote, handoffPost, closeAlertPost } = __lib['slack_text'];\n// @end-lib\nconst g = $('gate:check').first().json;\nreturn [{ json: { op: 'post', channel: g.conv.slack_channel || $env.SLACK_CHANNEL_ID, thread_ts: g.conv.slack_thread_ts, text: NOTES.customer_opted_out } }];"
+      },
       "position": [
-        5280,
-        200
+        2750,
+        -1200
       ],
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
     },
     {
-      "id": "e2b448af-7ad5-4a5d-b3e3-2afc97489b6f",
-      "name": "todo:P5 (human_owned)",
-      "parameters": {},
+      "id": "6e78cd5e-8fa4-4abd-a807-022016e81c78",
+      "name": "thread:input (closed)",
+      "parameters": {
+        "jsCode": "// @lib slack_text\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['mask'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Masks a WhatsApp number for Slack posts and the Sheets log (design sections 11 and 15).\n\n  const MASK_CHAR = '*';\n  const KEEP_DIGITS = 4;\n\n  // Keeps only the last 4 digits. Non-digits (such as a leading +) are dropped first.\n  // A number with 4 digits or fewer is masked completely, so nothing leaks from a short value.\n  function maskNumber(waId) {\n    if (waId === null || waId === undefined) return '';\n    const digits = String(waId).replace(/\\D/g, '');\n    if (digits.length <= KEEP_DIGITS) return MASK_CHAR.repeat(digits.length);\n    return MASK_CHAR.repeat(digits.length - KEEP_DIGITS) + digits.slice(-KEEP_DIGITS);\n  }\n\n  module.exports = { maskNumber };\n  return module.exports;\n})();\n__lib['slack_text'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slack text helpers (design section 11): owner mrkdwn to plain text, escaping customer text,\n  // the // team note rule, and the Block Kit posts for handoff and close alerts.\n\n  const { LIMITS } = require('./config');\n  const { maskNumber } = require('./mask');\n\n  // Stable action IDs. The interactivity workflow routes on these, so they must not change.\n  const ACTION_IDS = {\n    RETURN_TO_BOT: 'return_to_bot',\n    MARK_BOOKED: 'mark_booked',\n    REOPEN: 'reopen',\n    SEND_TEMPLATE: 'send_template',\n    DISCARD_WAITING: 'discard_waiting',\n  };\n\n  // Not in config.js: each quoted history message is cut to this many characters (a Slack section holds 3000).\n  const HISTORY_TEXT_MAX_CHARS = 300;\n\n  const HANDOFF_REASON_LABELS = {\n    wants_human: 'Customer asked for a person',\n    unclear: 'Bot could not understand the customer',\n    jev_unavailable: 'AI service unavailable',\n    change_booking: 'Customer wants to change a booking',\n    slots_exhausted: 'No times left to offer',\n    booking_key_deleted: 'Booking calendar entry was deleted',\n    unknown_stage: 'Conversation in an unknown stage',\n    zip_not_found: 'ZIP code not found after asking',\n  };\n\n  const CLOSE_REASON_LABELS = {\n    wrong_person: 'Wrong person',\n    abusive: 'Abusive messages',\n  };\n\n  const AUTHOR_LABELS = { customer: 'Customer', bot: 'Bot', owner: 'Owner', system: 'System' };\n\n  // Escapes customer text so it cannot trigger mentions (<!channel>) or disguised links.\n  function escapeForSlack(text) {\n    if (text === null || text === undefined) return '';\n    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  }\n\n  // Turns one <...> token of Slack mrkdwn into plain text.\n  function plainToken(inner) {\n    const bar = inner.indexOf('|');\n    const target = bar === -1 ? inner : inner.slice(0, bar);\n    const label = bar === -1 ? '' : inner.slice(bar + 1);\n    if (target.startsWith('@')) return ''; // user mention: nothing sensible for a customer\n    if (target.startsWith('#')) return label ? '#' + label : '';\n    if (target.startsWith('!')) return label && !/^(here|channel|everyone)$/.test(target.slice(1)) ? label : '';\n    if (/^(mailto|tel):/i.test(target)) return label || target.replace(/^(mailto|tel):/i, '');\n    if (!label || label === target) return target;\n    return label + ' (' + target + ')';\n  }\n\n  // Slack mrkdwn from the owner to plain text for the customer.\n  // Links, mentions, special mentions and the three HTML entities (&amp; last, so &amp;lt; stays &lt;).\n  function toPlain(text) {\n    if (text === null || text === undefined) return '';\n    return String(text)\n      .replace(/<([^<>]+)>/g, (m, inner) => plainToken(inner))\n      .replace(/&lt;/g, '<')\n      .replace(/&gt;/g, '>')\n      .replace(/&amp;/g, '&')\n      .replace(/[ \\t]{2,}/g, ' ')\n      .replace(/[ \\t]+\\n/g, '\\n')\n      .trim();\n  }\n\n  // A thread message starting with // is a note for the team and is never sent to the customer.\n  function isTeamNote(text) {\n    if (text === null || text === undefined) return false;\n    return String(text).trim().startsWith('//');\n  }\n\n  function truncate(text, max) {\n    return text.length > max ? text.slice(0, max - 3) + '...' : text;\n  }\n\n  function quote(text) {\n    return text\n      .split('\\n')\n      .map((line) => '> ' + line)\n      .join('\\n');\n  }\n\n  function button(label, actionId, value, style) {\n    const b = { type: 'button', text: { type: 'plain_text', text: label }, action_id: actionId };\n    if (value !== undefined && value !== null && value !== '') b.value = String(value);\n    if (style) b.style = style;\n    return b;\n  }\n\n  function sectionBlock(mrkdwn) {\n    return { type: 'section', text: { type: 'mrkdwn', text: mrkdwn } };\n  }\n\n  function slotLabels(offeredSlots) {\n    if (!Array.isArray(offeredSlots)) return [];\n    return offeredSlots.map((s) => (s && typeof s === 'object' ? s.label : s)).filter((l) => l);\n  }\n\n  // The first post of a handoff thread.\n  // { waId, reason, stage, offeredSlots: [{ id, label }], history: [{ author, text }], episode } -> { text, blocks }\n  // Customer-originated text is escaped. The number is masked except its last 4 digits.\n  function handoffPost({ waId, reason, stage, offeredSlots, history, episode } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = HANDOFF_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Handoff: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage: ' + escapeForSlack(stage || 'unknown'),\n    ];\n    const slots = slotLabels(offeredSlots);\n    if (slots.length) lines.push('Offered times: ' + slots.map(escapeForSlack).join('; '));\n\n    const recent = Array.isArray(history) ? history.slice(-LIMITS.historyMessages) : [];\n    if (recent.length) {\n      lines.push('', 'Last messages:');\n      for (const m of recent) {\n        const author = AUTHOR_LABELS[m && m.author] || escapeForSlack((m && m.author) || 'Unknown');\n        const body = truncate(escapeForSlack(m && m.text), HISTORY_TEXT_MAX_CHARS);\n        lines.push(author + ':', quote(body));\n      }\n    }\n    lines.push('', 'Reply in this thread to message the customer. Start a reply with // for a note that is not sent.');\n\n    return {\n      text: 'Handoff (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        {\n          type: 'actions',\n          elements: [\n            button('Return to bot', ACTION_IDS.RETURN_TO_BOT, episode, 'primary'),\n            button('Mark as booked', ACTION_IDS.MARK_BOOKED, episode),\n          ],\n        },\n      ],\n    };\n  }\n\n  // The alert posted when a conversation is closed (wrong_person or abusive), with a Reopen button.\n  // { waId, reason, stageBeforeClose } -> { text, blocks }\n  function closeAlertPost({ waId, reason, stageBeforeClose } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = CLOSE_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Conversation closed: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage before closing: ' + escapeForSlack(stageBeforeClose || 'unknown'),\n      '',\n      'Later messages from this customer are posted in this thread and get no reply. Reopen to put the conversation back.',\n    ];\n    return {\n      text: 'Conversation closed (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        { type: 'actions', elements: [button('Reopen', ACTION_IDS.REOPEN)] },\n      ],\n    };\n  }\n\n  // What a customer message looks like in the owner's thread (gate steps 5 and 6). Text is escaped;\n  // a non-text message is shown as \"[customer sent an image]\" and so on.\n  const MESSAGE_TYPE_LABELS = {\n    image: 'an image', audio: 'a voice note', voice: 'a voice note', video: 'a video', document: 'a document',\n    sticker: 'a sticker', reaction: 'a reaction', location: 'a location', contacts: 'a contact card',\n    button: 'a button reply', interactive: 'a button reply',\n  };\n  function customerThreadText(event) {\n    const e = event || {};\n    if (e.kind === 'text') return 'Customer: ' + escapeForSlack(e.text);\n    return 'Customer: [customer sent ' + (MESSAGE_TYPE_LABELS[e.message_type] || 'a message that cannot be shown here') + ']';\n  }\n\n  // Thread notes posted by owner-relay, owner-release and the gate.\n  const NOTES = {\n    back_with_bot: 'This conversation is back with the bot, so that message was not sent.',\n    not_sent_dnc: 'Not sent: the customer has opted out.',\n    not_sent: (reason) => 'Not sent (' + reason + ').',\n    customer_opted_out: 'The customer opted out. Nothing more will be sent to them.',\n    release_refused: (n) => 'Return to bot refused: ' + n + ' owner message' + (n === 1 ? ' is' : 's are') +\n      ' waiting. Send the template or discard them first.',\n    marked_booked: 'Marked as booked.',\n    reopened: (stage) => 'Reopened. Bot resumes at: ' + stage,\n    not_built: (action) => 'The ' + action + ' button is not available yet.',\n    template_sent: 'Template sent. The waiting messages go out when the customer replies.',\n    template_already_sent: 'The template was already sent for these waiting messages.',\n    template_not_sent_dnc: 'Template not sent: the customer has opted out.',\n    template_not_sent: (reason) => 'Template not sent (' + reason + ').',\n    nothing_waiting: 'No owner messages are waiting.',\n    discarded: (n) => 'Discarded ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n    waiting_sent: (n) => 'The customer replied: sent ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n  };\n\n  // Posted in the thread when an owner message is kept as waiting (outside the 24-hour window).\n  // count: how many owner messages are now waiting.\n  function waitingPost({ count } = {}) {\n    const n = Number(count) || 1;\n    const text = 'Not sent yet: the customer last wrote more than 24 hours ago, so WhatsApp only allows the ' +\n      'approved template. ' + n + ' owner message' + (n === 1 ? ' is' : 's are') + ' waiting and will be sent ' +\n      'when the customer replies.';\n    return {\n      text,\n      blocks: [\n        sectionBlock(text),\n        {\n          type: 'actions',\n          elements: [\n            button('Send template', ACTION_IDS.SEND_TEMPLATE, undefined, 'primary'),\n            button('Discard waiting messages', ACTION_IDS.DISCARD_WAITING),\n          ],\n        },\n      ],\n    };\n  }\n\n  module.exports = {\n    customerThreadText,\n    NOTES,\n    waitingPost,\n    ACTION_IDS,\n    toPlain,\n    escapeForSlack,\n    isTeamNote,\n    handoffPost,\n    closeAlertPost,\n  };\n  return module.exports;\n})();\nconst { customerThreadText, NOTES, waitingPost, ACTION_IDS, toPlain, escapeForSlack, isTeamNote, handoffPost, closeAlertPost } = __lib['slack_text'];\n// @end-lib\nconst g = $('gate:check').first().json;\nconst post = { op: 'post', channel: $env.SLACK_CHANNEL_ID, text: customerThreadText(g.event) };\nif (g.conv.close_thread_ts) post.thread_ts = g.conv.close_thread_ts;\nreturn [{ json: post }];"
+      },
       "position": [
         2640,
+        300
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "6b59e0b5-c585-4dc9-8237-e82993351d4e",
+      "name": "thread:input (human_owned)",
+      "parameters": {
+        "jsCode": "// @lib slack_text\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['mask'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Masks a WhatsApp number for Slack posts and the Sheets log (design sections 11 and 15).\n\n  const MASK_CHAR = '*';\n  const KEEP_DIGITS = 4;\n\n  // Keeps only the last 4 digits. Non-digits (such as a leading +) are dropped first.\n  // A number with 4 digits or fewer is masked completely, so nothing leaks from a short value.\n  function maskNumber(waId) {\n    if (waId === null || waId === undefined) return '';\n    const digits = String(waId).replace(/\\D/g, '');\n    if (digits.length <= KEEP_DIGITS) return MASK_CHAR.repeat(digits.length);\n    return MASK_CHAR.repeat(digits.length - KEEP_DIGITS) + digits.slice(-KEEP_DIGITS);\n  }\n\n  module.exports = { maskNumber };\n  return module.exports;\n})();\n__lib['slack_text'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slack text helpers (design section 11): owner mrkdwn to plain text, escaping customer text,\n  // the // team note rule, and the Block Kit posts for handoff and close alerts.\n\n  const { LIMITS } = require('./config');\n  const { maskNumber } = require('./mask');\n\n  // Stable action IDs. The interactivity workflow routes on these, so they must not change.\n  const ACTION_IDS = {\n    RETURN_TO_BOT: 'return_to_bot',\n    MARK_BOOKED: 'mark_booked',\n    REOPEN: 'reopen',\n    SEND_TEMPLATE: 'send_template',\n    DISCARD_WAITING: 'discard_waiting',\n  };\n\n  // Not in config.js: each quoted history message is cut to this many characters (a Slack section holds 3000).\n  const HISTORY_TEXT_MAX_CHARS = 300;\n\n  const HANDOFF_REASON_LABELS = {\n    wants_human: 'Customer asked for a person',\n    unclear: 'Bot could not understand the customer',\n    jev_unavailable: 'AI service unavailable',\n    change_booking: 'Customer wants to change a booking',\n    slots_exhausted: 'No times left to offer',\n    booking_key_deleted: 'Booking calendar entry was deleted',\n    unknown_stage: 'Conversation in an unknown stage',\n    zip_not_found: 'ZIP code not found after asking',\n  };\n\n  const CLOSE_REASON_LABELS = {\n    wrong_person: 'Wrong person',\n    abusive: 'Abusive messages',\n  };\n\n  const AUTHOR_LABELS = { customer: 'Customer', bot: 'Bot', owner: 'Owner', system: 'System' };\n\n  // Escapes customer text so it cannot trigger mentions (<!channel>) or disguised links.\n  function escapeForSlack(text) {\n    if (text === null || text === undefined) return '';\n    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  }\n\n  // Turns one <...> token of Slack mrkdwn into plain text.\n  function plainToken(inner) {\n    const bar = inner.indexOf('|');\n    const target = bar === -1 ? inner : inner.slice(0, bar);\n    const label = bar === -1 ? '' : inner.slice(bar + 1);\n    if (target.startsWith('@')) return ''; // user mention: nothing sensible for a customer\n    if (target.startsWith('#')) return label ? '#' + label : '';\n    if (target.startsWith('!')) return label && !/^(here|channel|everyone)$/.test(target.slice(1)) ? label : '';\n    if (/^(mailto|tel):/i.test(target)) return label || target.replace(/^(mailto|tel):/i, '');\n    if (!label || label === target) return target;\n    return label + ' (' + target + ')';\n  }\n\n  // Slack mrkdwn from the owner to plain text for the customer.\n  // Links, mentions, special mentions and the three HTML entities (&amp; last, so &amp;lt; stays &lt;).\n  function toPlain(text) {\n    if (text === null || text === undefined) return '';\n    return String(text)\n      .replace(/<([^<>]+)>/g, (m, inner) => plainToken(inner))\n      .replace(/&lt;/g, '<')\n      .replace(/&gt;/g, '>')\n      .replace(/&amp;/g, '&')\n      .replace(/[ \\t]{2,}/g, ' ')\n      .replace(/[ \\t]+\\n/g, '\\n')\n      .trim();\n  }\n\n  // A thread message starting with // is a note for the team and is never sent to the customer.\n  function isTeamNote(text) {\n    if (text === null || text === undefined) return false;\n    return String(text).trim().startsWith('//');\n  }\n\n  function truncate(text, max) {\n    return text.length > max ? text.slice(0, max - 3) + '...' : text;\n  }\n\n  function quote(text) {\n    return text\n      .split('\\n')\n      .map((line) => '> ' + line)\n      .join('\\n');\n  }\n\n  function button(label, actionId, value, style) {\n    const b = { type: 'button', text: { type: 'plain_text', text: label }, action_id: actionId };\n    if (value !== undefined && value !== null && value !== '') b.value = String(value);\n    if (style) b.style = style;\n    return b;\n  }\n\n  function sectionBlock(mrkdwn) {\n    return { type: 'section', text: { type: 'mrkdwn', text: mrkdwn } };\n  }\n\n  function slotLabels(offeredSlots) {\n    if (!Array.isArray(offeredSlots)) return [];\n    return offeredSlots.map((s) => (s && typeof s === 'object' ? s.label : s)).filter((l) => l);\n  }\n\n  // The first post of a handoff thread.\n  // { waId, reason, stage, offeredSlots: [{ id, label }], history: [{ author, text }], episode } -> { text, blocks }\n  // Customer-originated text is escaped. The number is masked except its last 4 digits.\n  function handoffPost({ waId, reason, stage, offeredSlots, history, episode } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = HANDOFF_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Handoff: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage: ' + escapeForSlack(stage || 'unknown'),\n    ];\n    const slots = slotLabels(offeredSlots);\n    if (slots.length) lines.push('Offered times: ' + slots.map(escapeForSlack).join('; '));\n\n    const recent = Array.isArray(history) ? history.slice(-LIMITS.historyMessages) : [];\n    if (recent.length) {\n      lines.push('', 'Last messages:');\n      for (const m of recent) {\n        const author = AUTHOR_LABELS[m && m.author] || escapeForSlack((m && m.author) || 'Unknown');\n        const body = truncate(escapeForSlack(m && m.text), HISTORY_TEXT_MAX_CHARS);\n        lines.push(author + ':', quote(body));\n      }\n    }\n    lines.push('', 'Reply in this thread to message the customer. Start a reply with // for a note that is not sent.');\n\n    return {\n      text: 'Handoff (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        {\n          type: 'actions',\n          elements: [\n            button('Return to bot', ACTION_IDS.RETURN_TO_BOT, episode, 'primary'),\n            button('Mark as booked', ACTION_IDS.MARK_BOOKED, episode),\n          ],\n        },\n      ],\n    };\n  }\n\n  // The alert posted when a conversation is closed (wrong_person or abusive), with a Reopen button.\n  // { waId, reason, stageBeforeClose } -> { text, blocks }\n  function closeAlertPost({ waId, reason, stageBeforeClose } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = CLOSE_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Conversation closed: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage before closing: ' + escapeForSlack(stageBeforeClose || 'unknown'),\n      '',\n      'Later messages from this customer are posted in this thread and get no reply. Reopen to put the conversation back.',\n    ];\n    return {\n      text: 'Conversation closed (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        { type: 'actions', elements: [button('Reopen', ACTION_IDS.REOPEN)] },\n      ],\n    };\n  }\n\n  // What a customer message looks like in the owner's thread (gate steps 5 and 6). Text is escaped;\n  // a non-text message is shown as \"[customer sent an image]\" and so on.\n  const MESSAGE_TYPE_LABELS = {\n    image: 'an image', audio: 'a voice note', voice: 'a voice note', video: 'a video', document: 'a document',\n    sticker: 'a sticker', reaction: 'a reaction', location: 'a location', contacts: 'a contact card',\n    button: 'a button reply', interactive: 'a button reply',\n  };\n  function customerThreadText(event) {\n    const e = event || {};\n    if (e.kind === 'text') return 'Customer: ' + escapeForSlack(e.text);\n    return 'Customer: [customer sent ' + (MESSAGE_TYPE_LABELS[e.message_type] || 'a message that cannot be shown here') + ']';\n  }\n\n  // Thread notes posted by owner-relay, owner-release and the gate.\n  const NOTES = {\n    back_with_bot: 'This conversation is back with the bot, so that message was not sent.',\n    not_sent_dnc: 'Not sent: the customer has opted out.',\n    not_sent: (reason) => 'Not sent (' + reason + ').',\n    customer_opted_out: 'The customer opted out. Nothing more will be sent to them.',\n    release_refused: (n) => 'Return to bot refused: ' + n + ' owner message' + (n === 1 ? ' is' : 's are') +\n      ' waiting. Send the template or discard them first.',\n    marked_booked: 'Marked as booked.',\n    reopened: (stage) => 'Reopened. Bot resumes at: ' + stage,\n    not_built: (action) => 'The ' + action + ' button is not available yet.',\n    template_sent: 'Template sent. The waiting messages go out when the customer replies.',\n    template_already_sent: 'The template was already sent for these waiting messages.',\n    template_not_sent_dnc: 'Template not sent: the customer has opted out.',\n    template_not_sent: (reason) => 'Template not sent (' + reason + ').',\n    nothing_waiting: 'No owner messages are waiting.',\n    discarded: (n) => 'Discarded ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n    waiting_sent: (n) => 'The customer replied: sent ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n  };\n\n  // Posted in the thread when an owner message is kept as waiting (outside the 24-hour window).\n  // count: how many owner messages are now waiting.\n  function waitingPost({ count } = {}) {\n    const n = Number(count) || 1;\n    const text = 'Not sent yet: the customer last wrote more than 24 hours ago, so WhatsApp only allows the ' +\n      'approved template. ' + n + ' owner message' + (n === 1 ? ' is' : 's are') + ' waiting and will be sent ' +\n      'when the customer replies.';\n    return {\n      text,\n      blocks: [\n        sectionBlock(text),\n        {\n          type: 'actions',\n          elements: [\n            button('Send template', ACTION_IDS.SEND_TEMPLATE, undefined, 'primary'),\n            button('Discard waiting messages', ACTION_IDS.DISCARD_WAITING),\n          ],\n        },\n      ],\n    };\n  }\n\n  module.exports = {\n    customerThreadText,\n    NOTES,\n    waitingPost,\n    ACTION_IDS,\n    toPlain,\n    escapeForSlack,\n    isTeamNote,\n    handoffPost,\n    closeAlertPost,\n  };\n  return module.exports;\n})();\nconst { customerThreadText, NOTES, waitingPost, ACTION_IDS, toPlain, escapeForSlack, isTeamNote, handoffPost, closeAlertPost } = __lib['slack_text'];\n// @end-lib\nconst g = $('gate:check').first().json;\nconst post = { op: 'post', channel: g.conv.slack_channel || $env.SLACK_CHANNEL_ID, text: customerThreadText(g.event) };\nif (g.conv.slack_thread_ts) post.thread_ts = g.conv.slack_thread_ts;\nreturn [{ json: post }];"
+      },
+      "position": [
+        2420,
         -300
       ],
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
     },
     {
       "id": "a7ce6c9c-1cdd-49f2-8e4e-346d0d457ef8",

@@ -1,0 +1,17 @@
+{
+  "token": "x",
+  "team_id": "T0DRYRUN",
+  "api_app_id": "A0DRYRUN",
+  "type": "event_callback",
+  "event_id": "Ev0DRYRUN01",
+  "event_time": 1764601200,
+  "event": {
+    "type": "message",
+    "channel": "CDRYRUN001",
+    "user": "UOWNER0001",
+    "text": "Hi, this is Sam from the team. Thursday works, see you then.",
+    "ts": "1764601200.000100",
+    "thread_ts": "1732480000.000001",
+    "channel_type": "channel"
+  }
+}

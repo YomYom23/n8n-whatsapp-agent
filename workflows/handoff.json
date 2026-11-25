@@ -1,0 +1,607 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "handoff:notice",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "conversations: get": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "history: get",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "conversations: update": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "return: handoff",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "handoff:notice": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "send: notice",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "handoff:post": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "slack: handoff post",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "handoff:row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "conversations: update",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "history: get": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "handoff:post",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "send: notice": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "conversations: get",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "slack: handoff post": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "handoff:row",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "1Qkj1jyQqzleF9mA",
+  "name": "handoff",
+  "nodes": [
+    {
+      "id": "63bdcc47-fbdb-4242-b229-036e4b0d4310",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "fcf3c6a2-11fd-4535-bcb0-531b6613713c",
+      "name": "conversations: get",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "conversations",
+          "mode": "list",
+          "value": "__table:conversations__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $('When Executed by Another Workflow').first().json.wa_id }}"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row"
+      },
+      "position": [
+        660,
+        0
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "41c4d8f9-2cae-41b7-a160-54c972aaf484",
+      "name": "conversations: update",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "stage",
+              "id": "stage",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "stage_version",
+              "id": "stage_version",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "stage_before_close",
+              "id": "stage_before_close",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "closed_reason",
+              "id": "closed_reason",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "close_thread_ts",
+              "id": "close_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "service",
+              "id": "service",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "address",
+              "id": "address",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "zip",
+              "id": "zip",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "offered_slots",
+              "id": "offered_slots",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "last_offered_day",
+              "id": "last_offered_day",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "reoffer_used",
+              "id": "reoffer_used",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "boolean"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slot_taken_count",
+              "id": "slot_taken_count",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "unclear_in_a_row",
+              "id": "unclear_in_a_row",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "zip_asks",
+              "id": "zip_asks",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "human_owned",
+              "id": "human_owned",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "boolean"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "handoff_reason",
+              "id": "handoff_reason",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "handoff_episode",
+              "id": "handoff_episode",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_channel",
+              "id": "slack_channel",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "last_customer_at",
+              "id": "last_customer_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "last_bot_question",
+              "id": "last_bot_question",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "booked_event_id",
+              "id": "booked_event_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "booked_label",
+              "id": "booked_label",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "hubspot_contact_id",
+              "id": "hubspot_contact_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "hubspot_deal_id",
+              "id": "hubspot_deal_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "deal_stage",
+              "id": "deal_stage",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {}
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "conversations",
+          "mode": "list",
+          "value": "__table:conversations__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $json.wa_id }}"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        1760,
+        0
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "b811f1cf-b251-4106-a725-aabebb5c3a13",
+      "name": "handoff:notice",
+      "parameters": {
+        "jsCode": "// @lib texts, slack_text\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['texts'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every fixed customer line (design sections 6, 8, 9, 10, 11; file 18). Each entry is a function\n  // returning the text, so the build script and callers treat them all alike.\n\n  const NOT_IN_FACTS_LINE = \"I'll pass that to the team\";\n\n  const TEXTS = {\n    // Stage questions (section 9).\n    stage_new: (services) =>\n      'Which clean would you like?' +\n      (Array.isArray(services) && services.length > 0 ? ' We offer ' + joinList(services) + '.' : ''),\n    stage_address: () => \"What's the address for the clean, including the ZIP code?\",\n    stage_address_again: () =>\n      \"Sorry, I couldn't find a ZIP code in that. What's the address for the clean, including the ZIP code?\",\n    stage_offer: (labels) => numbered('Here are the next times we have open:', labels),\n    stage_offer_later: (labels) => numbered('Here are some later times.', labels),\n    stage_booked: () => '',\n    booked_confirmation: (label) => \"You're booked for \" + label + '. Thanks, see you then!',\n    book_prompt: () => 'Would you like to book a clean?',\n\n    // Gate and sending (sections 6, 10).\n    opt_out_confirmation: () => \"You're opted out and won't get any more messages from us. Reply START to turn them back on.\",\n    start_reply: () => 'Messages are back on. Reply STOP at any time to opt out.',\n    handoff_notice: () => \"Thanks, I'm passing this to a member of our team, who'll reply here\",\n    unsupported_kind: () => 'I can only read text messages here',\n\n    // Routes (section 8).\n    out_of_area: (zip) =>\n      zip\n        ? \"Sorry, we don't clean in ZIP code \" + zip + ' yet. If you have another address, send it and I will check.'\n        : \"Sorry, we don't clean in that area yet. If you have another address, send it and I will check.\",\n    prompt_injection: () => 'I can help with questions about our cleaning and with bookings',\n    off_topic: () => \"I'm the assistant for a cleaning company, so I can only help with our cleaning and bookings.\",\n    repeat: (lastQuestion) =>\n      lastQuestion ? 'Sure, here it is again. ' + lastQuestion : \"There's nothing more I need from you right now.\",\n    later: () => 'No problem. Message me whenever it suits you.',\n    not_in_facts: () => NOT_IN_FACTS_LINE,\n    draft_fallback: () => \"Sorry, I can't answer that one properly. \" + NOT_IN_FACTS_LINE,\n    wrong_person_apology: () => \"Sorry about that, we have the wrong number. We won't message you again.\",\n    facts_unavailable: () => \"Sorry, I can't look that up right now. \" + NOT_IN_FACTS_LINE,\n\n    // Owner's template button (section 11). Sent outside the 24-hour window.\n    template: () => 'We have an update on your enquiry. Reply here to see it.',\n  };\n\n  function joinList(items) {\n    if (items.length <= 1) return items.join('');\n    return items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];\n  }\n\n  function numbered(intro, labels) {\n    const list = (labels || []).map((l, i) => i + 1 + ') ' + l).join('\\n');\n    return intro + '\\n' + list + '\\nReply with the number of the one that works best, or \"none\" if none of these suit you.';\n  }\n\n  // The question a stage asks, for stage logic and for 'repeat'. vars: { services, labels, later }.\n  function stageQuestion(stage, vars) {\n    const v = vars || {};\n    switch (stage) {\n      case 'new':\n        return TEXTS.stage_new(v.services);\n      case 'address':\n        return TEXTS.stage_address();\n      case 'offer':\n        return v.later ? TEXTS.stage_offer_later(v.labels) : TEXTS.stage_offer(v.labels);\n      default:\n        return '';\n    }\n  }\n\n  function bookableNames(services) {\n    return (Array.isArray(services) ? services : [])\n      .filter((r) => r.bookable === true || String(r.bookable || '').trim().toLowerCase() === 'yes')\n      .map((r) => String(r.service || '').trim().toLowerCase())\n      .filter(Boolean);\n  }\n\n  // Appends the follow-up question named by stages.next's 'then' to a reply (section 8: the stage\n  // question is added after a writer draft or fixed line). Returns { text, question }, where question\n  // is the new last_bot_question (null: unchanged).\n  function withThen(text, then, lastBotQuestion) {\n    let follow = '';\n    let question = null;\n    if (then === 'ask_book') {\n      follow = TEXTS.book_prompt();\n      question = follow;\n    } else if (then === 'last_question' && lastBotQuestion) {\n      follow = lastBotQuestion;\n    }\n    const parts = [text, follow].map((s) => String(s || '').trim()).filter(Boolean);\n    return { text: parts.join('\\n\\n'), question };\n  }\n\n  // The customer text for a stages.next reply code that needs no other workflow.\n  //   ctx: { services: prices rows, zip, lastBotQuestion, then }\n  // Returns { text, kind, question } (kind 'normal' or 'opt_out_confirmation'; question is the new\n  // last_bot_question or null for unchanged; text '' means send nothing), or null for the codes other\n  // workflows produce: writer, offer_times, later_times, booked_confirmation.\n  function fixedReply(reply, ctx) {\n    const c = ctx || {};\n    const done = (text, question, kind) => ({ text, kind: kind || 'normal', question: question || null });\n    const thenDone = (text) => {\n      const w = withThen(text, c.then, c.lastBotQuestion);\n      return done(w.text, w.question);\n    };\n    if (typeof reply !== 'string') throw new Error('fixedReply: reply must be a string');\n    if (reply.startsWith('handoff:')) return done(TEXTS.handoff_notice());\n    if (reply === 'close:wrong_person') return done(TEXTS.wrong_person_apology());\n    if (reply.startsWith('close:')) return done('');\n    switch (reply) {\n      case 'none':\n        return done('');\n      case 'ask_service': {\n        const q = TEXTS.stage_new(bookableNames(c.services));\n        return done(q, q);\n      }\n      case 'ask_address':\n        return done(TEXTS.stage_address(), TEXTS.stage_address());\n      case 'ask_address_again':\n        return done(TEXTS.stage_address_again(), TEXTS.stage_address());\n      case 'out_of_area':\n        return done(TEXTS.out_of_area(c.zip));\n      case 'ask_book':\n        return done(TEXTS.book_prompt(), TEXTS.book_prompt());\n      case 'fixed:opt_out':\n        return done(TEXTS.opt_out_confirmation(), null, 'opt_out_confirmation');\n      case 'fixed:prompt_injection':\n        return done(TEXTS.prompt_injection());\n      case 'fixed:off_topic':\n        return thenDone(TEXTS.off_topic());\n      case 'fixed:later':\n        return done(TEXTS.later());\n      case 'fixed:repeat':\n        return done(TEXTS.repeat(c.lastBotQuestion));\n      case 'fixed:unclear':\n        // \"Ask the stage question again\" (section 8): the follow-up question is the whole reply.\n        return thenDone('');\n      case 'writer':\n      case 'offer_times':\n      case 'later_times':\n      case 'booked_confirmation':\n        return null;\n      default:\n        throw new Error('fixedReply: unknown reply code ' + reply);\n    }\n  }\n\n  module.exports = { TEXTS, stageQuestion, withThen, fixedReply, NOT_IN_FACTS_LINE };\n  return module.exports;\n})();\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['mask'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Masks a WhatsApp number for Slack posts and the Sheets log (design sections 11 and 15).\n\n  const MASK_CHAR = '*';\n  const KEEP_DIGITS = 4;\n\n  // Keeps only the last 4 digits. Non-digits (such as a leading +) are dropped first.\n  // A number with 4 digits or fewer is masked completely, so nothing leaks from a short value.\n  function maskNumber(waId) {\n    if (waId === null || waId === undefined) return '';\n    const digits = String(waId).replace(/\\D/g, '');\n    if (digits.length <= KEEP_DIGITS) return MASK_CHAR.repeat(digits.length);\n    return MASK_CHAR.repeat(digits.length - KEEP_DIGITS) + digits.slice(-KEEP_DIGITS);\n  }\n\n  module.exports = { maskNumber };\n  return module.exports;\n})();\n__lib['slack_text'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slack text helpers (design section 11): owner mrkdwn to plain text, escaping customer text,\n  // the // team note rule, and the Block Kit posts for handoff and close alerts.\n\n  const { LIMITS } = require('./config');\n  const { maskNumber } = require('./mask');\n\n  // Stable action IDs. The interactivity workflow routes on these, so they must not change.\n  const ACTION_IDS = {\n    RETURN_TO_BOT: 'return_to_bot',\n    MARK_BOOKED: 'mark_booked',\n    REOPEN: 'reopen',\n    SEND_TEMPLATE: 'send_template',\n    DISCARD_WAITING: 'discard_waiting',\n  };\n\n  // Not in config.js: each quoted history message is cut to this many characters (a Slack section holds 3000).\n  const HISTORY_TEXT_MAX_CHARS = 300;\n\n  const HANDOFF_REASON_LABELS = {\n    wants_human: 'Customer asked for a person',\n    unclear: 'Bot could not understand the customer',\n    jev_unavailable: 'AI service unavailable',\n    change_booking: 'Customer wants to change a booking',\n    slots_exhausted: 'No times left to offer',\n    booking_key_deleted: 'Booking calendar entry was deleted',\n    unknown_stage: 'Conversation in an unknown stage',\n    zip_not_found: 'ZIP code not found after asking',\n  };\n\n  const CLOSE_REASON_LABELS = {\n    wrong_person: 'Wrong person',\n    abusive: 'Abusive messages',\n  };\n\n  const AUTHOR_LABELS = { customer: 'Customer', bot: 'Bot', owner: 'Owner', system: 'System' };\n\n  // Escapes customer text so it cannot trigger mentions (<!channel>) or disguised links.\n  function escapeForSlack(text) {\n    if (text === null || text === undefined) return '';\n    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  }\n\n  // Turns one <...> token of Slack mrkdwn into plain text.\n  function plainToken(inner) {\n    const bar = inner.indexOf('|');\n    const target = bar === -1 ? inner : inner.slice(0, bar);\n    const label = bar === -1 ? '' : inner.slice(bar + 1);\n    if (target.startsWith('@')) return ''; // user mention: nothing sensible for a customer\n    if (target.startsWith('#')) return label ? '#' + label : '';\n    if (target.startsWith('!')) return label && !/^(here|channel|everyone)$/.test(target.slice(1)) ? label : '';\n    if (/^(mailto|tel):/i.test(target)) return label || target.replace(/^(mailto|tel):/i, '');\n    if (!label || label === target) return target;\n    return label + ' (' + target + ')';\n  }\n\n  // Slack mrkdwn from the owner to plain text for the customer.\n  // Links, mentions, special mentions and the three HTML entities (&amp; last, so &amp;lt; stays &lt;).\n  function toPlain(text) {\n    if (text === null || text === undefined) return '';\n    return String(text)\n      .replace(/<([^<>]+)>/g, (m, inner) => plainToken(inner))\n      .replace(/&lt;/g, '<')\n      .replace(/&gt;/g, '>')\n      .replace(/&amp;/g, '&')\n      .replace(/[ \\t]{2,}/g, ' ')\n      .replace(/[ \\t]+\\n/g, '\\n')\n      .trim();\n  }\n\n  // A thread message starting with // is a note for the team and is never sent to the customer.\n  function isTeamNote(text) {\n    if (text === null || text === undefined) return false;\n    return String(text).trim().startsWith('//');\n  }\n\n  function truncate(text, max) {\n    return text.length > max ? text.slice(0, max - 3) + '...' : text;\n  }\n\n  function quote(text) {\n    return text\n      .split('\\n')\n      .map((line) => '> ' + line)\n      .join('\\n');\n  }\n\n  function button(label, actionId, value, style) {\n    const b = { type: 'button', text: { type: 'plain_text', text: label }, action_id: actionId };\n    if (value !== undefined && value !== null && value !== '') b.value = String(value);\n    if (style) b.style = style;\n    return b;\n  }\n\n  function sectionBlock(mrkdwn) {\n    return { type: 'section', text: { type: 'mrkdwn', text: mrkdwn } };\n  }\n\n  function slotLabels(offeredSlots) {\n    if (!Array.isArray(offeredSlots)) return [];\n    return offeredSlots.map((s) => (s && typeof s === 'object' ? s.label : s)).filter((l) => l);\n  }\n\n  // The first post of a handoff thread.\n  // { waId, reason, stage, offeredSlots: [{ id, label }], history: [{ author, text }], episode } -> { text, blocks }\n  // Customer-originated text is escaped. The number is masked except its last 4 digits.\n  function handoffPost({ waId, reason, stage, offeredSlots, history, episode } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = HANDOFF_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Handoff: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage: ' + escapeForSlack(stage || 'unknown'),\n    ];\n    const slots = slotLabels(offeredSlots);\n    if (slots.length) lines.push('Offered times: ' + slots.map(escapeForSlack).join('; '));\n\n    const recent = Array.isArray(history) ? history.slice(-LIMITS.historyMessages) : [];\n    if (recent.length) {\n      lines.push('', 'Last messages:');\n      for (const m of recent) {\n        const author = AUTHOR_LABELS[m && m.author] || escapeForSlack((m && m.author) || 'Unknown');\n        const body = truncate(escapeForSlack(m && m.text), HISTORY_TEXT_MAX_CHARS);\n        lines.push(author + ':', quote(body));\n      }\n    }\n    lines.push('', 'Reply in this thread to message the customer. Start a reply with // for a note that is not sent.');\n\n    return {\n      text: 'Handoff (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        {\n          type: 'actions',\n          elements: [\n            button('Return to bot', ACTION_IDS.RETURN_TO_BOT, episode, 'primary'),\n            button('Mark as booked', ACTION_IDS.MARK_BOOKED, episode),\n          ],\n        },\n      ],\n    };\n  }\n\n  // The alert posted when a conversation is closed (wrong_person or abusive), with a Reopen button.\n  // { waId, reason, stageBeforeClose } -> { text, blocks }\n  function closeAlertPost({ waId, reason, stageBeforeClose } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = CLOSE_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Conversation closed: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage before closing: ' + escapeForSlack(stageBeforeClose || 'unknown'),\n      '',\n      'Later messages from this customer are posted in this thread and get no reply. Reopen to put the conversation back.',\n    ];\n    return {\n      text: 'Conversation closed (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        { type: 'actions', elements: [button('Reopen', ACTION_IDS.REOPEN)] },\n      ],\n    };\n  }\n\n  // What a customer message looks like in the owner's thread (gate steps 5 and 6). Text is escaped;\n  // a non-text message is shown as \"[customer sent an image]\" and so on.\n  const MESSAGE_TYPE_LABELS = {\n    image: 'an image', audio: 'a voice note', voice: 'a voice note', video: 'a video', document: 'a document',\n    sticker: 'a sticker', reaction: 'a reaction', location: 'a location', contacts: 'a contact card',\n    button: 'a button reply', interactive: 'a button reply',\n  };\n  function customerThreadText(event) {\n    const e = event || {};\n    if (e.kind === 'text') return 'Customer: ' + escapeForSlack(e.text);\n    return 'Customer: [customer sent ' + (MESSAGE_TYPE_LABELS[e.message_type] || 'a message that cannot be shown here') + ']';\n  }\n\n  // Thread notes posted by owner-relay, owner-release and the gate.\n  const NOTES = {\n    back_with_bot: 'This conversation is back with the bot, so that message was not sent.',\n    not_sent_dnc: 'Not sent: the customer has opted out.',\n    not_sent: (reason) => 'Not sent (' + reason + ').',\n    customer_opted_out: 'The customer opted out. Nothing more will be sent to them.',\n    release_refused: (n) => 'Return to bot refused: ' + n + ' owner message' + (n === 1 ? ' is' : 's are') +\n      ' waiting. Send the template or discard them first.',\n    marked_booked: 'Marked as booked.',\n    reopened: (stage) => 'Reopened. Bot resumes at: ' + stage,\n    not_built: (action) => 'The ' + action + ' button is not available yet.',\n    template_sent: 'Template sent. The waiting messages go out when the customer replies.',\n    template_already_sent: 'The template was already sent for these waiting messages.',\n    template_not_sent_dnc: 'Template not sent: the customer has opted out.',\n    template_not_sent: (reason) => 'Template not sent (' + reason + ').',\n    nothing_waiting: 'No owner messages are waiting.',\n    discarded: (n) => 'Discarded ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n    waiting_sent: (n) => 'The customer replied: sent ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n  };\n\n  // Posted in the thread when an owner message is kept as waiting (outside the 24-hour window).\n  // count: how many owner messages are now waiting.\n  function waitingPost({ count } = {}) {\n    const n = Number(count) || 1;\n    const text = 'Not sent yet: the customer last wrote more than 24 hours ago, so WhatsApp only allows the ' +\n      'approved template. ' + n + ' owner message' + (n === 1 ? ' is' : 's are') + ' waiting and will be sent ' +\n      'when the customer replies.';\n    return {\n      text,\n      blocks: [\n        sectionBlock(text),\n        {\n          type: 'actions',\n          elements: [\n            button('Send template', ACTION_IDS.SEND_TEMPLATE, undefined, 'primary'),\n            button('Discard waiting messages', ACTION_IDS.DISCARD_WAITING),\n          ],\n        },\n      ],\n    };\n  }\n\n  module.exports = {\n    customerThreadText,\n    NOTES,\n    waitingPost,\n    ACTION_IDS,\n    toPlain,\n    escapeForSlack,\n    isTeamNote,\n    handoffPost,\n    closeAlertPost,\n  };\n  return module.exports;\n})();\nconst { TEXTS, stageQuestion, withThen, fixedReply, NOT_IN_FACTS_LINE } = __lib['texts'];\nconst { customerThreadText, NOTES, waitingPost, ACTION_IDS, toPlain, escapeForSlack, isTeamNote, handoffPost, closeAlertPost } = __lib['slack_text'];\n// @end-lib\nconst i = $('When Executed by Another Workflow').first().json;\nreturn [{ json: { wa_id: i.wa_id, text: TEXTS.handoff_notice(), kind: 'normal', sender_kind: 'bot', added_this_run: false,\n  now: i.now, received_at: i.received_at || null, route: i.route || '', stage: i.stage || '', classifier: i.classifier || '',\n  facts_version: i.facts_version || '', draft: '', problems: '', input_tokens: 0, output_tokens: 0 } }];"
+      },
+      "position": [
+        220,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "730ea683-90fd-497e-8983-bbc61fe04104",
+      "name": "handoff:post",
+      "parameters": {
+        "jsCode": "// @lib slack_text\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['mask'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Masks a WhatsApp number for Slack posts and the Sheets log (design sections 11 and 15).\n\n  const MASK_CHAR = '*';\n  const KEEP_DIGITS = 4;\n\n  // Keeps only the last 4 digits. Non-digits (such as a leading +) are dropped first.\n  // A number with 4 digits or fewer is masked completely, so nothing leaks from a short value.\n  function maskNumber(waId) {\n    if (waId === null || waId === undefined) return '';\n    const digits = String(waId).replace(/\\D/g, '');\n    if (digits.length <= KEEP_DIGITS) return MASK_CHAR.repeat(digits.length);\n    return MASK_CHAR.repeat(digits.length - KEEP_DIGITS) + digits.slice(-KEEP_DIGITS);\n  }\n\n  module.exports = { maskNumber };\n  return module.exports;\n})();\n__lib['slack_text'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slack text helpers (design section 11): owner mrkdwn to plain text, escaping customer text,\n  // the // team note rule, and the Block Kit posts for handoff and close alerts.\n\n  const { LIMITS } = require('./config');\n  const { maskNumber } = require('./mask');\n\n  // Stable action IDs. The interactivity workflow routes on these, so they must not change.\n  const ACTION_IDS = {\n    RETURN_TO_BOT: 'return_to_bot',\n    MARK_BOOKED: 'mark_booked',\n    REOPEN: 'reopen',\n    SEND_TEMPLATE: 'send_template',\n    DISCARD_WAITING: 'discard_waiting',\n  };\n\n  // Not in config.js: each quoted history message is cut to this many characters (a Slack section holds 3000).\n  const HISTORY_TEXT_MAX_CHARS = 300;\n\n  const HANDOFF_REASON_LABELS = {\n    wants_human: 'Customer asked for a person',\n    unclear: 'Bot could not understand the customer',\n    jev_unavailable: 'AI service unavailable',\n    change_booking: 'Customer wants to change a booking',\n    slots_exhausted: 'No times left to offer',\n    booking_key_deleted: 'Booking calendar entry was deleted',\n    unknown_stage: 'Conversation in an unknown stage',\n    zip_not_found: 'ZIP code not found after asking',\n  };\n\n  const CLOSE_REASON_LABELS = {\n    wrong_person: 'Wrong person',\n    abusive: 'Abusive messages',\n  };\n\n  const AUTHOR_LABELS = { customer: 'Customer', bot: 'Bot', owner: 'Owner', system: 'System' };\n\n  // Escapes customer text so it cannot trigger mentions (<!channel>) or disguised links.\n  function escapeForSlack(text) {\n    if (text === null || text === undefined) return '';\n    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  }\n\n  // Turns one <...> token of Slack mrkdwn into plain text.\n  function plainToken(inner) {\n    const bar = inner.indexOf('|');\n    const target = bar === -1 ? inner : inner.slice(0, bar);\n    const label = bar === -1 ? '' : inner.slice(bar + 1);\n    if (target.startsWith('@')) return ''; // user mention: nothing sensible for a customer\n    if (target.startsWith('#')) return label ? '#' + label : '';\n    if (target.startsWith('!')) return label && !/^(here|channel|everyone)$/.test(target.slice(1)) ? label : '';\n    if (/^(mailto|tel):/i.test(target)) return label || target.replace(/^(mailto|tel):/i, '');\n    if (!label || label === target) return target;\n    return label + ' (' + target + ')';\n  }\n\n  // Slack mrkdwn from the owner to plain text for the customer.\n  // Links, mentions, special mentions and the three HTML entities (&amp; last, so &amp;lt; stays &lt;).\n  function toPlain(text) {\n    if (text === null || text === undefined) return '';\n    return String(text)\n      .replace(/<([^<>]+)>/g, (m, inner) => plainToken(inner))\n      .replace(/&lt;/g, '<')\n      .replace(/&gt;/g, '>')\n      .replace(/&amp;/g, '&')\n      .replace(/[ \\t]{2,}/g, ' ')\n      .replace(/[ \\t]+\\n/g, '\\n')\n      .trim();\n  }\n\n  // A thread message starting with // is a note for the team and is never sent to the customer.\n  function isTeamNote(text) {\n    if (text === null || text === undefined) return false;\n    return String(text).trim().startsWith('//');\n  }\n\n  function truncate(text, max) {\n    return text.length > max ? text.slice(0, max - 3) + '...' : text;\n  }\n\n  function quote(text) {\n    return text\n      .split('\\n')\n      .map((line) => '> ' + line)\n      .join('\\n');\n  }\n\n  function button(label, actionId, value, style) {\n    const b = { type: 'button', text: { type: 'plain_text', text: label }, action_id: actionId };\n    if (value !== undefined && value !== null && value !== '') b.value = String(value);\n    if (style) b.style = style;\n    return b;\n  }\n\n  function sectionBlock(mrkdwn) {\n    return { type: 'section', text: { type: 'mrkdwn', text: mrkdwn } };\n  }\n\n  function slotLabels(offeredSlots) {\n    if (!Array.isArray(offeredSlots)) return [];\n    return offeredSlots.map((s) => (s && typeof s === 'object' ? s.label : s)).filter((l) => l);\n  }\n\n  // The first post of a handoff thread.\n  // { waId, reason, stage, offeredSlots: [{ id, label }], history: [{ author, text }], episode } -> { text, blocks }\n  // Customer-originated text is escaped. The number is masked except its last 4 digits.\n  function handoffPost({ waId, reason, stage, offeredSlots, history, episode } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = HANDOFF_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Handoff: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage: ' + escapeForSlack(stage || 'unknown'),\n    ];\n    const slots = slotLabels(offeredSlots);\n    if (slots.length) lines.push('Offered times: ' + slots.map(escapeForSlack).join('; '));\n\n    const recent = Array.isArray(history) ? history.slice(-LIMITS.historyMessages) : [];\n    if (recent.length) {\n      lines.push('', 'Last messages:');\n      for (const m of recent) {\n        const author = AUTHOR_LABELS[m && m.author] || escapeForSlack((m && m.author) || 'Unknown');\n        const body = truncate(escapeForSlack(m && m.text), HISTORY_TEXT_MAX_CHARS);\n        lines.push(author + ':', quote(body));\n      }\n    }\n    lines.push('', 'Reply in this thread to message the customer. Start a reply with // for a note that is not sent.');\n\n    return {\n      text: 'Handoff (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        {\n          type: 'actions',\n          elements: [\n            button('Return to bot', ACTION_IDS.RETURN_TO_BOT, episode, 'primary'),\n            button('Mark as booked', ACTION_IDS.MARK_BOOKED, episode),\n          ],\n        },\n      ],\n    };\n  }\n\n  // The alert posted when a conversation is closed (wrong_person or abusive), with a Reopen button.\n  // { waId, reason, stageBeforeClose } -> { text, blocks }\n  function closeAlertPost({ waId, reason, stageBeforeClose } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = CLOSE_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Conversation closed: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage before closing: ' + escapeForSlack(stageBeforeClose || 'unknown'),\n      '',\n      'Later messages from this customer are posted in this thread and get no reply. Reopen to put the conversation back.',\n    ];\n    return {\n      text: 'Conversation closed (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        { type: 'actions', elements: [button('Reopen', ACTION_IDS.REOPEN)] },\n      ],\n    };\n  }\n\n  // What a customer message looks like in the owner's thread (gate steps 5 and 6). Text is escaped;\n  // a non-text message is shown as \"[customer sent an image]\" and so on.\n  const MESSAGE_TYPE_LABELS = {\n    image: 'an image', audio: 'a voice note', voice: 'a voice note', video: 'a video', document: 'a document',\n    sticker: 'a sticker', reaction: 'a reaction', location: 'a location', contacts: 'a contact card',\n    button: 'a button reply', interactive: 'a button reply',\n  };\n  function customerThreadText(event) {\n    const e = event || {};\n    if (e.kind === 'text') return 'Customer: ' + escapeForSlack(e.text);\n    return 'Customer: [customer sent ' + (MESSAGE_TYPE_LABELS[e.message_type] || 'a message that cannot be shown here') + ']';\n  }\n\n  // Thread notes posted by owner-relay, owner-release and the gate.\n  const NOTES = {\n    back_with_bot: 'This conversation is back with the bot, so that message was not sent.',\n    not_sent_dnc: 'Not sent: the customer has opted out.',\n    not_sent: (reason) => 'Not sent (' + reason + ').',\n    customer_opted_out: 'The customer opted out. Nothing more will be sent to them.',\n    release_refused: (n) => 'Return to bot refused: ' + n + ' owner message' + (n === 1 ? ' is' : 's are') +\n      ' waiting. Send the template or discard them first.',\n    marked_booked: 'Marked as booked.',\n    reopened: (stage) => 'Reopened. Bot resumes at: ' + stage,\n    not_built: (action) => 'The ' + action + ' button is not available yet.',\n    template_sent: 'Template sent. The waiting messages go out when the customer replies.',\n    template_already_sent: 'The template was already sent for these waiting messages.',\n    template_not_sent_dnc: 'Template not sent: the customer has opted out.',\n    template_not_sent: (reason) => 'Template not sent (' + reason + ').',\n    nothing_waiting: 'No owner messages are waiting.',\n    discarded: (n) => 'Discarded ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n    waiting_sent: (n) => 'The customer replied: sent ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n  };\n\n  // Posted in the thread when an owner message is kept as waiting (outside the 24-hour window).\n  // count: how many owner messages are now waiting.\n  function waitingPost({ count } = {}) {\n    const n = Number(count) || 1;\n    const text = 'Not sent yet: the customer last wrote more than 24 hours ago, so WhatsApp only allows the ' +\n      'approved template. ' + n + ' owner message' + (n === 1 ? ' is' : 's are') + ' waiting and will be sent ' +\n      'when the customer replies.';\n    return {\n      text,\n      blocks: [\n        sectionBlock(text),\n        {\n          type: 'actions',\n          elements: [\n            button('Send template', ACTION_IDS.SEND_TEMPLATE, undefined, 'primary'),\n            button('Discard waiting messages', ACTION_IDS.DISCARD_WAITING),\n          ],\n        },\n      ],\n    };\n  }\n\n  module.exports = {\n    customerThreadText,\n    NOTES,\n    waitingPost,\n    ACTION_IDS,\n    toPlain,\n    escapeForSlack,\n    isTeamNote,\n    handoffPost,\n    closeAlertPost,\n  };\n  return module.exports;\n})();\nconst { customerThreadText, NOTES, waitingPost, ACTION_IDS, toPlain, escapeForSlack, isTeamNote, handoffPost, closeAlertPost } = __lib['slack_text'];\n// @end-lib\nconst i = $('When Executed by Another Workflow').first().json;\nconst conv = $('conversations: get').first().json;\nconst rows = $('history: get').all().map((x) => x.json)\n  .filter((r) => r.direction === 'in' || r.direction === 'out')\n  .sort((a, b) => Number(a.id) - Number(b.id));\nconst history = rows.map((r) => ({ author: r.author, text: r.text }));\n// The customer message that caused the handoff is logged after this run, so it is added here, before the notice.\nif (i.customer_text) {\n  const cust = { author: 'customer', text: i.customer_text };\n  const last = history[history.length - 1];\n  if (last && last.author === 'bot') history.splice(history.length - 1, 0, cust); else history.push(cust);\n}\nlet offeredSlots = [];\ntry { offeredSlots = JSON.parse(conv.offered_slots || '[]'); } catch (e) {}\nconst episode = (Number(conv.handoff_episode) || 0) + 1;\nconst post = handoffPost({ waId: i.wa_id, reason: i.reason, stage: conv.stage || i.stage, offeredSlots, history, episode });\nreturn [{ json: { op: 'post', channel: $env.SLACK_CHANNEL_ID, text: post.text, blocks: post.blocks, episode } }];"
+      },
+      "position": [
+        1100,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "2b24ec9c-c9f6-4cdd-8ff6-3e26e0447fe9",
+      "name": "handoff:row",
+      "parameters": {
+        "jsCode": "const i = $('When Executed by Another Workflow').first().json;\nconst p = $('handoff:post').first().json;\nconst r = $input.first().json;\nreturn [{ json: { wa_id: i.wa_id, human_owned: true, handoff_reason: i.reason, handoff_episode: p.episode,\n  slack_channel: p.channel, slack_thread_ts: r.ok ? r.ts : '' } }];"
+      },
+      "position": [
+        1540,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "d5a8bfb9-7b67-4717-9be7-f3a4259a8810",
+      "name": "history: get",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "message_log",
+          "mode": "list",
+          "value": "__table:message_log__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $('When Executed by Another Workflow').first().json.wa_id }}"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row",
+        "returnAll": true
+      },
+      "position": [
+        880,
+        0
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "018172b3-4a78-4bc5-9e45-c3fa1c8b9c4c",
+      "name": "return: handoff",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "kstud8r1",
+              "name": "ok",
+              "type": "boolean",
+              "value": "={{ true }}"
+            },
+            {
+              "id": "q47tao39",
+              "name": "slack_thread_ts",
+              "type": "string",
+              "value": "={{ $('handoff:row').first().json.slack_thread_ts }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "mode": "manual",
+        "options": {}
+      },
+      "position": [
+        1980,
+        0
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "id": "6daace74-e7be-4afc-ab24-4d59a3da9f23",
+      "name": "send: notice",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "send",
+          "mode": "list",
+          "value": "9l8u4sOy6VohX6vi"
+        }
+      },
+      "position": [
+        440,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "4b81c49f-f225-4e0d-8be6-56f5a7879350",
+      "name": "slack: handoff post",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "slack-adapter",
+          "mode": "list",
+          "value": "1y7I33XeHXVkDq6P"
+        }
+      },
+      "position": [
+        1320,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,527 @@
+{
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "clock:now",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "clock:now": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "slack:verify",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "guard:sig_slack": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sig:log-input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "url check?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "has events?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "ingress:rows",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "respond: 200 (no events)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: insert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: 200",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "ingress:rows": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: insert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "log: sig_rejected": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: 401",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "sig:log-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "log: sig_rejected",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "slack:verify": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "guard:sig_slack",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "url check?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: challenge",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "has events?",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "C1EE9C8UWk8syXHl",
+  "name": "ingress-slack-events",
+  "nodes": [
+    {
+      "id": "9e8e609e-98cc-464f-985e-84b93ff4a05d",
+      "name": "Webhook",
+      "parameters": {
+        "httpMethod": "POST",
+        "options": {
+          "rawBody": true
+        },
+        "path": "ingress-slack-events",
+        "responseMode": "responseNode"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "5a64b38f-ee3f-4ad9-be09-0406bbf22cc5"
+    },
+    {
+      "id": "c95727d9-a8f4-42e3-82e8-c8c123947fec",
+      "name": "clock:now",
+      "parameters": {
+        "jsCode": "return [{ json: { now: new Date().toISOString() } }];"
+      },
+      "position": [
+        220,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "7ba6508f-a279-46fd-8c04-335b93c6fe0a",
+      "name": "guard:sig_slack",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "3k6y3axb",
+              "leftValue": "={{ !$json.sigOk }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        660,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "8b5ee89e-8180-4a93-b9de-ac8e0aaec8d1",
+      "name": "has events?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "eon55g1j",
+              "leftValue": "={{ $json.events.length > 0 }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        1100,
+        100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "082b3a6f-06b4-4ea7-b4fe-800fc57dbb49",
+      "name": "inbox: insert",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "external_id",
+              "id": "external_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "received_at",
+              "id": "received_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payload",
+              "id": "payload",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {}
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "operation": "insert",
+        "resource": "row"
+      },
+      "position": [
+        1540,
+        100
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "6692c787-ba52-468a-acba-ab8456654999",
+      "name": "ingress:rows",
+      "parameters": {
+        "jsCode": "const v = $input.first().json;\nreturn v.events.map((e) => ({ json: { external_id: e.external_id, source: e.source, kind: e.kind,\n  wa_id: e.wa_id || '', slack_thread_ts: e.slack_thread_ts || '', received_at: v.now, status: 'received', execution_id: '',\n  payload: JSON.stringify(e) } }));"
+      },
+      "position": [
+        1320,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "61394064-834c-4cac-90af-6a2ce20c5917",
+      "name": "log: sig_rejected",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "log",
+          "mode": "list",
+          "value": "MmzCFtBICmiFgEDP"
+        }
+      },
+      "position": [
+        1100,
+        -200
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "executeOnce": true,
+      "id": "f72fe44a-9675-4a44-953d-c27d82020223",
+      "name": "respond: 200",
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        1760,
+        100
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "4683ce09-0cb2-49e0-a761-19372f71d409",
+      "name": "respond: 200 (no events)",
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        1320,
+        300
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "b1980d40-d7f2-46b7-ba8c-ea58ad6eb658",
+      "name": "respond: 401",
+      "parameters": {
+        "options": {
+          "responseCode": 401
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        1320,
+        -200
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "b2706ee9-04b2-4d9a-ab2b-7b1f0c46eea0",
+      "name": "respond: challenge",
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "text",
+        "responseBody": "={{ $json.challenge }}"
+      },
+      "position": [
+        1100,
+        -50
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "5cd0f707-6d18-4cb9-9b47-a87a0559fb6a",
+      "name": "sig:log-input",
+      "parameters": {
+        "jsCode": "return [{ json: { now: $json.now, direction: 'event', author: 'system', kind: 'sig_rejected', text: 'slack' } }];"
+      },
+      "position": [
+        880,
+        -200
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "414f7158-e58c-4dbc-9fef-3c66b2fe321c",
+      "name": "slack:verify",
+      "parameters": {
+        "jsCode": "// @lib signatures, events\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['signatures'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Webhook signature checks (design section 4). Pure: the crypto module and the current time are passed in.\n  // Both functions return true or false and never throw on bad input.\n\n  const META_PREFIX = 'sha256=';\n  const SLACK_PREFIX = 'v0=';\n  // Slack refuses requests whose timestamp is more than 5 minutes away from now (past or future).\n  const SLACK_MAX_AGE_SECONDS = 300;\n\n  // No instanceof here: n8n runs Code nodes in a sandbox, so a Buffer made there comes from another\n  // realm and fails \"instanceof Uint8Array\". ArrayBuffer.isView works across realms.\n  function isBody(rawBody) {\n    return typeof rawBody === 'string' || (rawBody != null && ArrayBuffer.isView(rawBody));\n  }\n\n  // Compares two hex strings in constant time, after comparing lengths.\n  function safeEqualHex(expectedHex, givenHex, crypto) {\n    const expected = Buffer.from(expectedHex, 'utf8');\n    const given = Buffer.from(givenHex.toLowerCase(), 'utf8');\n    if (expected.length !== given.length) return false;\n    return crypto.timingSafeEqual(expected, given);\n  }\n\n  function nowMs(now) {\n    if (typeof now === 'number') return now;\n    if (now && typeof now.getTime === 'function') return now.getTime(); // a Date, from any realm\n    if (now && typeof now.toMillis === 'function') return now.toMillis();\n    return NaN;\n  }\n\n  // Meta: X-Hub-Signature-256 is \"sha256=\" + HMAC-SHA256 hex of the raw request bytes with the app secret.\n  // The check must run over the raw bytes: Meta escapes non-ASCII text as unicode escape sequences,\n  // so re-serialising the parsed body changes the bytes.\n  function verifyMeta(rawBody, header, secret, crypto) {\n    try {\n      if (!isBody(rawBody) || typeof header !== 'string' || typeof secret !== 'string' || !secret) return false;\n      if (!header.startsWith(META_PREFIX)) return false;\n      const given = header.slice(META_PREFIX.length);\n      const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');\n      return safeEqualHex(expected, given, crypto);\n    } catch (e) {\n      return false;\n    }\n  }\n\n  // Slack: X-Slack-Signature is \"v0=\" + HMAC-SHA256 hex of \"v0:<timestamp>:<raw body>\" with the signing secret.\n  // timestamp is X-Slack-Request-Timestamp (seconds); now is the current time in milliseconds (a Date also works).\n  function verifySlack(rawBody, timestamp, header, secret, now, crypto) {\n    try {\n      if (!isBody(rawBody) || typeof header !== 'string' || typeof secret !== 'string' || !secret) return false;\n      const ts = String(timestamp === undefined || timestamp === null ? '' : timestamp).trim();\n      if (!/^\\d{1,15}$/.test(ts)) return false;\n      const nowMillis = nowMs(now);\n      if (!Number.isFinite(nowMillis)) return false;\n      if (Math.abs(nowMillis / 1000 - Number(ts)) > SLACK_MAX_AGE_SECONDS) return false;\n      if (!header.startsWith(SLACK_PREFIX)) return false;\n      const given = header.slice(SLACK_PREFIX.length);\n      const expected = crypto\n        .createHmac('sha256', secret)\n        .update('v0:' + ts + ':')\n        .update(rawBody)\n        .digest('hex');\n      return safeEqualHex(expected, given, crypto);\n    } catch (e) {\n      return false;\n    }\n  }\n\n  module.exports = { verifyMeta, verifySlack };\n  return module.exports;\n})();\n__lib['events'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Turns webhook bodies into the internal event format (design section 4):\n  //   { source, external_id, wa_id, timestamp (ISO), kind, text, message_type?, error? }\n  // kind is 'text', 'unsupported' (images, voice notes, reactions, buttons and the rest) or\n  // 'send_failed' (a Meta status event with status 'failed'). Other status events are dropped.\n\n  function isoFromSeconds(seconds) {\n    const n = Number(seconds);\n    return Number.isFinite(n) && n > 0 ? new Date(n * 1000).toISOString() : null;\n  }\n\n  // body: the parsed Meta webhook body. Returns { events, dropped } where dropped counts the\n  // status events (sent, delivered, read) and changes for other fields that were skipped.\n  function metaEvents(body) {\n    const events = [];\n    let dropped = 0;\n    const entries = body && Array.isArray(body.entry) ? body.entry : [];\n    for (const entry of entries) {\n      for (const change of Array.isArray(entry.changes) ? entry.changes : []) {\n        const value = change && change.value;\n        if (!change || change.field !== 'messages' || !value) {\n          dropped++;\n          continue;\n        }\n        for (const m of Array.isArray(value.messages) ? value.messages : []) {\n          if (!m || !m.id || !m.from) {\n            dropped++;\n            continue;\n          }\n          const isText = m.type === 'text' && m.text && typeof m.text.body === 'string';\n          events.push({\n            source: 'meta',\n            external_id: String(m.id),\n            wa_id: String(m.from),\n            timestamp: isoFromSeconds(m.timestamp),\n            kind: isText ? 'text' : 'unsupported',\n            text: isText ? m.text.body : '',\n            message_type: String(m.type || 'unknown'),\n          });\n        }\n        for (const s of Array.isArray(value.statuses) ? value.statuses : []) {\n          if (!s || s.status !== 'failed' || !s.id) {\n            dropped++;\n            continue;\n          }\n          const err = Array.isArray(s.errors) && s.errors[0] ? s.errors[0] : {};\n          events.push({\n            source: 'meta',\n            // a message can fail only once, so its ID plus the status is unique\n            external_id: String(s.id) + ':failed',\n            wa_id: String(s.recipient_id || ''),\n            timestamp: isoFromSeconds(s.timestamp),\n            kind: 'send_failed',\n            text: '',\n            error: { code: err.code == null ? null : err.code, title: String(err.title || err.message || '') },\n          });\n        }\n      }\n    }\n    return { events, dropped };\n  }\n\n  const REPLAY_KINDS = ['text', 'unsupported', 'send_failed', 'owner_message', 'owner_action'];\n\n  // ingress-replay: the body is already an internal event. Returns the event, or null if a required\n  // field is missing or the kind is unknown. source defaults to 'meta', the path the event stands in for.\n  function replayEvent(body) {\n    if (!body || typeof body !== 'object') return null;\n    const { external_id: id, wa_id: waId, kind } = body;\n    if (typeof id !== 'string' || id === '' || typeof kind !== 'string' || !REPLAY_KINDS.includes(kind)) return null;\n    if ((kind === 'text' || kind === 'unsupported') && (typeof waId !== 'string' || waId === '')) return null;\n    return {\n      ...body,\n      source: typeof body.source === 'string' && body.source ? body.source : 'meta',\n      text: typeof body.text === 'string' ? body.text : '',\n      timestamp: typeof body.timestamp === 'string' ? body.timestamp : null,\n    };\n  }\n\n  // Slack Events API body (design section 4). Returns { challenge } for Slack's URL check, otherwise\n  // { events, dropped }: only new plain messages posted as a reply in a thread become owner_message\n  // events. Edits, deletions, file shares, joins (any subtype) and messages from a bot or app are dropped.\n  // The external ID is Slack's event_id, so a Slack retry is a duplicate. Field names follow Slack's\n  // documented format (spike 4 was not run against a live app).\n  function slackEvents(body) {\n    if (!body || typeof body !== 'object') return { events: [], dropped: ['not an object'] };\n    if (body.type === 'url_verification') return { challenge: String(body.challenge || ''), events: [], dropped: [] };\n    const e = body.event;\n    if (body.type !== 'event_callback' || !e || typeof e !== 'object') return { events: [], dropped: ['not an event callback'] };\n    const why = e.type !== 'message' ? 'not a message'\n      : e.subtype ? 'subtype ' + e.subtype\n      : e.bot_id || e.app_id ? 'from a bot or app'\n      : !e.thread_ts || e.thread_ts === e.ts ? 'not a thread reply'\n      : typeof body.event_id !== 'string' || !body.event_id ? 'no event_id'\n      : null;\n    if (why) return { events: [], dropped: [why] };\n    return {\n      events: [{\n        source: 'slack', external_id: body.event_id, kind: 'owner_message', wa_id: '',\n        slack_channel: e.channel || '', slack_thread_ts: e.thread_ts, slack_ts: e.ts, slack_user: e.user || '',\n        text: typeof e.text === 'string' ? e.text : '', timestamp: null,\n      }],\n      dropped: [],\n    };\n  }\n\n  // A Slack block_actions payload (the JSON in the form field \"payload\") -> one owner_action event, or\n  // null. The thread is the message's thread, or the message itself for buttons on a thread's first post.\n  // Each click has its own action_ts, so a double click is two events; the handler makes the second a no-op.\n  function slackAction(payload) {\n    if (!payload || typeof payload !== 'object' || payload.type !== 'block_actions') return null;\n    const a = Array.isArray(payload.actions) ? payload.actions[0] : null;\n    if (!a || typeof a.action_id !== 'string') return null;\n    const c = payload.container || {};\n    const m = payload.message || {};\n    const thread = c.thread_ts || m.thread_ts || c.message_ts || m.ts;\n    if (!thread) return null;\n    const user = (payload.user && payload.user.id) || '';\n    return {\n      source: 'slack', external_id: 'action:' + (a.action_ts || '') + ':' + user + ':' + a.action_id, kind: 'owner_action', wa_id: '',\n      action_id: a.action_id, value: a.value === undefined ? '' : String(a.value), slack_user: user,\n      slack_channel: c.channel_id || (payload.channel && payload.channel.id) || '', slack_thread_ts: thread,\n      slack_ts: c.message_ts || m.ts || '', text: '', timestamp: null,\n    };\n  }\n\n  // The JSON in the \"payload\" field of a form-encoded Slack interactivity body, or null. Written by hand:\n  // n8n's Code-node sandbox has no URLSearchParams.\n  function slackFormPayload(rawForm) {\n    for (const pair of String(rawForm || '').split('&')) {\n      const eq = pair.indexOf('=');\n      const key = eq === -1 ? pair : pair.slice(0, eq);\n      if (key !== 'payload') continue;\n      try {\n        return JSON.parse(decodeURIComponent(pair.slice(eq + 1).replace(/\\+/g, ' ')));\n      } catch (e) {\n        return null;\n      }\n    }\n    return null;\n  }\n\n  module.exports = { metaEvents, replayEvent, slackEvents, slackAction, slackFormPayload };\n  return module.exports;\n})();\nconst { verifyMeta, verifySlack } = __lib['signatures'];\nconst { metaEvents, replayEvent, slackEvents, slackAction, slackFormPayload } = __lib['events'];\n// @end-lib\nconst crypto = require('crypto');\nconst req = $('Webhook').first();\nconst raw = Buffer.from(req.binary.data.data, 'base64');\nconst h = req.json.headers || {};\nconst now = $('clock:now').first().json.now;\nconst sigOk = verifySlack(raw, h['x-slack-request-timestamp'], h['x-slack-signature'], $env.SLACK_SIGNING_SECRET, Date.parse(now), crypto);\nconst parsed = sigOk ? slackEvents(JSON.parse(raw.toString('utf8'))) : { events: [] };\nreturn [{ json: { sigOk, challenge: parsed.challenge || null, events: parsed.events || [], now } }];"
+      },
+      "position": [
+        440,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "9a37c297-8c1e-48e6-9b0f-6b956dcf23bd",
+      "name": "url check?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "u8v9lmrv",
+              "leftValue": "={{ Boolean($json.challenge) }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        880,
+        100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

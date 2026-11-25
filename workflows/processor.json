@@ -77,14 +77,14 @@
         [
           {
             "index": 0,
-            "node": "todo:P5",
+            "node": "owner:input (message)",
             "type": "main"
           }
         ],
         [
           {
             "index": 0,
-            "node": "todo:P5",
+            "node": "owner:input (action)",
             "type": "main"
           }
         ]
@@ -342,6 +342,64 @@
         ]
       ]
     },
+    "owner-relay": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: done",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "inbox: failed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "owner-release": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: done",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "inbox: failed",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "owner:input (action)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "owner-release",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "owner:input (message)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "owner-relay",
+            "type": "main"
+          }
+        ]
+      ]
+    },
     "processor:pick": {
       "main": [
         [
@@ -397,17 +455,6 @@
           {
             "index": 0,
             "node": "lease: upsert",
-            "type": "main"
-          }
-        ]
-      ]
-    },
-    "todo:P5": {
-      "main": [
-        [
-          {
-            "index": 0,
-            "node": "inbox: done",
             "type": "main"
           }
         ]
@@ -1872,6 +1919,80 @@
       "typeVersion": 2.2
     },
     {
+      "id": "a1955564-88d2-48a1-9c5e-23eccd12eab5",
+      "name": "owner-relay",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "owner-relay",
+          "mode": "list",
+          "value": "NssQK4PrZlHNq3sR"
+        }
+      },
+      "position": [
+        4180,
+        350
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "14838362-0627-4bd7-9fa5-07e4e63e3b75",
+      "name": "owner-release",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "owner-release",
+          "mode": "list",
+          "value": "oPGtaGW0YqWSAkAH"
+        }
+      },
+      "position": [
+        4180,
+        550
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "56babea8-b8da-4e4e-a6fd-eb9e0deb39ba",
+      "name": "owner:input (action)",
+      "parameters": {
+        "jsCode": "const p = $('processor:pick').first().json;\nreturn [{ json: { event: p.event, now: $('clock:now').first().json.now, received_at: p.row.received_at } }];"
+      },
+      "position": [
+        3960,
+        550
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "38f66764-0cce-4cd0-a050-90fccfd91da3",
+      "name": "owner:input (message)",
+      "parameters": {
+        "jsCode": "const p = $('processor:pick').first().json;\nreturn [{ json: { event: p.event, now: $('clock:now').first().json.now, received_at: p.row.received_at } }];"
+      },
+      "position": [
+        3960,
+        350
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
       "id": "49700094-07f3-4053-875c-ca1b6f2b2dc9",
       "name": "processor:pick",
       "parameters": {
@@ -1975,17 +2096,6 @@
       ],
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2
-    },
-    {
-      "id": "47ad2bd1-1586-4e8b-88b7-d2595b358aab",
-      "name": "todo:P5",
-      "parameters": {},
-      "position": [
-        3960,
-        450
-      ],
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1
     }
   ],
   "settings": {

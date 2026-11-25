@@ -1,0 +1,36 @@
+{
+  "type": "block_actions",
+  "user": {
+    "id": "UOWNER0001",
+    "username": "owner"
+  },
+  "api_app_id": "A0DRYRUN",
+  "token": "x",
+  "trigger_id": "t1",
+  "team": {
+    "id": "T0DRYRUN"
+  },
+  "channel": {
+    "id": "CDRYRUN001"
+  },
+  "container": {
+    "type": "message",
+    "message_ts": "1732480000.000001",
+    "channel_id": "CDRYRUN001",
+    "is_ephemeral": false
+  },
+  "message": {
+    "type": "message",
+    "ts": "1732480000.000001",
+    "text": "Handoff"
+  },
+  "actions": [
+    {
+      "action_id": "return_to_bot",
+      "block_id": "b1",
+      "value": "1",
+      "type": "button",
+      "action_ts": "1764601300.000200"
+    }
+  ]
+}

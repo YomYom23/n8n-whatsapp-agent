@@ -1,7 +1,7 @@
 # Replay scenarios (design file 29). Run with: python tests/replay.py
 # Each scenario is tagged with the build step that enables it. Without --upto, the harness runs
 # every scenario up to current_step, so raise it as each step's workflows land.
-current_step = "P5"
+current_step = "P6"
 
 # --- P2: harness plumbing ------------------------------------------------------
 # No events. Proves the harness can load the mock, clear and count every table, and read calls.
@@ -1288,3 +1288,215 @@ jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking"
 route = "keyword_start"
 sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
 slack_posts = 1
+
+
+# --- P6: the 24-hour path ----------------------------------------------------------------
+# The handoff is at 15:00 on Dec 1; 21:00 on Dec 2 is 30 hours after the customer's last message.
+
+# CUJ 5: the owner replies 30 hours after the customer's last message. It is kept as waiting and the
+# thread gets Send template and Discard (removing send_24h sends it free-form).
+[[scenario]]
+name = "owner_reply_outside_window"
+step = "P6"
+guards = ["send_24h"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Thursday at 9 works for us.", event_id = "Ev0P50013", "event.ts" = "1764601213.000100" }
+clock = "2026-12-02T21:00:00Z"
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 2
+calls = { "slack.react" = 0 }
+rows = { pending_owner_messages = 1 }
+
+# CUJ 5: Return to bot is refused while a message waits, Send template sends the template, and when
+# the customer replies their message goes into the thread and the waiting message is sent (once:
+# the next customer message only goes into the thread).
+[[scenario]]
+name = "owner_template_then_customer_reply"
+step = "P6"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Thursday at 9 works for us.", event_id = "Ev0P50014", "event.ts" = "1764601214.000100" }
+clock = "2026-12-02T21:00:00Z"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "return_to_bot", "actions.0.action_ts" = "1764601315.000200" }
+clock = "2026-12-02T21:00:00Z"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "send_template", "actions.0.action_ts" = "1764601316.000200" }
+clock = "2026-12-02T21:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what is the update?"
+clock = "2026-12-02T22:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "thanks, see you Thursday"
+clock = "2026-12-02T22:05:00Z"
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }, { kind = "template" }, { kind = "normal", text_contains = "Thursday at 9 works for us." }]
+slack_posts = 7
+rows = { pending_owner_messages = 1 }
+
+# Send template goes out once per set of waiting messages; a second click only notes it.
+[[scenario]]
+name = "owner_template_sent_once"
+step = "P6"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Thursday at 9 works for us.", event_id = "Ev0P50017", "event.ts" = "1764601217.000100" }
+clock = "2026-12-02T21:00:00Z"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "send_template", "actions.0.action_ts" = "1764601318.000200" }
+clock = "2026-12-02T21:00:00Z"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "send_template", "actions.0.action_ts" = "1764601319.000200" }
+clock = "2026-12-02T21:00:00Z"
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }, { kind = "template" }]
+slack_posts = 4
+
+# Discard marks the waiting messages discarded; the customer's next message sends nothing.
+[[scenario]]
+name = "owner_discard_waiting"
+step = "P6"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Thursday at 9 works for us.", event_id = "Ev0P50020", "event.ts" = "1764601220.000100" }
+clock = "2026-12-02T21:00:00Z"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "discard_waiting", "actions.0.action_ts" = "1764601321.000200" }
+clock = "2026-12-02T21:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "hello?"
+clock = "2026-12-02T22:00:00Z"
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
+slack_posts = 4
+
+# STOP marks waiting owner messages blocked, so Return to bot is allowed straight after.
+[[scenario]]
+name = "stop_blocks_waiting"
+step = "P6"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Thursday at 9 works for us.", event_id = "Ev0P50022", "event.ts" = "1764601222.000100" }
+clock = "2026-12-02T21:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "STOP"
+clock = "2026-12-02T22:00:00Z"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "return_to_bot", "actions.0.action_ts" = "1764601323.000200" }
+clock = "2026-12-02T21:00:00Z"
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }, { kind = "normal", text_contains = "opted out" }]
+slack_posts = 4
+rows = { pending_owner_messages = 1, do_not_contact = 1 }

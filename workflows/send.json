@@ -66,6 +66,17 @@
         ]
       ]
     },
+    "log: waiting": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "return: waiting",
+            "type": "main"
+          }
+        ]
+      ]
+    },
     "meta:send": {
       "main": [
         [
@@ -79,6 +90,28 @@
           {
             "index": 0,
             "node": "send:result",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "pending: get (waiting)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "wait:log-input",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "pending: insert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "pending: get (waiting)",
             "type": "main"
           }
         ]
@@ -125,7 +158,29 @@
         [
           {
             "index": 0,
-            "node": "todo:P6",
+            "node": "wait:row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "wait:log-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "log: waiting",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "wait:row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "pending: insert",
             "type": "main"
           }
         ]
@@ -268,6 +323,29 @@
       "typeVersion": 1.2
     },
     {
+      "id": "146d89c2-2e0e-42aa-a9f7-dc3fbdc49eae",
+      "name": "log: waiting",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "log",
+          "mode": "list",
+          "value": "MmzCFtBICmiFgEDP"
+        }
+      },
+      "position": [
+        2016,
+        200
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
       "credentials": {
         "httpHeaderAuth": {
           "name": "Meta"
@@ -294,6 +372,159 @@
       ],
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "18d30ebd-64f4-430b-a9a5-0f4132703f97",
+      "name": "pending: get (waiting)",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "pending_owner_messages",
+          "mode": "list",
+          "value": "__table:pending_owner_messages__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $('send:decide').first().json.wa_id }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "waiting"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row",
+        "returnAll": true
+      },
+      "position": [
+        1568,
+        200
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "0d527ea9-b986-4f0a-9c16-360ce1ecc579",
+      "name": "pending: insert",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "handoff_episode",
+              "id": "handoff_episode",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_ts",
+              "id": "slack_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_user",
+              "id": "slack_user",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "text",
+              "id": "text",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "template_sent_at",
+              "id": "template_sent_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "created_at",
+              "id": "created_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            }
+          ],
+          "value": {}
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "pending_owner_messages",
+          "mode": "list",
+          "value": "__table:pending_owner_messages__"
+        },
+        "operation": "insert",
+        "resource": "row"
+      },
+      "position": [
+        1344,
+        200
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
     },
     {
       "id": "08e889a9-9fa5-45b5-8fe5-66b239a19e9b",
@@ -353,6 +584,43 @@
       "position": [
         1792,
         -200
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "id": "e3f84a89-97fe-48ad-9556-da7411705c7a",
+      "name": "return: waiting",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "xbtu7d1l",
+              "name": "sent",
+              "type": "boolean",
+              "value": "={{ false }}"
+            },
+            {
+              "id": "3pkqkbvq",
+              "name": "reason",
+              "type": "string",
+              "value": "={{ $('send:decide').first().json.decision.reason }}"
+            },
+            {
+              "id": "bqsxtz99",
+              "name": "waiting_count",
+              "type": "number",
+              "value": "={{ $('pending: get (waiting)').all().filter(x => x.json.status === 'waiting').length }}"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "mode": "manual",
+        "options": {}
+      },
+      "position": [
+        2240,
+        200
       ],
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4
@@ -473,15 +741,31 @@
       "typeVersion": 3.2
     },
     {
-      "id": "2e997b4b-457a-450c-8232-30d61c4958a5",
-      "name": "todo:P6",
-      "parameters": {},
+      "executeOnce": true,
+      "id": "43604352-f1c3-4481-a6ab-ffc3021827c6",
+      "name": "wait:log-input",
+      "parameters": {
+        "jsCode": "const s = $('send:decide').first().json;\nreturn [{ json: { now: s.now, wa_id: s.wa_id, direction: 'event', author: 'system', kind: 'send_waiting', text: s.decision.reason, route: s.route } }];"
+      },
+      "position": [
+        1792,
+        200
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "889859cd-7ef9-4e89-87f7-9c1cd1ad0082",
+      "name": "wait:row",
+      "parameters": {
+        "jsCode": "const i = $('send:decide').first().json;\nconst conv = $('conversations: get').first().json;\nreturn [{ json: { wa_id: i.wa_id, handoff_episode: Number(conv.handoff_episode) || 0,\n  slack_thread_ts: i.slack_thread_ts || conv.slack_thread_ts || '', slack_ts: i.slack_ts || '', slack_user: i.slack_user || '',\n  text: i.text || '', status: 'waiting', template_sent_at: null, created_at: i.now } }];"
+      },
       "position": [
         1120,
         200
       ],
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
     }
   ],
   "settings": {

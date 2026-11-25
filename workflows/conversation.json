@@ -528,6 +528,50 @@
         ]
       ]
     },
+    "pending: block (keyword)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "stop: in thread? (keyword)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "pending: block (phrase)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "stop: in thread? (phrase)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "pending: get (waiting)": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "waiting to send?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "pending: mark": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "waiting:note",
+            "type": "main"
+          }
+        ]
+      ]
+    },
     "pick:route": {
       "main": [
         [
@@ -744,7 +788,7 @@
         [
           {
             "index": 0,
-            "node": "stop: in thread? (keyword)",
+            "node": "pending: block (keyword)",
             "type": "main"
           }
         ]
@@ -755,7 +799,7 @@
         [
           {
             "index": 0,
-            "node": "stop: in thread? (phrase)",
+            "node": "pending: block (phrase)",
             "type": "main"
           }
         ]
@@ -778,6 +822,17 @@
           {
             "index": 0,
             "node": "route: unsupported",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "send: waiting": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "waiting:marks",
             "type": "main"
           }
         ]
@@ -931,6 +986,17 @@
         [
           {
             "index": 0,
+            "node": "pending: get (waiting)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "slack: waiting note": {
+      "main": [
+        [
+          {
+            "index": 0,
             "node": "route: human_owned",
             "type": "main"
           }
@@ -1041,6 +1107,57 @@
           {
             "index": 0,
             "node": "facts:input",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "waiting to send?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "waiting:items",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "route: human_owned",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "waiting:items": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "send: waiting",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "waiting:marks": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "pending: mark",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "waiting:note": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "slack: waiting note",
             "type": "main"
           }
         ]
@@ -3338,6 +3455,438 @@
       "typeVersion": 2.2
     },
     {
+      "alwaysOutputData": true,
+      "id": "ac9dbd46-0c34-4a68-b634-ecc2183ba86b",
+      "name": "pending: block (keyword)",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "handoff_episode",
+              "id": "handoff_episode",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_ts",
+              "id": "slack_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_user",
+              "id": "slack_user",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "text",
+              "id": "text",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "template_sent_at",
+              "id": "template_sent_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "created_at",
+              "id": "created_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            }
+          ],
+          "value": {
+            "status": "blocked"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "pending_owner_messages",
+          "mode": "list",
+          "value": "__table:pending_owner_messages__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $('gate:check').first().json.event.wa_id }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "waiting"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        1980,
+        -1000
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "c062daad-ade1-4ea8-adc3-d953667fe712",
+      "name": "pending: block (phrase)",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "handoff_episode",
+              "id": "handoff_episode",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_ts",
+              "id": "slack_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_user",
+              "id": "slack_user",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "text",
+              "id": "text",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "template_sent_at",
+              "id": "template_sent_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "created_at",
+              "id": "created_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            }
+          ],
+          "value": {
+            "status": "blocked"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "pending_owner_messages",
+          "mode": "list",
+          "value": "__table:pending_owner_messages__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $('gate:check').first().json.event.wa_id }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "waiting"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        2640,
+        -1200
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "7695ca45-b193-4446-9030-a776b0aba526",
+      "name": "pending: get (waiting)",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "pending_owner_messages",
+          "mode": "list",
+          "value": "__table:pending_owner_messages__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $('gate:check').first().json.event.wa_id }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "waiting"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row",
+        "returnAll": true
+      },
+      "position": [
+        2640,
+        -500
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "40c0dc30-9267-4445-acb6-4b98f6be2dd3",
+      "name": "pending: mark",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "handoff_episode",
+              "id": "handoff_episode",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_ts",
+              "id": "slack_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_user",
+              "id": "slack_user",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "text",
+              "id": "text",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "template_sent_at",
+              "id": "template_sent_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "created_at",
+              "id": "created_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            }
+          ],
+          "value": {
+            "status": "={{ $json.status }}"
+          }
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "pending_owner_messages",
+          "mode": "list",
+          "value": "__table:pending_owner_messages__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        3740,
+        -650
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
       "id": "717e6f6f-23e0-4f2a-b918-6077c5ee2784",
       "name": "pick:route",
       "parameters": {
@@ -3439,6 +3988,7 @@
       "typeVersion": 3.4
     },
     {
+      "executeOnce": true,
       "id": "362d8c1e-2888-4ae4-a319-57d7c565ef2f",
       "name": "route: human_owned",
       "parameters": {
@@ -3922,6 +4472,29 @@
       "typeVersion": 1.2
     },
     {
+      "id": "b2d31173-0f13-4d06-b5e8-4f10850096d4",
+      "name": "send: waiting",
+      "parameters": {
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "send",
+          "mode": "list",
+          "value": "9l8u4sOy6VohX6vi"
+        }
+      },
+      "position": [
+        3300,
+        -650
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
       "id": "057fbf41-ded6-4163-83de-6cbf8e1fa1f7",
       "name": "send: writer",
       "parameters": {
@@ -4154,6 +4727,29 @@
       "typeVersion": 1.2
     },
     {
+      "id": "20f443a1-0d90-44b5-91a7-e018b1e52df5",
+      "name": "slack: waiting note",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "slack-adapter",
+          "mode": "list",
+          "value": "1y7I33XeHXVkDq6P"
+        }
+      },
+      "position": [
+        4180,
+        -650
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
       "id": "dfc2b6f9-c3f4-4453-9b25-009e1a8fc466",
       "name": "stage:save",
       "parameters": {
@@ -4167,6 +4763,7 @@
       "typeVersion": 2
     },
     {
+      "executeOnce": true,
       "id": "c04e740e-7b0f-4e98-8bc0-1f8c5f83474d",
       "name": "stop: in thread? (keyword)",
       "parameters": {
@@ -4202,6 +4799,7 @@
       "typeVersion": 2.2
     },
     {
+      "executeOnce": true,
       "id": "2b637d46-5856-479f-bf6b-a0e3ef68b436",
       "name": "stop: in thread? (phrase)",
       "parameters": {
@@ -4322,6 +4920,81 @@
       ],
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2
+    },
+    {
+      "executeOnce": true,
+      "id": "13ca0bc8-78cd-4887-9e08-d754d48e7aa0",
+      "name": "waiting to send?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "s9a8ein3",
+              "leftValue": "={{ $('pending: get (waiting)').all().some((x) => x.json.status === 'waiting') }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        2860,
+        -500
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "1c8b7d33-e74d-4cf4-81a7-493efbe76146",
+      "name": "waiting:items",
+      "parameters": {
+        "jsCode": "const g = $('gate:check').first().json;\nconst rows = $('pending: get (waiting)').all().map((x) => x.json).filter((r) => r.status === 'waiting')\n  .sort((a, b) => Number(a.id) - Number(b.id));\nreturn rows.map((r) => ({ json: { wa_id: g.event.wa_id, text: r.text, kind: 'normal', sender_kind: 'owner', added_this_run: false,\n  now: g.now, received_at: g.received_at, route: 'owner_waiting', stage: g.conv.stage, classifier: '', facts_version: '',\n  draft: '', problems: '', input_tokens: 0, output_tokens: 0, pending_id: r.id } }));"
+      },
+      "position": [
+        3080,
+        -650
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "e10b6835-9a14-44d8-aa88-0ee356a894f0",
+      "name": "waiting:marks",
+      "parameters": {
+        "jsCode": "const src = $('waiting:items').all();\nreturn $input.all().map((x, k) => ({ json: { id: src[k].json.pending_id, status: x.json.sent === true ? 'sent' : 'blocked' } }));"
+      },
+      "position": [
+        3520,
+        -650
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "69997b96-6662-4887-9c46-020603cf0226",
+      "name": "waiting:note",
+      "parameters": {
+        "jsCode": "// @lib slack_text\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['mask'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Masks a WhatsApp number for Slack posts and the Sheets log (design sections 11 and 15).\n\n  const MASK_CHAR = '*';\n  const KEEP_DIGITS = 4;\n\n  // Keeps only the last 4 digits. Non-digits (such as a leading +) are dropped first.\n  // A number with 4 digits or fewer is masked completely, so nothing leaks from a short value.\n  function maskNumber(waId) {\n    if (waId === null || waId === undefined) return '';\n    const digits = String(waId).replace(/\\D/g, '');\n    if (digits.length <= KEEP_DIGITS) return MASK_CHAR.repeat(digits.length);\n    return MASK_CHAR.repeat(digits.length - KEEP_DIGITS) + digits.slice(-KEEP_DIGITS);\n  }\n\n  module.exports = { maskNumber };\n  return module.exports;\n})();\n__lib['slack_text'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Slack text helpers (design section 11): owner mrkdwn to plain text, escaping customer text,\n  // the // team note rule, and the Block Kit posts for handoff and close alerts.\n\n  const { LIMITS } = require('./config');\n  const { maskNumber } = require('./mask');\n\n  // Stable action IDs. The interactivity workflow routes on these, so they must not change.\n  const ACTION_IDS = {\n    RETURN_TO_BOT: 'return_to_bot',\n    MARK_BOOKED: 'mark_booked',\n    REOPEN: 'reopen',\n    SEND_TEMPLATE: 'send_template',\n    DISCARD_WAITING: 'discard_waiting',\n  };\n\n  // Not in config.js: each quoted history message is cut to this many characters (a Slack section holds 3000).\n  const HISTORY_TEXT_MAX_CHARS = 300;\n\n  const HANDOFF_REASON_LABELS = {\n    wants_human: 'Customer asked for a person',\n    unclear: 'Bot could not understand the customer',\n    jev_unavailable: 'AI service unavailable',\n    change_booking: 'Customer wants to change a booking',\n    slots_exhausted: 'No times left to offer',\n    booking_key_deleted: 'Booking calendar entry was deleted',\n    unknown_stage: 'Conversation in an unknown stage',\n    zip_not_found: 'ZIP code not found after asking',\n  };\n\n  const CLOSE_REASON_LABELS = {\n    wrong_person: 'Wrong person',\n    abusive: 'Abusive messages',\n  };\n\n  const AUTHOR_LABELS = { customer: 'Customer', bot: 'Bot', owner: 'Owner', system: 'System' };\n\n  // Escapes customer text so it cannot trigger mentions (<!channel>) or disguised links.\n  function escapeForSlack(text) {\n    if (text === null || text === undefined) return '';\n    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  }\n\n  // Turns one <...> token of Slack mrkdwn into plain text.\n  function plainToken(inner) {\n    const bar = inner.indexOf('|');\n    const target = bar === -1 ? inner : inner.slice(0, bar);\n    const label = bar === -1 ? '' : inner.slice(bar + 1);\n    if (target.startsWith('@')) return ''; // user mention: nothing sensible for a customer\n    if (target.startsWith('#')) return label ? '#' + label : '';\n    if (target.startsWith('!')) return label && !/^(here|channel|everyone)$/.test(target.slice(1)) ? label : '';\n    if (/^(mailto|tel):/i.test(target)) return label || target.replace(/^(mailto|tel):/i, '');\n    if (!label || label === target) return target;\n    return label + ' (' + target + ')';\n  }\n\n  // Slack mrkdwn from the owner to plain text for the customer.\n  // Links, mentions, special mentions and the three HTML entities (&amp; last, so &amp;lt; stays &lt;).\n  function toPlain(text) {\n    if (text === null || text === undefined) return '';\n    return String(text)\n      .replace(/<([^<>]+)>/g, (m, inner) => plainToken(inner))\n      .replace(/&lt;/g, '<')\n      .replace(/&gt;/g, '>')\n      .replace(/&amp;/g, '&')\n      .replace(/[ \\t]{2,}/g, ' ')\n      .replace(/[ \\t]+\\n/g, '\\n')\n      .trim();\n  }\n\n  // A thread message starting with // is a note for the team and is never sent to the customer.\n  function isTeamNote(text) {\n    if (text === null || text === undefined) return false;\n    return String(text).trim().startsWith('//');\n  }\n\n  function truncate(text, max) {\n    return text.length > max ? text.slice(0, max - 3) + '...' : text;\n  }\n\n  function quote(text) {\n    return text\n      .split('\\n')\n      .map((line) => '> ' + line)\n      .join('\\n');\n  }\n\n  function button(label, actionId, value, style) {\n    const b = { type: 'button', text: { type: 'plain_text', text: label }, action_id: actionId };\n    if (value !== undefined && value !== null && value !== '') b.value = String(value);\n    if (style) b.style = style;\n    return b;\n  }\n\n  function sectionBlock(mrkdwn) {\n    return { type: 'section', text: { type: 'mrkdwn', text: mrkdwn } };\n  }\n\n  function slotLabels(offeredSlots) {\n    if (!Array.isArray(offeredSlots)) return [];\n    return offeredSlots.map((s) => (s && typeof s === 'object' ? s.label : s)).filter((l) => l);\n  }\n\n  // The first post of a handoff thread.\n  // { waId, reason, stage, offeredSlots: [{ id, label }], history: [{ author, text }], episode } -> { text, blocks }\n  // Customer-originated text is escaped. The number is masked except its last 4 digits.\n  function handoffPost({ waId, reason, stage, offeredSlots, history, episode } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = HANDOFF_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Handoff: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage: ' + escapeForSlack(stage || 'unknown'),\n    ];\n    const slots = slotLabels(offeredSlots);\n    if (slots.length) lines.push('Offered times: ' + slots.map(escapeForSlack).join('; '));\n\n    const recent = Array.isArray(history) ? history.slice(-LIMITS.historyMessages) : [];\n    if (recent.length) {\n      lines.push('', 'Last messages:');\n      for (const m of recent) {\n        const author = AUTHOR_LABELS[m && m.author] || escapeForSlack((m && m.author) || 'Unknown');\n        const body = truncate(escapeForSlack(m && m.text), HISTORY_TEXT_MAX_CHARS);\n        lines.push(author + ':', quote(body));\n      }\n    }\n    lines.push('', 'Reply in this thread to message the customer. Start a reply with // for a note that is not sent.');\n\n    return {\n      text: 'Handoff (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        {\n          type: 'actions',\n          elements: [\n            button('Return to bot', ACTION_IDS.RETURN_TO_BOT, episode, 'primary'),\n            button('Mark as booked', ACTION_IDS.MARK_BOOKED, episode),\n          ],\n        },\n      ],\n    };\n  }\n\n  // The alert posted when a conversation is closed (wrong_person or abusive), with a Reopen button.\n  // { waId, reason, stageBeforeClose } -> { text, blocks }\n  function closeAlertPost({ waId, reason, stageBeforeClose } = {}) {\n    const masked = maskNumber(waId);\n    const reasonLabel = CLOSE_REASON_LABELS[reason] || escapeForSlack(reason || 'unknown');\n    const lines = [\n      '*Conversation closed: ' + reasonLabel + '*',\n      'Customer: ' + masked,\n      'Stage before closing: ' + escapeForSlack(stageBeforeClose || 'unknown'),\n      '',\n      'Later messages from this customer are posted in this thread and get no reply. Reopen to put the conversation back.',\n    ];\n    return {\n      text: 'Conversation closed (' + reasonLabel + ') for ' + masked,\n      blocks: [\n        sectionBlock(lines.join('\\n')),\n        { type: 'actions', elements: [button('Reopen', ACTION_IDS.REOPEN)] },\n      ],\n    };\n  }\n\n  // What a customer message looks like in the owner's thread (gate steps 5 and 6). Text is escaped;\n  // a non-text message is shown as \"[customer sent an image]\" and so on.\n  const MESSAGE_TYPE_LABELS = {\n    image: 'an image', audio: 'a voice note', voice: 'a voice note', video: 'a video', document: 'a document',\n    sticker: 'a sticker', reaction: 'a reaction', location: 'a location', contacts: 'a contact card',\n    button: 'a button reply', interactive: 'a button reply',\n  };\n  function customerThreadText(event) {\n    const e = event || {};\n    if (e.kind === 'text') return 'Customer: ' + escapeForSlack(e.text);\n    return 'Customer: [customer sent ' + (MESSAGE_TYPE_LABELS[e.message_type] || 'a message that cannot be shown here') + ']';\n  }\n\n  // Thread notes posted by owner-relay, owner-release and the gate.\n  const NOTES = {\n    back_with_bot: 'This conversation is back with the bot, so that message was not sent.',\n    not_sent_dnc: 'Not sent: the customer has opted out.',\n    not_sent: (reason) => 'Not sent (' + reason + ').',\n    customer_opted_out: 'The customer opted out. Nothing more will be sent to them.',\n    release_refused: (n) => 'Return to bot refused: ' + n + ' owner message' + (n === 1 ? ' is' : 's are') +\n      ' waiting. Send the template or discard them first.',\n    marked_booked: 'Marked as booked.',\n    reopened: (stage) => 'Reopened. Bot resumes at: ' + stage,\n    not_built: (action) => 'The ' + action + ' button is not available yet.',\n    template_sent: 'Template sent. The waiting messages go out when the customer replies.',\n    template_already_sent: 'The template was already sent for these waiting messages.',\n    template_not_sent_dnc: 'Template not sent: the customer has opted out.',\n    template_not_sent: (reason) => 'Template not sent (' + reason + ').',\n    nothing_waiting: 'No owner messages are waiting.',\n    discarded: (n) => 'Discarded ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n    waiting_sent: (n) => 'The customer replied: sent ' + n + ' waiting message' + (n === 1 ? '' : 's') + '.',\n  };\n\n  // Posted in the thread when an owner message is kept as waiting (outside the 24-hour window).\n  // count: how many owner messages are now waiting.\n  function waitingPost({ count } = {}) {\n    const n = Number(count) || 1;\n    const text = 'Not sent yet: the customer last wrote more than 24 hours ago, so WhatsApp only allows the ' +\n      'approved template. ' + n + ' owner message' + (n === 1 ? ' is' : 's are') + ' waiting and will be sent ' +\n      'when the customer replies.';\n    return {\n      text,\n      blocks: [\n        sectionBlock(text),\n        {\n          type: 'actions',\n          elements: [\n            button('Send template', ACTION_IDS.SEND_TEMPLATE, undefined, 'primary'),\n            button('Discard waiting messages', ACTION_IDS.DISCARD_WAITING),\n          ],\n        },\n      ],\n    };\n  }\n\n  module.exports = {\n    customerThreadText,\n    NOTES,\n    waitingPost,\n    ACTION_IDS,\n    toPlain,\n    escapeForSlack,\n    isTeamNote,\n    handoffPost,\n    closeAlertPost,\n  };\n  return module.exports;\n})();\nconst { customerThreadText, NOTES, waitingPost, ACTION_IDS, toPlain, escapeForSlack, isTeamNote, handoffPost, closeAlertPost } = __lib['slack_text'];\n// @end-lib\nconst g = $('gate:check').first().json;\nconst n = $('waiting:marks').all().filter((x) => x.json.status === 'sent').length;\nreturn [{ json: { op: 'post', channel: g.conv.slack_channel || $env.SLACK_CHANNEL_ID, thread_ts: g.conv.slack_thread_ts, text: NOTES.waiting_sent(n) } }];"
+      },
+      "position": [
+        3960,
+        -650
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
     }
   ],
   "settings": {

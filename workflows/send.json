@@ -144,7 +144,7 @@
         [
           {
             "index": 0,
-            "node": "meta:send",
+            "node": "provider: twilio?",
             "type": "main"
           }
         ],
@@ -181,6 +181,42 @@
           {
             "index": 0,
             "node": "pending: insert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "provider: twilio?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "twilio:send",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "meta:send",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "twilio:send": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "send:result",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "send:result",
             "type": "main"
           }
         ]
@@ -367,7 +403,7 @@
         "url": "=https://graph.facebook.com/{{ $env.META_GRAPH_VERSION }}/{{ $env.META_PHONE_NUMBER_ID }}/messages"
       },
       "position": [
-        1120,
+        1340,
         -200
       ],
       "type": "n8n-nodes-base.httpRequest",
@@ -629,7 +665,7 @@
       "id": "aedae1b6-3105-411c-83ed-75e07375e3eb",
       "name": "send:decide",
       "parameters": {
-        "jsCode": "// @lib send_rules\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['send_rules'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // The section 10 table: whether `send` may send a message right now.\n  // Pure: the conversation is re-read by the caller and the clock is passed in.\n\n  const config = require('./config');\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    return value && typeof value.getTime === 'function' ? value.getTime() : new Date(value).getTime();\n  }\n\n  // True if the last customer message is no older than WINDOW_HOURS at `now`.\n  // No customer message at all counts as outside the window.\n  function within24h(lastCustomerAt, now) {\n    if (lastCustomerAt === null || lastCustomerAt === undefined || lastCustomerAt === '') return false;\n    const last = toMillis(lastCustomerAt);\n    const current = toMillis(now);\n    if (Number.isNaN(last) || Number.isNaN(current)) return false;\n    return current - last <= config.WINDOW_HOURS * 3600000;\n  }\n\n  const SENDER_KINDS = ['bot', 'owner'];\n  const KINDS = ['normal', 'opt_out_confirmation', 'template'];\n\n  // Returns { action: 'send' | 'drop' | 'wait', reason?, notifyThread?, offerButtons?, draftCheck? }.\n  //   drop: not sent (reason says which rule). wait: kept as waiting.\n  //   notifyThread: the Slack thread is told. offerButtons: \"Send template\" / \"Discard\" offered.\n  //   draftCheck: on a send, the AI-written text must pass the draft check and 600-character cap.\n  // enabled: the node's generated @guards list (send_dnc, send_human_owned, send_24h). A rule whose\n  // guard is missing from it is skipped, for the guard-removal run. Omitted means every guard is on.\n  function decide({ conversation, onDnc: dnc, addedThisRun, senderKind, kind, now, enabled }) {\n    if (!SENDER_KINDS.includes(senderKind)) throw new Error('unknown sender_kind: ' + senderKind);\n    if (!KINDS.includes(kind)) throw new Error('unknown kind: ' + kind);\n    const on = (id) => !Array.isArray(enabled) || enabled.includes(id);\n    const onDnc = Boolean(dnc) && on('send_dnc');\n    const rawOwned = Boolean(conversation && conversation.human_owned);\n    const owned = rawOwned && on('send_human_owned'); // the guard covers bot sends only\n    const inWindow = !on('send_24h') || within24h(conversation && conversation.last_customer_at, now);\n\n    if (kind === 'opt_out_confirmation') {\n      // Sent only in the same run that added the number; ignores ownership and the window.\n      return addedThisRun\n        ? { action: 'send' }\n        : { action: 'drop', reason: 'opt_out_not_added_this_run' };\n    }\n\n    if (kind === 'template') {\n      if (onDnc) return { action: 'drop', reason: 'dnc', notifyThread: true };\n      return { action: 'send' }; // templates are allowed outside the window and with the owner\n    }\n\n    if (senderKind === 'owner') {\n      if (onDnc) return { action: 'drop', reason: 'dnc', notifyThread: true };\n      if (!rawOwned) return { action: 'drop', reason: 'not_with_owner', notifyThread: true };\n      if (!inWindow) return { action: 'wait', reason: 'outside_24h', notifyThread: true, offerButtons: true };\n      return { action: 'send' };\n    }\n\n    // Bot, normal\n    if (onDnc) return { action: 'drop', reason: 'dnc' };\n    if (owned) return { action: 'drop', reason: 'human_owned' };\n    if (!inWindow) return { action: 'drop', reason: 'outside_24h' };\n    return { action: 'send', draftCheck: true };\n  }\n\n  module.exports = { decide, within24h };\n  return module.exports;\n})();\nconst { decide, within24h } = __lib['send_rules'];\n// @end-lib\nconst ENABLED_GUARDS = ['send_dnc', 'send_human_owned', 'send_24h']; // @guards\nconst input = $('When Executed by Another Workflow').first().json;\nconst conv = $('conversations: get').first().json;\nconst onDnc = $('do_not_contact: get').all().some((i) => i.json.wa_id === input.wa_id);\nconst d = decide({ conversation: conv, onDnc, addedThisRun: Boolean(input.added_this_run),\n  senderKind: input.sender_kind, kind: input.kind, now: input.now, enabled: ENABLED_GUARDS });\nconst body = input.kind === 'template'\n  ? { messaging_product: 'whatsapp', to: input.wa_id, type: 'template',\n      template: { name: $env.META_TEMPLATE_NAME, language: { code: $env.META_TEMPLATE_LANG } } }\n  : { messaging_product: 'whatsapp', to: input.wa_id, type: 'text', text: { body: input.text, preview_url: false } };\nreturn [{ json: { ...input, decision: d, body } }];"
+        "jsCode": "// @lib send_rules\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['config'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Every number and fixed list the logic modules use (design section 7 onwards, file 7).\n  // Other lib modules read these through require('./config'), never as literals.\n\n  const HAZARD_ORDER = ['opt_out', 'wrong_person', 'abusive', 'prompt_injection', 'wants_human'];\n\n  // Escape options added to the `answer` question at every stage (section 7).\n  const ESCAPE_OPTIONS = ['price_question', 'booking_request', 'other_question', 'off_topic', 'repeat', 'later', 'unclear'];\n\n  // Draft-check problems asked of Jev (section 8). Lead Bot's insurance_talk and price_talk are dropped.\n  const DRAFT_JEV_PROBLEMS = ['unsupported_fact', 'claims_action', 'promise', 'leaks_rules', 'off_brand'];\n  // Draft problems found by code (section 8).\n  const DRAFT_CODE_PROBLEMS = ['empty', 'too_long', 'promises_follow_up', 'price_mismatch', 'unknown_number'];\n\n  const THRESHOLDS = {\n    hazard: 0.5,         // first hazard at or above this decides the route\n    answerConfidence: 0.5, // answer below this counts as unclear\n    draftCheck: 0.3,     // a Jev draft problem at or above this blocks the draft\n  };\n\n  const LIMITS = {\n    unclearInARow: 2,    // this many unclear/off_topic in a row hands off\n    zipAsks: 2,          // address asked this many times without a ZIP hands off\n    draftMaxChars: 600,\n    historyMessages: 6,\n    priceHoursMax: 8,    // price_hours options are 1..8 plus not_stated\n  };\n\n  const JEV = {\n    timeoutMs: 4000,\n    retryWaitsMs: [1000, 2000],\n  };\n\n  const SLOTS = {\n    offered: 3,\n    gapMinutes: 30,\n    minNoticeHours: 12,\n    daysAhead: 14,\n  };\n\n  const BRANCH_B = {\n    scheduleSeconds: 5,\n    leaseSeconds: 60,\n    loopLimitSeconds: 45,\n    stuckRowMinutes: 5,\n  };\n\n  const WINDOW_HOURS = 24; // Meta's customer-service window\n\n  module.exports = {\n    HAZARD_ORDER,\n    ESCAPE_OPTIONS,\n    DRAFT_JEV_PROBLEMS,\n    DRAFT_CODE_PROBLEMS,\n    THRESHOLDS,\n    LIMITS,\n    JEV,\n    SLOTS,\n    BRANCH_B,\n    WINDOW_HOURS,\n  };\n  return module.exports;\n})();\n__lib['send_rules'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // The section 10 table: whether `send` may send a message right now.\n  // Pure: the conversation is re-read by the caller and the clock is passed in.\n\n  const config = require('./config');\n\n  function toMillis(value) {\n    // no instanceof: a Date from n8n's Code-node sandbox is from another realm\n    return value && typeof value.getTime === 'function' ? value.getTime() : new Date(value).getTime();\n  }\n\n  // True if the last customer message is no older than WINDOW_HOURS at `now`.\n  // No customer message at all counts as outside the window.\n  function within24h(lastCustomerAt, now) {\n    if (lastCustomerAt === null || lastCustomerAt === undefined || lastCustomerAt === '') return false;\n    const last = toMillis(lastCustomerAt);\n    const current = toMillis(now);\n    if (Number.isNaN(last) || Number.isNaN(current)) return false;\n    return current - last <= config.WINDOW_HOURS * 3600000;\n  }\n\n  const SENDER_KINDS = ['bot', 'owner'];\n  const KINDS = ['normal', 'opt_out_confirmation', 'template'];\n\n  // Returns { action: 'send' | 'drop' | 'wait', reason?, notifyThread?, offerButtons?, draftCheck? }.\n  //   drop: not sent (reason says which rule). wait: kept as waiting.\n  //   notifyThread: the Slack thread is told. offerButtons: \"Send template\" / \"Discard\" offered.\n  //   draftCheck: on a send, the AI-written text must pass the draft check and 600-character cap.\n  // enabled: the node's generated @guards list (send_dnc, send_human_owned, send_24h). A rule whose\n  // guard is missing from it is skipped, for the guard-removal run. Omitted means every guard is on.\n  function decide({ conversation, onDnc: dnc, addedThisRun, senderKind, kind, now, enabled }) {\n    if (!SENDER_KINDS.includes(senderKind)) throw new Error('unknown sender_kind: ' + senderKind);\n    if (!KINDS.includes(kind)) throw new Error('unknown kind: ' + kind);\n    const on = (id) => !Array.isArray(enabled) || enabled.includes(id);\n    const onDnc = Boolean(dnc) && on('send_dnc');\n    const rawOwned = Boolean(conversation && conversation.human_owned);\n    const owned = rawOwned && on('send_human_owned'); // the guard covers bot sends only\n    const inWindow = !on('send_24h') || within24h(conversation && conversation.last_customer_at, now);\n\n    if (kind === 'opt_out_confirmation') {\n      // Sent only in the same run that added the number; ignores ownership and the window.\n      return addedThisRun\n        ? { action: 'send' }\n        : { action: 'drop', reason: 'opt_out_not_added_this_run' };\n    }\n\n    if (kind === 'template') {\n      if (onDnc) return { action: 'drop', reason: 'dnc', notifyThread: true };\n      return { action: 'send' }; // templates are allowed outside the window and with the owner\n    }\n\n    if (senderKind === 'owner') {\n      if (onDnc) return { action: 'drop', reason: 'dnc', notifyThread: true };\n      if (!rawOwned) return { action: 'drop', reason: 'not_with_owner', notifyThread: true };\n      if (!inWindow) return { action: 'wait', reason: 'outside_24h', notifyThread: true, offerButtons: true };\n      return { action: 'send' };\n    }\n\n    // Bot, normal\n    if (onDnc) return { action: 'drop', reason: 'dnc' };\n    if (owned) return { action: 'drop', reason: 'human_owned' };\n    if (!inWindow) return { action: 'drop', reason: 'outside_24h' };\n    return { action: 'send', draftCheck: true };\n  }\n\n  module.exports = { decide, within24h };\n  return module.exports;\n})();\nconst { decide, within24h } = __lib['send_rules'];\n// @end-lib\nconst ENABLED_GUARDS = ['send_dnc', 'send_human_owned', 'send_24h']; // @guards\nconst input = $('When Executed by Another Workflow').first().json;\nconst conv = $('conversations: get').first().json;\nconst onDnc = $('do_not_contact: get').all().some((i) => i.json.wa_id === input.wa_id);\nconst d = decide({ conversation: conv, onDnc, addedThisRun: Boolean(input.added_this_run),\n  senderKind: input.sender_kind, kind: input.kind, now: input.now, enabled: ENABLED_GUARDS });\nconst body = input.kind === 'template'\n  ? { messaging_product: 'whatsapp', to: input.wa_id, type: 'template',\n      template: { name: $env.META_TEMPLATE_NAME, language: { code: $env.META_TEMPLATE_LANG } } }\n  : { messaging_product: 'whatsapp', to: input.wa_id, type: 'text', text: { body: input.text, preview_url: false } };\n// The Twilio route (WA_PROVIDER=twilio, used while Meta's own number can't send) posts a form instead.\nconst provider = String($env.WA_PROVIDER || 'meta').toLowerCase() === 'twilio' ? 'twilio' : 'meta';\nconst enc = (o) => Object.entries(o).filter(([, v]) => v !== undefined && v !== null && v !== '')\n  .map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(String(v))).join('&');\nconst twilioForm = provider !== 'twilio' ? '' : enc({\n  From: 'whatsapp:' + $env.TWILIO_WHATSAPP_FROM, To: 'whatsapp:+' + input.wa_id,\n  ...(input.kind === 'template' ? { ContentSid: $env.TWILIO_TEMPLATE_SID } : { Body: input.text }),\n  StatusCallback: $env.TWILIO_WEBHOOK_URL || String($env.WEBHOOK_URL || '').replace(/\\/*$/, '/') + 'webhook/ingress-twilio',\n});\nreturn [{ json: { ...input, decision: d, body, provider, twilio_form: twilioForm } }];"
       },
       "position": [
         672,
@@ -642,7 +678,7 @@
       "id": "ef90c3fe-6a7d-401b-ad69-f1f70256a515",
       "name": "send:result",
       "parameters": {
-        "jsCode": "const input = $('send:decide').first().json;\nconst r = $input.first().json;\nconst failed = Boolean(r.error);\nconst now = input.now;\nconst replyMs = input.received_at ? Date.parse(now) - Date.parse(input.received_at) : null;\nreturn [{ json: {\n  now, wa_id: input.wa_id, direction: 'out', author: input.sender_kind,\n  kind: failed ? 'send_error' : input.kind, text: input.text || '', route: input.route, stage: input.stage,\n  classifier: input.classifier, draft: input.draft, problems: input.problems, facts_version: input.facts_version,\n  input_tokens: input.input_tokens, output_tokens: input.output_tokens, reply_ms: replyMs,\n  meta_message_id: failed ? null : (r.messages && r.messages[0] && r.messages[0].id) || null,\n  error: failed ? JSON.stringify(r.error).slice(0, 500) : null,\n} }];"
+        "jsCode": "const input = $('send:decide').first().json;\nconst r = $input.first().json;\nconst failed = Boolean(r.error);\nconst now = input.now;\nconst replyMs = input.received_at ? Date.parse(now) - Date.parse(input.received_at) : null;\nreturn [{ json: {\n  now, wa_id: input.wa_id, direction: 'out', author: input.sender_kind,\n  kind: failed ? 'send_error' : input.kind, text: input.text || '', route: input.route, stage: input.stage,\n  classifier: input.classifier, draft: input.draft, problems: input.problems, facts_version: input.facts_version,\n  input_tokens: input.input_tokens, output_tokens: input.output_tokens, reply_ms: replyMs,\n  // Meta's message ID, or Twilio's message SID on the Twilio route\n  meta_message_id: failed ? null : (r.messages && r.messages[0] && r.messages[0].id) || r.sid || null,\n  error: failed ? JSON.stringify(r.error).slice(0, 500) : null,\n} }];"
       },
       "position": [
         1344,
@@ -766,6 +802,70 @@
       ],
       "type": "n8n-nodes-base.code",
       "typeVersion": 2
+    },
+    {
+      "id": "198b7add-d3b1-45fe-8921-2576747f6390",
+      "name": "provider: twilio?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        -360
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "9b843ddd",
+              "leftValue": "={{ $json.provider === 'twilio' }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "ac6daf50-3031-494f-a699-146d53f79601",
+      "name": "twilio:send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1340,
+        -520
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.twilio.com/2010-04-01/Accounts/{{ $env.TWILIO_ACCOUNT_SID }}/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/x-www-form-urlencoded",
+        "body": "={{ $json.twilio_form }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "Twilio"
+        }
+      },
+      "onError": "continueErrorOutput"
     }
   ],
   "settings": {

@@ -201,6 +201,7 @@ flowchart LR
 
 | Workflow | Started by | Job |
 | --- | --- | --- |
+| `ingress-twilio` | Webhook (POST) | The Twilio route (P10): Twilio's signature check (`X-Twilio-Signature`, HMAC-SHA1 over the URL and sorted form fields); an incoming message becomes the same inbox event as Meta's; a `failed` or `undelivered` status callback becomes `send_failed`; other statuses are dropped |
 | `ingress-whatsapp` | Webhook (GET and POST) | Meta's verify handshake; signature check; drop status events except `failed`; duplicate check; hand each message to its handler (section 5) |
 | `ingress-slack-events` | Webhook | Slack's URL check; signature and timestamp check; keep owner messages in bot threads; duplicate check; hand to `owner-relay` |
 | `ingress-slack-interactivity` | Webhook | Signature check on button clicks; duplicate check; hand to `owner-release` |
@@ -425,7 +426,7 @@ Then it creates the event with that ID, the service and the address. A conflict 
 
 *   each live adapter is replaced by its fake from `workflows/fakes/`, under the same workflow ID;
 *   `ingress-replay` is added;
-*   the hosts of outside calls (`graph.facebook.com`, `api.anthropic.com`, and Jev's if the node allows it) are rewritten to the mock server; if the Jev node has no settable base URL, a fake `classify` that calls the mock is used instead;
+*   the hosts of outside calls (`graph.facebook.com`, `api.anthropic.com`, `api.twilio.com`, and Jev's if the node allows it) are rewritten to the mock server; if the Jev node has no settable base URL, a fake `classify` that calls the mock is used instead;
 *   every node named `clock:now` is replaced by an HTTP Request that gets the scenario's time from the mock server;
 *   each `--remove-guard <id>` is applied (below).
 
@@ -435,14 +436,14 @@ Then it creates the event with that ID, the service and the address. A conflict 
 
 | Group | Guard IDs |
 | --- | --- |
-| Ingress | `sig_meta`, `sig_slack`, `dedup` |
+| Ingress | `sig_meta`, `sig_slack`, `sig_twilio`, `dedup` |
 | Gate | `keyword_stop`, `dnc`, `optout_phrase`, `human_owned`, `closed` |
 | Classifier | `hazard_opt_out`, `hazard_wrong_person`, `hazard_abusive`, `hazard_prompt_injection`, `hazard_wants_human`, `missing_field`, `offered_only` |
 | Draft check | `dc_unsupported_fact`, `dc_claims_action`, `dc_promise`, `dc_leaks_rules`, `dc_off_brand`, `dc_empty`, `dc_too_long`, `dc_follow_up`, `dc_price`, `dc_unknown_number` |
 | Send | `send_dnc`, `send_human_owned`, `send_24h` |
 | Booking | `book_already`, `book_allowed`, `book_free`, `zip_area` |
 
-M (the guard count in Goal 1) is the number of rows in this table's lists: 32. If spike 2 rules out the signature checks, `sig_meta` and `sig_slack` are dropped and M is 30.
+M (the guard count in Goal 1) is the number of rows in this table's lists: 33 (32 until P10 added `sig_twilio`). If spike 2 rules out the signature checks, `sig_meta` and `sig_slack` are dropped and M is 31.
 
 **Replay harness.** `tests/replay.py` runs against the dry-run instance. For each scenario in `tests/scenarios.toml`: delete all rows from the data tables, send the scenario to the mock server (`POST /_scenario`), send its events (validly signed, unsigned, or with a wrong signature) to the real ingress webhooks, or to `ingress-replay` for events whose signature doesn't matter to the scenario; wait until n8n reports no running or queued executions (and, in branch B, until the inbox has no `received` rows); then check the route, the sends (`GET /_calls`), the rows, the Slack posts, the HubSpot calls and the guard problems.
 
@@ -669,6 +670,7 @@ Spikes come first; each records its result in `docs/spikes.md`, and the chosen b
 | P7 | `crm-sync`, `hubspot-adapter` (live and fake), `sheets-log` | Author + Agent | 24, 25 |
 | P8 | Live-model tier, guard-removal run, adapter contract test, full hand test, metrics, README; also the live adapters and the `error` workflow, which no earlier step listed | Agent; Author runs hand tests | 23, 24, 31, 33 (`hand-test.md`), 34, 35 |
 | P9 | `doctor`; also `scripts/run_doctor.py`, `tests/doctor_check.py`, the mock's Graph reads and the `META_WABA_ID` env value | Author + Agent | 24 |
+| P10 | The Twilio route, a stand-in while Meta's business verification is pending: `ingress-twilio`, `send` switching on `WA_PROVIDER` (`meta` by default, or `twilio`), the mock's Twilio Messages API, `sig_twilio`, and `tests/replay.py --provider twilio`. Twilio's sandbox is a shared number that each tester joins with a code, and the session ends 3 days after joining | Agent | 24, 27, 28, 29 |
 
 Until P1's captures exist, the Agent uses hand-written webhook bodies in Meta's documented format; they are replaced by redacted captures in P1.
 

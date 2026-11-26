@@ -15,6 +15,7 @@ Service stand-ins (paths as the dry-run deployment rewrites them):
     POST /<version>/<phone_number_id>/messages        Meta send
     POST /v1/systemone                                TypeSafe System One (Jev)
     POST /v1/messages                                 Anthropic Messages
+    POST /2010-04-01/Accounts/<sid>/Messages.json     Twilio send (the Twilio route), form body
     POST /adapter/{calendar,sheets,slack,hubspot}     fake adapters, body { op, ... }
     GET  /<version>/me, /me/permissions, /<phone_number_id>, /<waba_id>/subscribed_apps,
          /<waba_id>/message_templates, /<waba_id>    Graph reads made by the doctor workflow
@@ -28,6 +29,7 @@ Scenario body:
       slack: { unavailable },
       hubspot: { unavailable, contacts: {phone: contact_id} },
       meta: { refuse_outside_window },
+      twilio: { error: { code, message } },
       meta_setup: { token_expired, scopes: [...], phone: {...}, subscribed_apps: [...],
                     templates: [...], waba: {...} } }
 
@@ -295,6 +297,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._anthropic(body)
             if len(parts) == 3 and parts[2] == "messages":
                 return self._meta(parts[1], body)
+            if len(parts) == 4 and parts[:2] == ["2010-04-01", "Accounts"] and parts[3] == "Messages.json":
+                return self._twilio(parts[2], body)
         self._json(404, {"error": f"no mock route for POST {path}"})
 
     # each of these runs with STATE.lock held
@@ -359,6 +363,18 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, {"data": [t for t in setup["templates"] if not name or t["name"] == name]})
         return self._json(400, {"error": {"message": f"Unsupported get request (mock: {op})", "type": "GraphMethodException",
                                           "code": 100, "error_subcode": 33, "fbtrace_id": "mock"}})
+
+    def _twilio(self, account_sid, body):
+        """Twilio's Messages API. The form body arrives as _raw, since _body only parses JSON."""
+        form = dict(urllib.parse.parse_qsl(body.get("_raw", ""), keep_blank_values=True))
+        STATE.record("twilio", "template" if form.get("ContentSid") else "text",
+                     {**form, "account_sid": account_sid, "basic_auth": (self.headers.get("Authorization") or "").startswith("Basic ")})
+        err = STATE.section("twilio").get("error")
+        if err:
+            return self._json(400, {"code": err.get("code", 21211), "message": err.get("message", "scripted error"),
+                                    "more_info": "https://www.twilio.com/docs/errors", "status": 400})
+        self._json(201, {"sid": f"SMMOCK{next(STATE.ids):026d}", "status": "queued", "to": form.get("To"),
+                         "from": form.get("From"), "body": form.get("Body"), "account_sid": account_sid})
 
     def _passthrough(self, service, path, body):
         """Live-model tier: forward to the real service with the caller's auth headers."""

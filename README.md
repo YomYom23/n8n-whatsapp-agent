@@ -24,12 +24,12 @@ was sent and written.
 
 | Run | Result | What it means |
 | --- | --- | --- |
-| Fixed tier | **passed 54 of 54** | Model answers and AI drafts are scripted, including drafts that are bad on purpose. Every guard has at least one scenario it must catch. |
-| Guard-removal run | **32 of 32 guards** caused their scenario to fail when removed | Each guard is removed in turn and its scenarios are run again. A guard counts only if removing it makes a scenario fail. |
+| Fixed tier | **passed 60 of 60** | Model answers and AI drafts are scripted, including drafts that are bad on purpose. Every guard has at least one scenario it must catch. |
+| Guard-removal run | **32 of 32 guards** caused their scenario to fail when removed; the 33rd, `sig_twilio` (added with the Twilio route), was removed on its own and both its scenarios failed | Each guard is removed in turn and its scenarios are run again. A guard counts only if removing it makes a scenario fail. |
 | Live-model tier | _not run yet_ | Real Jev and Haiku calls, everything else still faked. Reported on its own, with no pass threshold, and never added to the fixed tier. |
 
-The 32 guards are listed in [the design](docs/designs/whatsapp-agent.md#13-replay-test-dry-run-deployment-and-guards):
-webhook signatures and duplicates; the gate (STOP and START keywords, do-not-contact, opt-out
+The 33 guards are listed in [the design](docs/designs/whatsapp-agent.md#13-replay-test-dry-run-deployment-and-guards):
+webhook signatures (Meta, Slack, Twilio) and duplicates; the gate (STOP and START keywords, do-not-contact, opt-out
 phrases, owner-held and closed conversations); the classifier's hazards and its missing-field rule;
 the ten draft checks; the three send rules; and the booking checks.
 
@@ -95,6 +95,13 @@ adapters call each API with an HTTP Request node and an n8n-managed credential, 
 error codes map exactly onto the contract the fakes follow. `tests/adapter_contract.py` checks both
 against that contract. Any failed run goes to the `error` workflow, which alerts the owner in Slack,
 and by email if Slack itself is down.
+
+**The Twilio route.** While Meta's business verification is pending, the test number can't send, so
+there is a stand-in: `ingress-twilio` takes messages from the Twilio WhatsApp Sandbox (checking
+Twilio's signature), and `send` posts replies to Twilio's Messages API when `WA_PROVIDER=twilio`.
+Everything between the two is unchanged. The sandbox is a shared Twilio number that each tester joins
+by sending a code, and the session ends 3 days after joining, so it suits hand tests, not customers.
+`python tests/replay.py --provider twilio` runs the scenarios for the send side.
 
 The `doctor` workflow answers "why don't my messages reach n8n?" without sending anything. It runs
 only by hand and makes read-only Graph API calls: whether the token works and has the WhatsApp
@@ -194,6 +201,7 @@ python scripts/setup_tables.py --instance dryrun    # data tables
 python scripts/deploy_workflows.py --instance dryrun
 python tests/replay.py                              # fixed tier
 python tests/replay.py --remove-guards              # guard-removal run
+python tests/replay.py --provider twilio            # send's Twilio route (recreates n8n with WA_PROVIDER=twilio)
 python scripts/set_model_keys.py                    # real Jev and Anthropic keys into dry-run (hidden prompt)
 python tests/replay.py --tier live                  # live-model tier
 python tests/adapter_contract.py                    # live adapters against their fakes

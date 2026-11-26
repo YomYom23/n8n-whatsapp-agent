@@ -1,0 +1,476 @@
+{
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "clock:now",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "clock:now": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "twilio:verify",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "guard:sig_twilio": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sig:log-input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "has events?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "has events?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "ingress:rows",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "respond: 200 (no events)",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "inbox: insert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: 200",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "ingress:rows": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "inbox: insert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "twilio:verify": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "guard:sig_twilio",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "log: sig_rejected": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond: 401",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "sig:log-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "log: sig_rejected",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "TwiIn6Hq9Vd2Kc4P",
+  "name": "ingress-twilio",
+  "nodes": [
+    {
+      "id": "0fc36729-37d1-44fc-b043-904c5a55459b",
+      "name": "Webhook",
+      "parameters": {
+        "httpMethod": "POST",
+        "options": {
+          "rawBody": true
+        },
+        "path": "ingress-twilio",
+        "responseMode": "responseNode"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "37ddb639-951a-4479-8f6f-bfc68a7b6757"
+    },
+    {
+      "id": "c1526d18-33b8-4069-b20c-e2a6dd996f8b",
+      "name": "clock:now",
+      "parameters": {
+        "jsCode": "return [{ json: { now: new Date().toISOString() } }];"
+      },
+      "position": [
+        220,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "9480d3c2-e114-46ef-a3ac-131c83f13d97",
+      "name": "guard:sig_twilio",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "4dkv0br8",
+              "leftValue": "={{ !$json.sigOk }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        660,
+        100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "424dd7b8-1def-4e89-979c-ccaeaa0ab606",
+      "name": "has events?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "za463a64",
+              "leftValue": "={{ $json.events.length > 0 }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        880,
+        200
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "f4ddbd3f-beb4-4561-aa76-1c5956620a66",
+      "name": "inbox: insert",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "external_id",
+              "id": "external_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "received_at",
+              "id": "received_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "payload",
+              "id": "payload",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {}
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "inbox",
+          "mode": "list",
+          "value": "__table:inbox__"
+        },
+        "operation": "insert",
+        "resource": "row"
+      },
+      "position": [
+        1320,
+        150
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "5d1b976c-e012-408c-9e65-fb2e467509d9",
+      "name": "ingress:rows",
+      "parameters": {
+        "jsCode": "const v = $input.first().json;\nreturn v.events.map((e) => ({ json: { external_id: e.external_id, source: e.source, kind: e.kind,\n  wa_id: e.wa_id, slack_thread_ts: '', received_at: v.now, status: 'received', execution_id: '',\n  payload: JSON.stringify(e) } }));"
+      },
+      "position": [
+        1100,
+        150
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "7c1aaba5-8836-48a3-b2ce-70a8ec6db378",
+      "name": "twilio:verify",
+      "parameters": {
+        "jsCode": "// @lib signatures, events\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['signatures'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Webhook signature checks (design section 4). Pure: the crypto module and the current time are passed in.\n  // Both functions return true or false and never throw on bad input.\n\n  const META_PREFIX = 'sha256=';\n  const SLACK_PREFIX = 'v0=';\n  // Slack refuses requests whose timestamp is more than 5 minutes away from now (past or future).\n  const SLACK_MAX_AGE_SECONDS = 300;\n\n  // No instanceof here: n8n runs Code nodes in a sandbox, so a Buffer made there comes from another\n  // realm and fails \"instanceof Uint8Array\". ArrayBuffer.isView works across realms.\n  function isBody(rawBody) {\n    return typeof rawBody === 'string' || (rawBody != null && ArrayBuffer.isView(rawBody));\n  }\n\n  // Compares two hex strings in constant time, after comparing lengths.\n  function safeEqualHex(expectedHex, givenHex, crypto) {\n    const expected = Buffer.from(expectedHex, 'utf8');\n    const given = Buffer.from(givenHex.toLowerCase(), 'utf8');\n    if (expected.length !== given.length) return false;\n    return crypto.timingSafeEqual(expected, given);\n  }\n\n  function nowMs(now) {\n    if (typeof now === 'number') return now;\n    if (now && typeof now.getTime === 'function') return now.getTime(); // a Date, from any realm\n    if (now && typeof now.toMillis === 'function') return now.toMillis();\n    return NaN;\n  }\n\n  // Meta: X-Hub-Signature-256 is \"sha256=\" + HMAC-SHA256 hex of the raw request bytes with the app secret.\n  // The check must run over the raw bytes: Meta escapes non-ASCII text as unicode escape sequences,\n  // so re-serialising the parsed body changes the bytes.\n  function verifyMeta(rawBody, header, secret, crypto) {\n    try {\n      if (!isBody(rawBody) || typeof header !== 'string' || typeof secret !== 'string' || !secret) return false;\n      if (!header.startsWith(META_PREFIX)) return false;\n      const given = header.slice(META_PREFIX.length);\n      const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');\n      return safeEqualHex(expected, given, crypto);\n    } catch (e) {\n      return false;\n    }\n  }\n\n  // Slack: X-Slack-Signature is \"v0=\" + HMAC-SHA256 hex of \"v0:<timestamp>:<raw body>\" with the signing secret.\n  // timestamp is X-Slack-Request-Timestamp (seconds); now is the current time in milliseconds (a Date also works).\n  function verifySlack(rawBody, timestamp, header, secret, now, crypto) {\n    try {\n      if (!isBody(rawBody) || typeof header !== 'string' || typeof secret !== 'string' || !secret) return false;\n      const ts = String(timestamp === undefined || timestamp === null ? '' : timestamp).trim();\n      if (!/^\\d{1,15}$/.test(ts)) return false;\n      const nowMillis = nowMs(now);\n      if (!Number.isFinite(nowMillis)) return false;\n      if (Math.abs(nowMillis / 1000 - Number(ts)) > SLACK_MAX_AGE_SECONDS) return false;\n      if (!header.startsWith(SLACK_PREFIX)) return false;\n      const given = header.slice(SLACK_PREFIX.length);\n      const expected = crypto\n        .createHmac('sha256', secret)\n        .update('v0:' + ts + ':')\n        .update(rawBody)\n        .digest('hex');\n      return safeEqualHex(expected, given, crypto);\n    } catch (e) {\n      return false;\n    }\n  }\n\n  // Twilio: X-Twilio-Signature is base64 HMAC-SHA1, keyed with the account's Auth Token, of the full URL\n  // Twilio called followed by every POST parameter's name and value, sorted by name (values of a repeated\n  // name sorted too). url must be exactly the URL Twilio was given; params is [[name, value], ...].\n  function verifyTwilio(url, params, header, authToken, crypto) {\n    try {\n      if (typeof url !== 'string' || !url || !Array.isArray(params) || typeof header !== 'string' || !header) return false;\n      if (typeof authToken !== 'string' || !authToken) return false;\n      const sorted = params.map((p) => [String(p[0]), String(p[1])])\n        .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));\n      const data = sorted.reduce((acc, p) => acc + p[0] + p[1], url);\n      const expected = Buffer.from(crypto.createHmac('sha1', authToken).update(Buffer.from(data, 'utf8')).digest('base64'), 'utf8');\n      const given = Buffer.from(header, 'utf8');\n      if (expected.length !== given.length) return false;\n      return crypto.timingSafeEqual(expected, given);\n    } catch (e) {\n      return false;\n    }\n  }\n\n  module.exports = { verifyMeta, verifySlack, verifyTwilio };\n  return module.exports;\n})();\n__lib['events'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Turns webhook bodies into the internal event format (design section 4):\n  //   { source, external_id, wa_id, timestamp (ISO), kind, text, message_type?, error? }\n  // kind is 'text', 'unsupported' (images, voice notes, reactions, buttons and the rest) or\n  // 'send_failed' (a Meta status event with status 'failed'). Other status events are dropped.\n\n  function isoFromSeconds(seconds) {\n    const n = Number(seconds);\n    return Number.isFinite(n) && n > 0 ? new Date(n * 1000).toISOString() : null;\n  }\n\n  // body: the parsed Meta webhook body. Returns { events, dropped } where dropped counts the\n  // status events (sent, delivered, read) and changes for other fields that were skipped.\n  function metaEvents(body) {\n    const events = [];\n    let dropped = 0;\n    const entries = body && Array.isArray(body.entry) ? body.entry : [];\n    for (const entry of entries) {\n      for (const change of Array.isArray(entry.changes) ? entry.changes : []) {\n        const value = change && change.value;\n        if (!change || change.field !== 'messages' || !value) {\n          dropped++;\n          continue;\n        }\n        for (const m of Array.isArray(value.messages) ? value.messages : []) {\n          if (!m || !m.id || !m.from) {\n            dropped++;\n            continue;\n          }\n          const isText = m.type === 'text' && m.text && typeof m.text.body === 'string';\n          events.push({\n            source: 'meta',\n            external_id: String(m.id),\n            wa_id: String(m.from),\n            timestamp: isoFromSeconds(m.timestamp),\n            kind: isText ? 'text' : 'unsupported',\n            text: isText ? m.text.body : '',\n            message_type: String(m.type || 'unknown'),\n          });\n        }\n        for (const s of Array.isArray(value.statuses) ? value.statuses : []) {\n          if (!s || s.status !== 'failed' || !s.id) {\n            dropped++;\n            continue;\n          }\n          const err = Array.isArray(s.errors) && s.errors[0] ? s.errors[0] : {};\n          events.push({\n            source: 'meta',\n            // a message can fail only once, so its ID plus the status is unique\n            external_id: String(s.id) + ':failed',\n            wa_id: String(s.recipient_id || ''),\n            timestamp: isoFromSeconds(s.timestamp),\n            kind: 'send_failed',\n            text: '',\n            error: { code: err.code == null ? null : err.code, title: String(err.title || err.message || '') },\n          });\n        }\n      }\n    }\n    return { events, dropped };\n  }\n\n  const REPLAY_KINDS = ['text', 'unsupported', 'send_failed', 'owner_message', 'owner_action'];\n\n  // ingress-replay: the body is already an internal event. Returns the event, or null if a required\n  // field is missing or the kind is unknown. source defaults to 'meta', the path the event stands in for.\n  function replayEvent(body) {\n    if (!body || typeof body !== 'object') return null;\n    const { external_id: id, wa_id: waId, kind } = body;\n    if (typeof id !== 'string' || id === '' || typeof kind !== 'string' || !REPLAY_KINDS.includes(kind)) return null;\n    if ((kind === 'text' || kind === 'unsupported') && (typeof waId !== 'string' || waId === '')) return null;\n    return {\n      ...body,\n      source: typeof body.source === 'string' && body.source ? body.source : 'meta',\n      text: typeof body.text === 'string' ? body.text : '',\n      timestamp: typeof body.timestamp === 'string' ? body.timestamp : null,\n    };\n  }\n\n  // Slack Events API body (design section 4). Returns { challenge } for Slack's URL check, otherwise\n  // { events, dropped }: only new plain messages posted as a reply in a thread become owner_message\n  // events. Edits, deletions, file shares, joins (any subtype) and messages from a bot or app are dropped.\n  // The external ID is Slack's event_id, so a Slack retry is a duplicate. Field names follow Slack's\n  // documented format (spike 4 was not run against a live app).\n  function slackEvents(body) {\n    if (!body || typeof body !== 'object') return { events: [], dropped: ['not an object'] };\n    if (body.type === 'url_verification') return { challenge: String(body.challenge || ''), events: [], dropped: [] };\n    const e = body.event;\n    if (body.type !== 'event_callback' || !e || typeof e !== 'object') return { events: [], dropped: ['not an event callback'] };\n    const why = e.type !== 'message' ? 'not a message'\n      : e.subtype ? 'subtype ' + e.subtype\n      : e.bot_id || e.app_id ? 'from a bot or app'\n      : !e.thread_ts || e.thread_ts === e.ts ? 'not a thread reply'\n      : typeof body.event_id !== 'string' || !body.event_id ? 'no event_id'\n      : null;\n    if (why) return { events: [], dropped: [why] };\n    return {\n      events: [{\n        source: 'slack', external_id: body.event_id, kind: 'owner_message', wa_id: '',\n        slack_channel: e.channel || '', slack_thread_ts: e.thread_ts, slack_ts: e.ts, slack_user: e.user || '',\n        text: typeof e.text === 'string' ? e.text : '', timestamp: null,\n      }],\n      dropped: [],\n    };\n  }\n\n  // A Slack block_actions payload (the JSON in the form field \"payload\") -> one owner_action event, or\n  // null. The thread is the message's thread, or the message itself for buttons on a thread's first post.\n  // Each click has its own action_ts, so a double click is two events; the handler makes the second a no-op.\n  function slackAction(payload) {\n    if (!payload || typeof payload !== 'object' || payload.type !== 'block_actions') return null;\n    const a = Array.isArray(payload.actions) ? payload.actions[0] : null;\n    if (!a || typeof a.action_id !== 'string') return null;\n    const c = payload.container || {};\n    const m = payload.message || {};\n    const thread = c.thread_ts || m.thread_ts || c.message_ts || m.ts;\n    if (!thread) return null;\n    const user = (payload.user && payload.user.id) || '';\n    return {\n      source: 'slack', external_id: 'action:' + (a.action_ts || '') + ':' + user + ':' + a.action_id, kind: 'owner_action', wa_id: '',\n      action_id: a.action_id, value: a.value === undefined ? '' : String(a.value), slack_user: user,\n      slack_channel: c.channel_id || (payload.channel && payload.channel.id) || '', slack_thread_ts: thread,\n      slack_ts: c.message_ts || m.ts || '', text: '', timestamp: null,\n    };\n  }\n\n  // A form-encoded body as [[name, value], ...] in body order, or null if a part can't be decoded.\n  // Written by hand: n8n's Code-node sandbox has no URLSearchParams.\n  function parseForm(rawForm) {\n    const out = [];\n    const dec = (s) => decodeURIComponent(s.replace(/\\+/g, ' '));\n    try {\n      for (const pair of String(rawForm || '').split('&')) {\n        if (pair === '') continue;\n        const eq = pair.indexOf('=');\n        out.push(eq === -1 ? [dec(pair), ''] : [dec(pair.slice(0, eq)), dec(pair.slice(eq + 1))]);\n      }\n    } catch (e) {\n      return null;\n    }\n    return out;\n  }\n\n  // The JSON in the \"payload\" field of a form-encoded Slack interactivity body, or null.\n  function slackFormPayload(rawForm) {\n    const pair = (parseForm(rawForm) || []).find((p) => p[0] === 'payload');\n    if (!pair) return null;\n    try {\n      return JSON.parse(pair[1]);\n    } catch (e) {\n      return null;\n    }\n  }\n\n  const TWILIO_FAILED = ['failed', 'undelivered'];\n  const waIdFromAddress = (addr) => String(addr || '').replace(/^whatsapp:/, '').replace(/\\D/g, '');\n\n  // A Twilio WhatsApp webhook (the Twilio route, used while Meta's own number can't send). params is\n  // parseForm's output. Two kinds of request arrive at the same URL:\n  //   - an incoming message (From = whatsapp:+<number>): one 'text' or 'unsupported' event, keyed by MessageSid;\n  //   - a status callback for a message we sent (it has MessageStatus): 'failed' and 'undelivered' become\n  //     send_failed, keyed by MessageSid + ':failed' as for Meta; other statuses are dropped.\n  // A request for another Twilio account (AccountSid differs from accountSid) gives no events.\n  function twilioEvents(params, accountSid) {\n    const f = {};\n    for (const [k, v] of params || []) if (!(k in f)) f[k] = v;\n    if (accountSid && f.AccountSid !== accountSid) return { events: [], dropped: 1 };\n    const sid = f.MessageSid || f.SmsMessageSid || '';\n    if (!sid) return { events: [], dropped: 1 };\n    const status = f.MessageStatus || '';\n    if (status && status !== 'received') {\n      if (!TWILIO_FAILED.includes(status)) return { events: [], dropped: 1 };\n      return { events: [{\n        source: 'twilio', external_id: sid + ':failed', wa_id: waIdFromAddress(f.To), timestamp: null,\n        kind: 'send_failed', text: '',\n        error: { code: f.ErrorCode ? Number(f.ErrorCode) : null, title: String(f.ErrorMessage || status) },\n      }], dropped: 0 };\n    }\n    const waId = waIdFromAddress(f.From) || String(f.WaId || '').replace(/\\D/g, '');\n    if (!waId || !/^whatsapp:/.test(String(f.From || ''))) return { events: [], dropped: 1 };\n    const media = Number(f.NumMedia || 0) > 0;\n    const type = f.MessageType || (media ? 'media' : 'text');\n    const isText = !media && type === 'text' && typeof f.Body === 'string' && f.Body !== '';\n    return { events: [{\n      source: 'twilio', external_id: sid, wa_id: waId, timestamp: null,\n      kind: isText ? 'text' : 'unsupported', text: isText ? f.Body : '', message_type: String(type),\n    }], dropped: 0 };\n  }\n\n  module.exports = { metaEvents, replayEvent, slackEvents, slackAction, slackFormPayload, parseForm, twilioEvents };\n  return module.exports;\n})();\nconst { verifyMeta, verifySlack, verifyTwilio } = __lib['signatures'];\nconst { metaEvents, replayEvent, slackEvents, slackAction, slackFormPayload, parseForm, twilioEvents } = __lib['events'];\n// @end-lib\n// Twilio route (used while Meta's own number can't send). Twilio signs the exact URL it was given plus\n// the form parameters, so the URL is rebuilt from WEBHOOK_URL (or TWILIO_WEBHOOK_URL when Twilio is\n// pointed somewhere else), not read from the request, which Caddy and ngrok have rewritten.\nconst crypto = require('crypto');\nconst req = $('Webhook').first();\nconst params = parseForm(Buffer.from(req.binary.data.data, 'base64').toString('utf8')) || [];\nconst url = $env.TWILIO_WEBHOOK_URL || String($env.WEBHOOK_URL || '').replace(/\\/*$/, '/') + 'webhook/ingress-twilio';\nconst sigOk = verifyTwilio(url, params, req.json.headers['x-twilio-signature'], $env.TWILIO_AUTH_TOKEN, crypto);\nconst { events } = sigOk ? twilioEvents(params, $env.TWILIO_ACCOUNT_SID) : { events: [] };\nreturn [{ json: { sigOk, events, now: $('clock:now').first().json.now } }];"
+      },
+      "position": [
+        440,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "3d8c920d-2345-479e-8cd8-2d29ab5f9166",
+      "name": "log: sig_rejected",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "log",
+          "mode": "list",
+          "value": "MmzCFtBICmiFgEDP"
+        }
+      },
+      "position": [
+        1100,
+        -50
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "executeOnce": true,
+      "id": "a727a502-5033-4caf-b602-c5cde38a7c3f",
+      "name": "respond: 200",
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/xml"
+              }
+            ]
+          }
+        }
+      },
+      "position": [
+        1540,
+        150
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "03d04cea-b3d4-4bf6-a068-7f91d86ffbb3",
+      "name": "respond: 200 (no events)",
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/xml"
+              }
+            ]
+          }
+        }
+      },
+      "position": [
+        1100,
+        350
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "4ec731e6-8501-4d11-bac0-a6f9279f0a33",
+      "name": "respond: 401",
+      "parameters": {
+        "options": {
+          "responseCode": 401
+        },
+        "respondWith": "noData"
+      },
+      "position": [
+        1320,
+        -50
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "a95deabe-8acc-4f57-bd41-fa553050b9d3",
+      "name": "sig:log-input",
+      "parameters": {
+        "jsCode": "return [{ json: { now: $json.now, direction: 'event', author: 'system', kind: 'sig_rejected', text: '' } }];"
+      },
+      "position": [
+        880,
+        -50
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1",
+    "errorWorkflow": "ErrWf7Kq2Lm9Xp4T"
+  }
+}

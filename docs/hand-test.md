@@ -12,6 +12,10 @@ The hand-test window is also the window `scripts/report_metrics.py` reads for th
 *   Meta can deliver from the test number. **Blocked as of 2026-11-25:** sends fail with 131031
     "Business Account locked" until business verification passes (see `docs/spikes.md`, S0). If
     verification fails, the fallback is the Twilio WhatsApp Sandbox, and the README says so.
+    **Twilio route (built 2026-11-26):** with `WA_PROVIDER=twilio` in `deploy/live.env`, the sandbox's
+    "When a message comes in" URL set to `https://<N8N_HOST>/webhook/ingress-twilio` (POST), and the
+    phone joined to the sandbox, the same script runs over Twilio. Rejoin every 3 days. Record which
+    route each run used.
 *   The live instance runs the workflows from git (`python scripts/deploy_workflows.py --instance live`),
     and the live adapters (calendar, Sheets, Slack, HubSpot) point at test accounts.
 *   `python tests/adapter_contract.py` passes.

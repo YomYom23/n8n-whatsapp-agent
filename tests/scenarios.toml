@@ -1,7 +1,7 @@
 # Replay scenarios (design file 29). Run with: python tests/replay.py
 # Each scenario is tagged with the build step that enables it. Without --upto, the harness runs
 # every scenario up to current_step, so raise it as each step's workflows land.
-current_step = "P7"
+current_step = "P10"
 
 # --- P2: harness plumbing ------------------------------------------------------
 # No events. Proves the harness can load the mock, clear and count every table, and read calls.
@@ -1616,3 +1616,220 @@ sends = [{ kind = "normal" }]
 slack_posts = 1
 calls = { "hubspot.find_contact" = 1, "hubspot.create_contact" = 0, "sheets.append_log" = 2 }
 rows = { message_log = 2 }
+
+
+# --- P10: the Twilio route (stand-in while Meta's own number can't send) ------------
+# ingress-twilio works whatever WA_PROVIDER is, so these run in the normal (meta) run: the reply to a
+# Twilio message goes out through Meta here. The provider = "twilio" scenarios below cover send's
+# Twilio route and run only with: python tests/replay.py --provider twilio
+
+# A signed Twilio message reaches the conversation like a Meta one: STOP opts the number out.
+[[scenario]]
+name = "twilio_inbound_stop"
+step = "P10"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "valid"
+text = "STOP"
+
+[scenario.expect]
+route = "keyword_stop"
+sends = [{ kind = "normal", text_contains = "opted out", to = "15550000001" }]
+rows = { do_not_contact = 1, message_log = 2 }
+
+
+# A wrong X-Twilio-Signature is refused with 401 and nothing reaches the inbox.
+[[scenario]]
+name = "sig_twilio_wrong_signature"
+step = "P10"
+guards = ["sig_twilio"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "wrong"
+text = "hello"
+status = 401
+
+[scenario.expect]
+sends = []
+rows = { inbox = 0, message_log = 1 }
+
+
+# No signature at all is refused the same way.
+[[scenario]]
+name = "sig_twilio_unsigned"
+step = "P10"
+guards = ["sig_twilio"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "none"
+text = "hello"
+status = 401
+
+[scenario.expect]
+sends = []
+rows = { inbox = 0, message_log = 1 }
+
+
+# Twilio retries a webhook with the same MessageSid: the second is a duplicate and gets no reply.
+[[scenario]]
+name = "twilio_dedup_same_message_twice"
+step = "P10"
+guards = ["dedup"]
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "valid"
+text = "hi"
+message_id = "SMREPLAYdedup0001"
+
+[[scenario.event]]
+source = "twilio"
+signing = "valid"
+text = "hi"
+message_id = "SMREPLAYdedup0001"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "stage_answer"
+sends = [{ kind = "normal", text_contains = "book" }]
+rows = { inbox = 2, message_log = 2 }
+
+
+# An undelivered status callback (63016: outside the 24-hour window) is logged as send_failed.
+[[scenario]]
+name = "twilio_status_undelivered"
+step = "P10"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "valid"
+message_status = "undelivered"
+error_code = 63016
+
+[scenario.expect]
+sends = []
+rows = { inbox = 1, message_log = 1 }
+
+
+# Other status callbacks (queued, sent, delivered, read) are dropped at ingress.
+[[scenario]]
+name = "twilio_status_delivered_dropped"
+step = "P10"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "valid"
+message_status = "delivered"
+
+[scenario.expect]
+sends = []
+rows = { inbox = 0, message_log = 0 }
+
+
+# --- P10, provider = "twilio": send's Twilio route ---------------------------------
+
+# The opt-out confirmation goes out through Twilio's Messages API, to whatsapp:+<number>, not Meta.
+[[scenario]]
+name = "twilio_route_stop_reply"
+step = "P10"
+provider = "twilio"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "valid"
+text = "STOP"
+
+[scenario.expect]
+route = "keyword_stop"
+sends = [{ kind = "normal", via = "twilio", text_contains = "opted out", to = "15550000001" }]
+calls = { meta = 0, "twilio.text" = 1 }
+rows = { do_not_contact = 1, message_log = 2 }
+
+
+# An ordinary answer also goes through Twilio.
+[[scenario]]
+name = "twilio_route_answer"
+step = "P10"
+provider = "twilio"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "valid"
+text = "hi"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+route = "stage_answer"
+sends = [{ kind = "normal", via = "twilio", text_contains = "book" }]
+calls = { meta = 0 }
+rows = { message_log = 2 }
+
+
+# Send template outside the 24-hour window sends Twilio's content template (ContentSid), once.
+[[scenario]]
+name = "twilio_route_template"
+step = "P10"
+provider = "twilio"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "valid"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_events"
+signing = "valid"
+fixture = "tests/fixtures/slack/thread_message.json"
+set = { "event.text" = "Thursday at 9 works for us.", event_id = "Ev0P10017", "event.ts" = "1764601217.000100" }
+clock = "2026-12-02T21:00:00Z"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "send_template", "actions.0.action_ts" = "1764601318.000200" }
+clock = "2026-12-02T21:00:00Z"
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+sends = [{ kind = "normal", via = "twilio", text_contains = "passing this to a member of our team" }, { kind = "template", via = "twilio" }]
+calls = { meta = 0, "twilio.template" = 1 }
+
+
+# Twilio refuses the send (21211, invalid To): logged as send_error; the run doesn't fail, so no alert.
+[[scenario]]
+name = "twilio_route_send_refused"
+step = "P10"
+provider = "twilio"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "twilio"
+signing = "valid"
+text = "STOP"
+
+[scenario.script]
+twilio = { error = { code = 21211, message = "The 'To' number is not a valid phone number." } }
+
+[scenario.expect]
+sends = [{ kind = "normal", via = "twilio" }]
+slack_posts = 0
+rows = { do_not_contact = 1, message_log = 2 }

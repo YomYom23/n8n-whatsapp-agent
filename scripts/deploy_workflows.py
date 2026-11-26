@@ -8,7 +8,7 @@
 
 Builds .staging/workflows/ from workflows/ and, for dry-run, changes it first:
   - each adapter is replaced by its fake from workflows/fakes/, and ingress-replay is added;
-  - HTTP Request URLs to graph.facebook.com and api.anthropic.com point at {{ $env.MOCK_URL }};
+  - HTTP Request URLs to graph.facebook.com, api.anthropic.com and api.twilio.com point at {{ $env.MOCK_URL }};
   - every clock:now node becomes an HTTP Request to the mock's /_clock;
   - each --remove-guard <id> replaces guard:<id> with a pass-through to its false output, or deletes
     '<id>' from the Code nodes' // @guards lines (an ID found in neither place is an error).
@@ -18,8 +18,8 @@ Then it resolves credential names to IDs (n8n export:credentials, IDs and names 
 __table:<name>__ to data-table IDs (public API), imports with "n8n import:workflow --separate"
 (which keeps workflow IDs, spike 7) and publishes every workflow with a trigger, since import
 unpublishes everything. On dry-run it also creates the "TypeSafe AI" credential with its base URL
-set to the mock if it is missing (the public API can't set that field, spike 1), and a placeholder
-"SMTP" credential for the error workflow's email fallback.
+set to the mock if it is missing (the public API can't set that field, spike 1), and placeholder
+"SMTP" and "Twilio" credentials (the error workflow's email fallback; send's Twilio route).
 """
 import argparse
 import json
@@ -42,6 +42,7 @@ STATE = STAGING / "dryrun_state.json"
 CONTAINER_DIR = "/tmp/wa-staging"
 TYPESAFE = ("typeSafeAiApi", "TypeSafe AI")
 SMTP = ("smtp", "SMTP")
+TWILIO = ("httpBasicAuth", "Twilio")
 
 
 def load_dir(path, fake=False):
@@ -98,22 +99,21 @@ def ensure_typesafe(creds, env):
     return n8n_cli.credentials("dryrun")
 
 
-def ensure_smtp_placeholder(creds):
-    """Dry-run only: the error workflow's email fallback needs an SMTP credential to import. The
-    placeholder points at a port nothing listens on, so a fallback email fails fast and sends nothing."""
-    if SMTP in creds:
+def ensure_placeholder(creds, key, cred_id, data):
+    """Dry-run only: imports a credential whose workflows need it to resolve, holding nothing real.
+    SMTP points at a port nothing listens on, so a fallback email fails fast and sends nothing; the
+    Twilio route's calls go to the mock, which ignores the placeholder login."""
+    if key in creds:
         return creds
     with tempfile.TemporaryDirectory() as d:
         p = Path(d) / "cred.json"
-        p.write_text(json.dumps([{"id": "smtpDryrunNone01", "name": SMTP[1], "type": SMTP[0],
-                                  "data": {"host": "127.0.0.1", "port": 1, "secure": False, "user": "", "password": ""}}]),
-                     encoding="utf-8")
+        p.write_text(json.dumps([{"id": cred_id, "name": key[1], "type": key[0], "data": data}]), encoding="utf-8")
         n8n_cli.cp_in("dryrun", p, "/tmp/wa-cred.json")
     try:
         n8n_cli.n8n("dryrun", "n8n", "import:credentials", "--input=/tmp/wa-cred.json")
     finally:
         n8n_cli.n8n("dryrun", "rm", "-f", "/tmp/wa-cred.json", user="root")
-    print("created placeholder credential %r (sends nothing)" % SMTP[1])
+    print("created placeholder credential %r (sends nothing)" % key[1])
     return n8n_cli.credentials("dryrun")
 
 
@@ -138,7 +138,9 @@ def main():
     creds = n8n_cli.credentials(args.instance)
     if args.instance == "dryrun":
         creds = ensure_typesafe(creds, setup_tables.load_env(ROOT / "deploy" / "dryrun.env"))
-        creds = ensure_smtp_placeholder(creds)
+        creds = ensure_placeholder(creds, SMTP, "smtpDryrunNone01",
+                                   {"host": "127.0.0.1", "port": 1, "secure": False, "user": "", "password": ""})
+        creds = ensure_placeholder(creds, TWILIO, "twilioDryrunNon1", {"user": "ACdryrun", "password": "dryrun-placeholder"})
 
     staged = []
     try:

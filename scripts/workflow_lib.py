@@ -8,13 +8,13 @@ import re
 # Section 3. Names are how the scripts recognise the project's workflows on an instance.
 PROJECT_WORKFLOWS = {
     "ingress-whatsapp", "ingress-slack-events", "ingress-slack-interactivity", "ingress-replay",
-    "processor", "conversation", "classify", "answer", "book", "handoff", "close", "owner-relay",
+    "ingress-twilio", "processor", "conversation", "classify", "answer", "book", "handoff", "close", "owner-relay",
     "owner-release", "send", "log", "crm-sync", "sheets-log", "calendar-adapter", "sheets-adapter",
     "slack-adapter", "hubspot-adapter", "doctor", "error",
 }
 DRYRUN_ONLY = {"ingress-replay"}  # saved with the fakes, refused by a live deploy
 
-LIVE_HOSTS = ["https://graph.facebook.com", "https://api.anthropic.com"]
+LIVE_HOSTS = ["https://graph.facebook.com", "https://api.anthropic.com", "https://api.twilio.com"]
 MOCK_HOST_EXPR = "{{ $env.MOCK_URL }}"
 MOCK_MARKERS = ["$env.MOCK_URL", "mock:8765"]
 

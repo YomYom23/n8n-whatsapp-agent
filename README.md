@@ -96,6 +96,16 @@ error codes map exactly onto the contract the fakes follow. `tests/adapter_contr
 against that contract. Any failed run goes to the `error` workflow, which alerts the owner in Slack,
 and by email if Slack itself is down.
 
+The `doctor` workflow answers "why don't my messages reach n8n?" without sending anything. It runs
+only by hand and makes read-only Graph API calls: whether the token works and has the WhatsApp
+scopes, the phone number's status, quality and whether Meta will let it send (this is where the
+business-verification block shows), whether the WhatsApp account is subscribed to the app (without
+it, no webhooks arrive even with the callback URL set), and whether the template is approved and
+still Utility. It also makes Meta's GET verify request against `ingress-whatsapp`. Its report
+shows only the last 4 digits of the number and never shows a token or secret.
+`tests/doctor_check.py` runs it against eight Meta accounts that the mock describes, from healthy
+to locked.
+
 The logic lives in `lib/` as plain JavaScript with unit tests. A build step copies each module into
 the Code nodes that use it, so a client reading a workflow sees the code itself, with no `require` line.
 
@@ -189,6 +199,8 @@ python tests/replay.py --tier live                  # live-model tier
 python tests/adapter_contract.py                    # live adapters against their fakes
 python tests/adapter_contract.py --instance dryrun  # fakes only, against the contract
 python scripts/report_metrics.py --haiku-input <usd/M> --haiku-output <usd/M>   # metrics table
+python tests/doctor_check.py                        # doctor against the mock's Meta accounts
+python scripts/run_doctor.py                        # doctor on the live instance (read-only)
 ```
 
 The env files are described in `deploy/*.env.example`. The full design is in

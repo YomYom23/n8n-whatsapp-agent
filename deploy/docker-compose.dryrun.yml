@@ -21,6 +21,8 @@ services:
       N8N_PORT: "5678"
       N8N_PROTOCOL: http
       WEBHOOK_URL: http://localhost:5679/
+      # the doctor makes its webhook handshake from inside the container, where n8n is on 5678
+      DOCTOR_WEBHOOK_URL: http://localhost:5678/
       N8N_EDITOR_BASE_URL: http://localhost:5679
       N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
       NODE_FUNCTION_ALLOW_BUILTIN: crypto

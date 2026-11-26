@@ -16,6 +16,8 @@ Service stand-ins (paths as the dry-run deployment rewrites them):
     POST /v1/systemone                                TypeSafe System One (Jev)
     POST /v1/messages                                 Anthropic Messages
     POST /adapter/{calendar,sheets,slack,hubspot}     fake adapters, body { op, ... }
+    GET  /<version>/me, /me/permissions, /<phone_number_id>, /<waba_id>/subscribed_apps,
+         /<waba_id>/message_templates, /<waba_id>    Graph reads made by the doctor workflow
 
 Scenario body:
     { name, now, live_models,
@@ -25,7 +27,12 @@ Scenario body:
       sheets: { facts_dir, unavailable },
       slack: { unavailable },
       hubspot: { unavailable, contacts: {phone: contact_id} },
-      meta: { refuse_outside_window } }
+      meta: { refuse_outside_window },
+      meta_setup: { token_expired, scopes: [...], phone: {...}, subscribed_apps: [...],
+                    templates: [...], waba: {...} } }
+
+meta_setup describes the Meta account the doctor reads; each key replaces the healthy default
+(META_SETUP_DEFAULT) and phone and waba are merged field by field.
 
 A Jev stage answer is { hazards: {name: p}, answer: {value, confidence},
 price_service: {value, confidence}, price_hours: {value, confidence} }; hazards not listed
@@ -43,6 +50,7 @@ import os
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -54,6 +62,20 @@ DRAFT_CHECK_MARKER = "unsupported_fact"  # a question ID only the draft-check se
 META_OUTSIDE_WINDOW = {"code": 131047, "title": "Re-engagement message",
                        "message": "Re-engagement message",
                        "error_data": {"details": "Message failed to send because more than 24 hours have passed since the customer last replied to this number."}}
+
+
+META_SETUP_DEFAULT = {
+    "token_expired": False,
+    "scopes": ["whatsapp_business_messaging", "whatsapp_business_management"],
+    "phone": {"display_phone_number": "+1 555-010-1234", "verified_name": "Sparkle Clean (demo)",
+              "code_verification_status": "VERIFIED", "quality_rating": "GREEN", "platform_type": "CLOUD_API",
+              "status": "CONNECTED", "health_status": {"can_send_message": "AVAILABLE", "entities": []}},
+    "subscribed_apps": [{"whatsapp_business_api_data": {"id": "1", "name": "wa-agent (mock)"}}],
+    "templates": [{"name": "enquiry_update", "status": "APPROVED", "category": "UTILITY", "language": "en_US", "id": "1"}],
+    "waba": {"name": "Sparkle Clean (demo)", "account_review_status": "APPROVED",
+             "health_status": {"can_send_message": "AVAILABLE", "entities": []}},
+}
+GRAPH_VERSION_PREFIX = "v"
 
 
 def utcnow_iso():
@@ -236,6 +258,9 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, {"now": STATE.now})
         elif self.path == "/_health":
             self._json(200, {"ok": True, "scenario": STATE.scenario.get("name")})
+        elif self.path.split("/")[1][:1] == GRAPH_VERSION_PREFIX and self.path.split("/")[1][1:2].isdigit():
+            with STATE.lock:
+                self._graph_get()
         else:
             self._json(404, {"error": "not found"})
 
@@ -306,6 +331,34 @@ class Handler(BaseHTTPRequestHandler):
         to = str(body.get("to", ""))
         self._json(200, {"messaging_product": "whatsapp", "contacts": [{"input": to, "wa_id": to}],
                          "messages": [{"id": f"wamid.MOCK{next(STATE.ids):06d}"}]})
+
+    def _graph_get(self):
+        """Doctor reads. Unknown paths are a Graph-style 400, as Meta answers them."""
+        path, _, query = self.path.partition("?")
+        parts = [p for p in path.split("/") if p][1:]
+        params = dict(urllib.parse.parse_qsl(query))
+        op = "/".join("{id}" if p.isdigit() else p for p in parts)
+        STATE.record("meta_get", op, {"path": "/".join(parts), "query": params,
+                                       "bearer": (self.headers.get("Authorization") or "").startswith("Bearer ")})
+        setup = {**META_SETUP_DEFAULT, **STATE.section("meta_setup")}
+        if setup["token_expired"]:
+            return self._json(401, {"error": {"message": "Error validating access token: Session has expired (mock).",
+                                              "type": "OAuthException", "code": 190, "error_subcode": 463, "fbtrace_id": "mock"}})
+        if op == "me":
+            return self._json(200, {"id": "1", "name": "wa-agent system user (mock)"})
+        if op == "me/permissions":
+            return self._json(200, {"data": [{"permission": s, "status": "granted"} for s in setup["scopes"]]})
+        if op == "{id}" and "account_review_status" in params.get("fields", ""):  # the WhatsApp account
+            return self._json(200, {"id": parts[0], **META_SETUP_DEFAULT["waba"], **STATE.section("meta_setup").get("waba", {})})
+        if op == "{id}":
+            return self._json(200, {"id": parts[0], **META_SETUP_DEFAULT["phone"], **STATE.section("meta_setup").get("phone", {})})
+        if op == "{id}/subscribed_apps":
+            return self._json(200, {"data": setup["subscribed_apps"]})
+        if op == "{id}/message_templates":
+            name = params.get("name")
+            return self._json(200, {"data": [t for t in setup["templates"] if not name or t["name"] == name]})
+        return self._json(400, {"error": {"message": f"Unsupported get request (mock: {op})", "type": "GraphMethodException",
+                                          "code": 100, "error_subcode": 33, "fbtrace_id": "mock"}})
 
     def _passthrough(self, service, path, body):
         """Live-model tier: forward to the real service with the caller's auth headers."""

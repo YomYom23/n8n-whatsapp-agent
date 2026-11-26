@@ -668,7 +668,7 @@ Spikes come first; each records its result in `docs/spikes.md`, and the chosen b
 | P6 | 24-hour path: waiting messages, Send template, Discard, release refusal | Author + Agent | 24 |
 | P7 | `crm-sync`, `hubspot-adapter` (live and fake), `sheets-log` | Author + Agent | 24, 25 |
 | P8 | Live-model tier, guard-removal run, adapter contract test, full hand test, metrics, README; also the live adapters and the `error` workflow, which no earlier step listed | Agent; Author runs hand tests | 23, 24, 31, 33 (`hand-test.md`), 34, 35 |
-| P9 | `doctor` | Author + Agent | 24 |
+| P9 | `doctor`; also `scripts/run_doctor.py`, `tests/doctor_check.py`, the mock's Graph reads and the `META_WABA_ID` env value | Author + Agent | 24 |
 
 Until P1's captures exist, the Agent uses hand-written webhook bodies in Meta's documented format; they are replaced by redacted captures in P1.
 

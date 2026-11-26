@@ -344,7 +344,9 @@ sheets = { unavailable = true }
 [scenario.expect]
 route = "facts_unavailable"
 sends = [{ kind = "normal", text_contains = "can't look that up" }]
-slack_posts = 1
+# 1 facts-unavailable alert, plus 2 from the error workflow: with Sheets down, sheets-log fails for
+# the inbound row and the reply row (sections 15 and 17).
+slack_posts = 3
 rows = { message_log = 2 }
 
 
@@ -1591,3 +1593,26 @@ jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking"
 
 [scenario.expect]
 hubspot_calls = 0
+
+# HubSpot down: crm-sync fails and the error workflow alerts the owner once, but the reply is sent
+# as usual, because HubSpot runs outside the reply path (sections 15 and 17).
+[[scenario]]
+name = "crm_hubspot_unavailable_reply_unaffected"
+step = "P7"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }]
+hubspot = { unavailable = true }
+
+[scenario.expect]
+sends = [{ kind = "normal" }]
+slack_posts = 1
+calls = { "hubspot.find_contact" = 1, "hubspot.create_contact" = 0, "sheets.append_log" = 2 }
+rows = { message_log = 2 }

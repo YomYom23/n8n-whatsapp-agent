@@ -2101,6 +2101,7 @@
   "settings": {
     "availableInMCP": true,
     "executionOrder": "v1",
-    "saveDataSuccessExecution": "none"
+    "saveDataSuccessExecution": "none",
+    "errorWorkflow": "ErrWf7Kq2Lm9Xp4T"
   }
 }

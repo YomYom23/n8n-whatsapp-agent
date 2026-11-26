@@ -1,0 +1,187 @@
+{
+  "id": "1y7I33XeHXVkDq6P",
+  "name": "slack-adapter",
+  "nodes": [
+    {
+      "id": "1d734d61-5569-4909-858d-01f78513d12d",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "5d35d981-7575-41e7-8d1f-b577757b55a1",
+      "name": "slack:request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// slack-adapter (live): section 13 contract over the Slack Web API (bot token).\nconst i = $input.first().json;\nconst api = 'https://slack.com/api/';\nconst withBlocks = (b) => (Array.isArray(i.blocks) && i.blocks.length ? { ...b, blocks: i.blocks } : b);\nswitch (i.op) {\n  case 'post':\n    return [{ json: { op: i.op, method: 'POST', url: api + 'chat.postMessage',\n      body: withBlocks({ channel: i.channel, text: i.text || '', unfurl_links: false, unfurl_media: false,\n        ...(i.thread_ts ? { thread_ts: i.thread_ts } : {}) }) } }];\n  case 'react':\n    return [{ json: { op: i.op, method: 'POST', url: api + 'reactions.add', body: { channel: i.channel, timestamp: i.ts, name: i.name } } }];\n  case 'update':\n    return [{ json: { op: i.op, method: 'POST', url: api + 'chat.update', body: withBlocks({ channel: i.channel, ts: i.ts, text: i.text || '' }) } }];\n  default:\n    return [{ json: { op: i.op, invalid: true } }];\n}"
+      }
+    },
+    {
+      "id": "9da5e59f-95ab-411b-85fb-f5fff51fc5cd",
+      "name": "op known?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "9da5e59f",
+              "leftValue": "={{ !$json.invalid }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "5d35d951-a50f-4dcd-8559-ad51a567c1f9",
+      "name": "slack:send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        -100
+      ],
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "slackApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body || {}) }}",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "slackApi": {
+          "name": "Slack"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "5d35d981-55e7-49c1-85e9-5d89550599f5",
+      "name": "slack:result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Maps an HTTP status (or a network failure) to the section 13 error kinds.\nfunction fail(kind, message) { return [{ json: { ok: false, error: { kind, message: String(message).slice(0, 300) } } }]; }\nfunction httpFail(res, what) {\n  if (!res || res.statusCode === undefined) return fail('unavailable', what + ': ' + JSON.stringify((res && res.error) || res).slice(0, 200));\n  const s = res.statusCode;\n  const msg = what + ' ' + s + ': ' + JSON.stringify(res.body).slice(0, 200);\n  if (s === 429 || s >= 500) return fail('unavailable', msg);\n  if (s === 404 || s === 410) return fail('not_found', msg);\n  if (s === 409) return fail('conflict', msg);\n  if (s === 401 || s === 403) return fail('unavailable', msg);\n  return fail('invalid', msg);\n}\nconst ok2xx = (res) => res && res.statusCode >= 200 && res.statusCode < 300;\n\n\nconst req = $('slack:request').first().json;\nif (req.invalid) return fail('invalid', 'unknown op ' + JSON.stringify(req.op) + ' for slack');\nconst res = $input.first().json;\nif (!ok2xx(res)) return httpFail(res, req.op);\nconst b = res.body || {};\nif (!b.ok) {\n  const e = String(b.error || 'unknown_error');\n  if (req.op === 'react' && e === 'already_reacted') return [{ json: { ok: true } }];\n  if (['ratelimited', 'service_unavailable', 'fatal_error', 'internal_error', 'request_timeout', 'not_authed', 'invalid_auth', 'account_inactive', 'token_revoked'].includes(e)) return fail('unavailable', req.op + ': ' + e);\n  if (['channel_not_found', 'message_not_found', 'thread_not_found', 'not_in_channel'].includes(e)) return fail('not_found', req.op + ': ' + e);\n  return fail('invalid', req.op + ': ' + e);\n}\nif (req.op === 'post') return [{ json: { ok: true, ts: b.ts } }];\nreturn [{ json: { ok: true } }];"
+      }
+    },
+    {
+      "id": "25e9e141-a569-4d09-8585-0d55f517b11b",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -420
+      ],
+      "parameters": {
+        "content": "## slack-adapter (live)\nOps: `post` (chat.postMessage, optional blocks and thread_ts), `react` (reactions.add; already_reacted counts as ok), `update` (chat.update). Bot scopes: chat:write, reactions:write.\n\nInput `{ op, ... }`; output `{ ok: true, ... }` or `{ ok: false, error: { kind, message } }` (design section 13). The dry-run instance uses the fake in `workflows/fakes/` under this same workflow ID. Check both with `python tests/adapter_contract.py`.",
+        "width": 900,
+        "height": 300
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "slack:request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "slack:request": {
+      "main": [
+        [
+          {
+            "node": "op known?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "op known?": {
+      "main": [
+        [
+          {
+            "node": "slack:send",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "slack:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "slack:send": {
+      "main": [
+        [
+          {
+            "node": "slack:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1",
+    "errorWorkflow": "ErrWf7Kq2Lm9Xp4T"
+  }
+}

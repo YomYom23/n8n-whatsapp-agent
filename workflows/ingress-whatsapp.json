@@ -504,6 +504,7 @@
   ],
   "settings": {
     "availableInMCP": true,
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "errorWorkflow": "ErrWf7Kq2Lm9Xp4T"
   }
 }

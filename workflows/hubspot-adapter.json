@@ -1,0 +1,187 @@
+{
+  "id": "gTLF7DkHIVjAbz1y",
+  "name": "hubspot-adapter",
+  "nodes": [
+    {
+      "id": "1d734d61-5569-4909-858d-01f78513d12d",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "85c54527-6539-45a7-8df3-91f5b535b15d",
+      "name": "hubspot:request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// hubspot-adapter (live): section 13 contract over the HubSpot CRM v3 API (private app token).\nconst i = $input.first().json;\nconst api = 'https://api.hubapi.com/crm/v3/objects/';\nswitch (i.op) {\n  case 'find_contact':\n    return [{ json: { op: i.op, method: 'POST', url: api + 'contacts/search',\n      body: { filterGroups: [{ filters: [{ propertyName: 'phone', operator: 'EQ', value: i.phone }] }], properties: ['phone'], limit: 1 } } }];\n  case 'create_contact':\n    return [{ json: { op: i.op, method: 'POST', url: api + 'contacts', body: { properties: { phone: i.phone } } } }];\n  case 'create_deal':\n    return [{ json: { op: i.op, method: 'POST', url: api + 'deals', body: {\n      properties: { dealname: i.name || 'WhatsApp enquiry', dealstage: i.stage, pipeline: $env.HUBSPOT_PIPELINE_ID || 'default' },\n      // association type 3: deal to contact (HubSpot-defined)\n      associations: [{ to: { id: String(i.contact_id) }, types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 3 }] }] } } }];\n  case 'move_deal':\n    return [{ json: { op: i.op, method: 'PATCH', url: api + 'deals/' + encodeURIComponent(i.deal_id || ''), body: { properties: { dealstage: i.stage } } } }];\n  default:\n    return [{ json: { op: i.op, invalid: true } }];\n}"
+      }
+    },
+    {
+      "id": "9da5e59f-95ab-411b-85fb-f5fff51fc5cd",
+      "name": "op known?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "9da5e59f",
+              "leftValue": "={{ !$json.invalid }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "85c54527-5507-49c1-85e9-5d89550f896f",
+      "name": "hubspot:send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        -100
+      ],
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "hubspotAppToken",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body || {}) }}",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "hubspotAppToken": {
+          "name": "HubSpot"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "85c54527-6559-49c3-858d-0d516559651b",
+      "name": "hubspot:result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Maps an HTTP status (or a network failure) to the section 13 error kinds.\nfunction fail(kind, message) { return [{ json: { ok: false, error: { kind, message: String(message).slice(0, 300) } } }]; }\nfunction httpFail(res, what) {\n  if (!res || res.statusCode === undefined) return fail('unavailable', what + ': ' + JSON.stringify((res && res.error) || res).slice(0, 200));\n  const s = res.statusCode;\n  const msg = what + ' ' + s + ': ' + JSON.stringify(res.body).slice(0, 200);\n  if (s === 429 || s >= 500) return fail('unavailable', msg);\n  if (s === 404 || s === 410) return fail('not_found', msg);\n  if (s === 409) return fail('conflict', msg);\n  if (s === 401 || s === 403) return fail('unavailable', msg);\n  return fail('invalid', msg);\n}\nconst ok2xx = (res) => res && res.statusCode >= 200 && res.statusCode < 300;\n\n\nconst req = $('hubspot:request').first().json;\nif (req.invalid) return fail('invalid', 'unknown op ' + JSON.stringify(req.op) + ' for hubspot');\nconst res = $input.first().json;\nif (!ok2xx(res)) return httpFail(res, req.op);\nconst b = res.body || {};\nif (req.op === 'find_contact') return [{ json: { ok: true, contact_id: (b.results && b.results[0] && String(b.results[0].id)) || null } }];\nif (req.op === 'create_contact') return [{ json: { ok: true, contact_id: String(b.id) } }];\nif (req.op === 'create_deal') return [{ json: { ok: true, deal_id: String(b.id) } }];\nreturn [{ json: { ok: true } }];"
+      }
+    },
+    {
+      "id": "25e9e141-a569-4d09-8585-0d55f517b11b",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -420
+      ],
+      "parameters": {
+        "content": "## hubspot-adapter (live)\nOps: `find_contact` (search by phone), `create_contact`, `create_deal` (associated with the contact, in `HUBSPOT_PIPELINE_ID`), `move_deal`.\n\nInput `{ op, ... }`; output `{ ok: true, ... }` or `{ ok: false, error: { kind, message } }` (design section 13). The dry-run instance uses the fake in `workflows/fakes/` under this same workflow ID. Check both with `python tests/adapter_contract.py`.",
+        "width": 900,
+        "height": 300
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "hubspot:request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "hubspot:request": {
+      "main": [
+        [
+          {
+            "node": "op known?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "op known?": {
+      "main": [
+        [
+          {
+            "node": "hubspot:send",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "hubspot:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "hubspot:send": {
+      "main": [
+        [
+          {
+            "node": "hubspot:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1",
+    "errorWorkflow": "ErrWf7Kq2Lm9Xp4T"
+  }
+}

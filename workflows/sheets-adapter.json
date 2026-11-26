@@ -1,0 +1,282 @@
+{
+  "id": "ZH0uq96AjSZJkI5i",
+  "name": "sheets-adapter",
+  "nodes": [
+    {
+      "id": "1d734d61-5569-4909-858d-01f78513d12d",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "5d790507-3579-49c3-858d-0d516559651b",
+      "name": "sheets:request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// sheets-adapter (live): section 13 contract over the Google Sheets API v4.\nconst i = $input.first().json;\nconst base = 'https://sheets.googleapis.com/v4/spreadsheets/';\n// message_log columns (design section 14), in sheet column order\nconst LOG_COLUMNS = ['logged_at', 'wa_id', 'direction', 'author', 'kind', 'text', 'route', 'stage', 'classifier', 'draft',\n  'problems', 'facts_version', 'execution_id', 'workflow_version', 'input_tokens', 'output_tokens', 'reply_ms'];\nswitch (i.op) {\n  case 'read_facts':\n    return [{ json: { op: i.op, method: 'GET', url: base + $env.FACTS_SHEET_ID +\n      '/values:batchGet?ranges=facts&ranges=prices&ranges=service_areas&ranges=hours&valueRenderOption=FORMATTED_VALUE' } }];\n  case 'append_log': {\n    const r = i.row || {};\n    const cell = (v) => (v === undefined || v === null ? '' : typeof v === 'object' ? JSON.stringify(v) : v);\n    return [{ json: { op: i.op, method: 'POST',\n      url: base + $env.LOG_SHEET_ID + '/values/log!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',\n      body: { values: [LOG_COLUMNS.map((k) => cell(r[k]))] } } }];\n  }\n  default:\n    return [{ json: { op: i.op, invalid: true } }];\n}"
+      }
+    },
+    {
+      "id": "9da5e59f-95ab-411b-85fb-f5fff51fc5cd",
+      "name": "op known?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "9da5e59f",
+              "leftValue": "={{ !$json.invalid }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "8557a529-95ab-411b-85fb-f5fff5a1590d",
+      "name": "has body?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        -100
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "8557a529",
+              "leftValue": "={{ $json.method !== 'GET' }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "5d790505-356b-4177-8d75-39b535a78901",
+      "name": "sheets:send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        -200
+      ],
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body || {}) }}",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "5d79050d-350f-4dcd-8559-ad51a567c1f9",
+      "name": "sheets:get",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "5d790507-3577-41e7-8d1f-b577757b55a1",
+      "name": "sheets:result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Maps an HTTP status (or a network failure) to the section 13 error kinds.\nfunction fail(kind, message) { return [{ json: { ok: false, error: { kind, message: String(message).slice(0, 300) } } }]; }\nfunction httpFail(res, what) {\n  if (!res || res.statusCode === undefined) return fail('unavailable', what + ': ' + JSON.stringify((res && res.error) || res).slice(0, 200));\n  const s = res.statusCode;\n  const msg = what + ' ' + s + ': ' + JSON.stringify(res.body).slice(0, 200);\n  if (s === 429 || s >= 500) return fail('unavailable', msg);\n  if (s === 404 || s === 410) return fail('not_found', msg);\n  if (s === 409) return fail('conflict', msg);\n  if (s === 401 || s === 403) return fail('unavailable', msg);\n  return fail('invalid', msg);\n}\nconst ok2xx = (res) => res && res.statusCode >= 200 && res.statusCode < 300;\n\n\nconst crypto = require('crypto');\nconst req = $('sheets:request').first().json;\nif (req.invalid) return fail('invalid', 'unknown op ' + JSON.stringify(req.op) + ' for sheets');\nconst res = $input.first().json;\nif (!ok2xx(res)) return httpFail(res, req.op);\nif (req.op === 'append_log') return [{ json: { ok: true } }];\n// read_facts: each tab's first row is the header; every value is returned as a string, like the CSV copy the fake reads\nconst tabs = ['facts', 'prices', 'service_areas', 'hours'];\nconst ranges = (res.body && res.body.valueRanges) || [];\nconst out = { ok: true };\ntabs.forEach((tab, n) => {\n  const values = (ranges[n] && ranges[n].values) || [];\n  const header = (values[0] || []).map((h) => String(h).trim());\n  out[tab] = values.slice(1)\n    .filter((row) => row.some((v) => String(v).trim() !== ''))\n    .map((row) => Object.fromEntries(header.map((h, k) => [h, row[k] === undefined ? '' : String(row[k])])));\n});\nout.version = crypto.createHash('sha256').update(JSON.stringify(tabs.map((t) => out[t]))).digest('hex').slice(0, 12);\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "25e9e141-a569-4d09-8585-0d55f517b11b",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -420
+      ],
+      "parameters": {
+        "content": "## sheets-adapter (live)\nOps: `read_facts` (tabs facts, prices, service_areas, hours of `FACTS_SHEET_ID`, every value a string) and `append_log` (one row on the `log` tab of `LOG_SHEET_ID`, in message_log column order).\n\nInput `{ op, ... }`; output `{ ok: true, ... }` or `{ ok: false, error: { kind, message } }` (design section 13). The dry-run instance uses the fake in `workflows/fakes/` under this same workflow ID. Check both with `python tests/adapter_contract.py`.",
+        "width": 900,
+        "height": 300
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "sheets:request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sheets:request": {
+      "main": [
+        [
+          {
+            "node": "op known?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "op known?": {
+      "main": [
+        [
+          {
+            "node": "has body?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "sheets:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "has body?": {
+      "main": [
+        [
+          {
+            "node": "sheets:send",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "sheets:get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sheets:send": {
+      "main": [
+        [
+          {
+            "node": "sheets:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sheets:get": {
+      "main": [
+        [
+          {
+            "node": "sheets:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1",
+    "errorWorkflow": "ErrWf7Kq2Lm9Xp4T"
+  }
+}

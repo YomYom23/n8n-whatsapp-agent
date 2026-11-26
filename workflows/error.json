@@ -1,0 +1,178 @@
+{
+  "id": "ErrWf7Kq2Lm9Xp4T",
+  "name": "error",
+  "nodes": [
+    {
+      "id": "3dcda127-f599-41e7-8d1f-b577757bb10d",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "3dcda9b3-356b-4177-8d75-39b5355d8dff",
+      "name": "error:alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Builds the owner alert for a failed run (design section 17). Long digit runs are masked, so a\n// phone number inside an error message doesn't reach Slack or email in full.\nconst e = $input.first().json;\nconst mask = (s) => String(s || '').replace(/\\d{7,}/g, (d) => '*'.repeat(d.length - 4) + d.slice(-4));\nconst wf = (e.workflow && e.workflow.name) || 'unknown workflow';\nconst ex = (e.execution && e.execution.id) || (e.trigger && 'trigger') || '?';\nconst err = (e.execution && e.execution.error) || (e.trigger && e.trigger.error) || {};\nconst node = (e.execution && e.execution.lastNodeExecuted) || err.node && err.node.name || '';\nconst text = ':warning: Run failed: *' + wf + '* (execution ' + ex + ')' + (node ? ', at node ' + node : '') + '\\n' +\n  mask(err.message || 'no error message').slice(0, 500);\nreturn [{ json: { op: 'post', channel: $env.SLACK_CHANNEL_ID, text, subject: 'n8n run failed: ' + wf, plain: text.replace(/[*:]/g, '') } }];"
+      }
+    },
+    {
+      "id": "5d35ddb3-7569-41e7-8d1f-b577757bb9f5",
+      "name": "slack-adapter",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "source": "database",
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1y7I33XeHXVkDq6P",
+          "cachedResultName": "slack-adapter"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "055fb11f-05fb-49f5-8d35-b93f8557b917",
+      "name": "posted?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "055fb11b",
+              "leftValue": "={{ $json.ok === true }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "353189e9-c547-49c1-85e9-5d8955093d3b",
+      "name": "email: alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        100
+      ],
+      "parameters": {
+        "fromEmail": "={{ $env.ALERT_EMAIL }}",
+        "toEmail": "={{ $env.ALERT_EMAIL }}",
+        "subject": "={{ $('error:alert').first().json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $('error:alert').first().json.plain + '\\n\\n(The Slack alert failed: ' + JSON.stringify($json.error || $json).slice(0, 300) + ')' }}",
+        "options": {}
+      },
+      "credentials": {
+        "smtp": {
+          "name": "SMTP"
+        }
+      }
+    },
+    {
+      "id": "25e9e141-a569-4d09-8585-0d55f517b11b",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -340
+      ],
+      "parameters": {
+        "content": "## error\nStarted by n8n when any workflow run fails (each workflow names this one as its error workflow). Posts the workflow name, execution ID and error to Slack through `slack-adapter`; if that post fails, sends the same alert by email through SMTP, which does not depend on Slack (design section 17).",
+        "width": 900,
+        "height": 220
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "error:alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "error:alert": {
+      "main": [
+        [
+          {
+            "node": "slack-adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "slack-adapter": {
+      "main": [
+        [
+          {
+            "node": "posted?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "posted?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "email: alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

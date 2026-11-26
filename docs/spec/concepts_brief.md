@@ -1,5 +1,7 @@
 # Concept Brief: n8n WhatsApp Agent with Lead Bot's Safety Design (Cleaning Company Demo)
 
+> **Superseded in part.** [The design document](../designs/whatsapp-agent.md) supersedes this brief's open items. The 2026-11-24 review changed four decisions recorded here: event ordering (a scheduled processor with a lease, chosen by spike 3), the guard-removal run (guards removed at deploy time on a dry-run instance), release (Return to bot keeps the conversation and clears only the offered times) and the booking key (one key per slot, so a customer can book again). Where the two differ, the design wins.
+
 **Author:** Yomi O Lebi
 **Date:** 2026-11-19 (updated 2026-11-20)
 **Mode:** Multi-lens brainstorm (7 lenses), two rounds

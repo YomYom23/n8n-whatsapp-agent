@@ -18,7 +18,8 @@ Then it resolves credential names to IDs (n8n export:credentials, IDs and names 
 __table:<name>__ to data-table IDs (public API), imports with "n8n import:workflow --separate"
 (which keeps workflow IDs, spike 7) and publishes every workflow with a trigger, since import
 unpublishes everything. On dry-run it also creates the "TypeSafe AI" credential with its base URL
-set to the mock if it is missing (the public API can't set that field, spike 1).
+set to the mock if it is missing (the public API can't set that field, spike 1), and a placeholder
+"SMTP" credential for the error workflow's email fallback.
 """
 import argparse
 import json
@@ -40,6 +41,7 @@ STAGED = STAGING / "workflows"
 STATE = STAGING / "dryrun_state.json"
 CONTAINER_DIR = "/tmp/wa-staging"
 TYPESAFE = ("typeSafeAiApi", "TypeSafe AI")
+SMTP = ("smtp", "SMTP")
 
 
 def load_dir(path, fake=False):
@@ -96,6 +98,25 @@ def ensure_typesafe(creds, env):
     return n8n_cli.credentials("dryrun")
 
 
+def ensure_smtp_placeholder(creds):
+    """Dry-run only: the error workflow's email fallback needs an SMTP credential to import. The
+    placeholder points at a port nothing listens on, so a fallback email fails fast and sends nothing."""
+    if SMTP in creds:
+        return creds
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / "cred.json"
+        p.write_text(json.dumps([{"id": "smtpDryrunNone01", "name": SMTP[1], "type": SMTP[0],
+                                  "data": {"host": "127.0.0.1", "port": 1, "secure": False, "user": "", "password": ""}}]),
+                     encoding="utf-8")
+        n8n_cli.cp_in("dryrun", p, "/tmp/wa-cred.json")
+    try:
+        n8n_cli.n8n("dryrun", "n8n", "import:credentials", "--input=/tmp/wa-cred.json")
+    finally:
+        n8n_cli.n8n("dryrun", "rm", "-f", "/tmp/wa-cred.json", user="root")
+    print("created placeholder credential %r (sends nothing)" % SMTP[1])
+    return n8n_cli.credentials("dryrun")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--instance", choices=["dryrun", "live"], required=True)
@@ -117,6 +138,7 @@ def main():
     creds = n8n_cli.credentials(args.instance)
     if args.instance == "dryrun":
         creds = ensure_typesafe(creds, setup_tables.load_env(ROOT / "deploy" / "dryrun.env"))
+        creds = ensure_smtp_placeholder(creds)
 
     staged = []
     try:

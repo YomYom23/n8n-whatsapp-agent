@@ -1,0 +1,282 @@
+{
+  "id": "vjPuC1YcUU1dSQ4S",
+  "name": "calendar-adapter",
+  "nodes": [
+    {
+      "id": "1d734d61-5569-4909-858d-01f78513d12d",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "5569e1b7-e571-4d5b-8d89-e52155415dc5",
+      "name": "calendar:request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// calendar-adapter (live): section 13 contract over the Google Calendar API v3.\nconst i = $input.first().json;\nconst cal = encodeURIComponent($env.GOOGLE_CALENDAR_ID);\nconst base = 'https://www.googleapis.com/calendar/v3';\nconst tz = $env.BUSINESS_TZ || 'America/New_York';\nswitch (i.op) {\n  case 'busy':\n    return [{ json: { op: i.op, method: 'POST', url: base + '/freeBusy',\n      body: { timeMin: i.from, timeMax: i.to, items: [{ id: $env.GOOGLE_CALENDAR_ID }] } } }];\n  case 'get_event':\n    return [{ json: { op: i.op, method: 'GET', url: base + '/calendars/' + cal + '/events/' + encodeURIComponent(i.event_id || '') } }];\n  case 'create_event':\n    return [{ json: { op: i.op, method: 'POST', url: base + '/calendars/' + cal + '/events',\n      body: { id: i.event_id, summary: i.summary || '', description: i.description || '', location: i.location || '',\n        start: { dateTime: i.start, timeZone: tz }, end: { dateTime: i.end, timeZone: tz } } } }];\n  default:\n    return [{ json: { op: i.op, invalid: true } }];\n}"
+      }
+    },
+    {
+      "id": "9da5e59f-95ab-411b-85fb-f5fff51fc5cd",
+      "name": "op known?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "9da5e59f",
+              "leftValue": "={{ !$json.invalid }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "8557a529-95ab-411b-85fb-f5fff5a1590d",
+      "name": "has body?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        -100
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "8557a529",
+              "leftValue": "={{ $json.method !== 'GET' }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "5569e1b7-e57b-41e7-8d1f-b577757b49a3",
+      "name": "calendar:send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        -200
+      ],
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body || {}) }}",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "name": "Google Calendar"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "5569e1b7-e577-49c1-85e9-5d89550f896f",
+      "name": "calendar:get",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "name": "Google Calendar"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "5569e1b7-e575-49a7-8df3-91f5b535b15d",
+      "name": "calendar:result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Maps an HTTP status (or a network failure) to the section 13 error kinds.\nfunction fail(kind, message) { return [{ json: { ok: false, error: { kind, message: String(message).slice(0, 300) } } }]; }\nfunction httpFail(res, what) {\n  if (!res || res.statusCode === undefined) return fail('unavailable', what + ': ' + JSON.stringify((res && res.error) || res).slice(0, 200));\n  const s = res.statusCode;\n  const msg = what + ' ' + s + ': ' + JSON.stringify(res.body).slice(0, 200);\n  if (s === 429 || s >= 500) return fail('unavailable', msg);\n  if (s === 404 || s === 410) return fail('not_found', msg);\n  if (s === 409) return fail('conflict', msg);\n  if (s === 401 || s === 403) return fail('unavailable', msg);\n  return fail('invalid', msg);\n}\nconst ok2xx = (res) => res && res.statusCode >= 200 && res.statusCode < 300;\n\n\nconst req = $('calendar:request').first().json;\nif (req.invalid) return fail('invalid', 'unknown op ' + JSON.stringify(req.op) + ' for calendar');\nconst res = $input.first().json;\nconst body = (res && res.body) || {};\nconst iso = (t) => (t && (t.dateTime || t.date)) || null;\nif (req.op === 'get_event') {\n  if (res && (res.statusCode === 404 || res.statusCode === 410)) return [{ json: { ok: true, found: false, status: null, start: null, end: null } }];\n  if (!ok2xx(res)) return httpFail(res, 'get_event');\n  return [{ json: { ok: true, found: true, status: body.status || 'confirmed', start: iso(body.start), end: iso(body.end) } }];\n}\nif (!ok2xx(res)) return httpFail(res, req.op);\nif (req.op === 'busy') {\n  const c = (body.calendars || {})[$env.GOOGLE_CALENDAR_ID] || Object.values(body.calendars || {})[0] || {};\n  if (c.errors && c.errors.length) return fail(c.errors[0].reason === 'notFound' ? 'not_found' : 'unavailable', 'freeBusy: ' + JSON.stringify(c.errors));\n  return [{ json: { ok: true, busy: (c.busy || []).map((b) => ({ start: b.start, end: b.end })) } }];\n}\nreturn [{ json: { ok: true, event_id: body.id } }];"
+      }
+    },
+    {
+      "id": "25e9e141-a569-4d09-8585-0d55f517b11b",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -420
+      ],
+      "parameters": {
+        "content": "## calendar-adapter (live)\nOps: `busy` (freeBusy), `get_event`, `create_event` (with our own event ID, so a retried booking hits 409 `conflict`). Calendar: `GOOGLE_CALENDAR_ID`; times in `BUSINESS_TZ`.\n\nInput `{ op, ... }`; output `{ ok: true, ... }` or `{ ok: false, error: { kind, message } }` (design section 13). The dry-run instance uses the fake in `workflows/fakes/` under this same workflow ID. Check both with `python tests/adapter_contract.py`.",
+        "width": 900,
+        "height": 300
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "calendar:request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calendar:request": {
+      "main": [
+        [
+          {
+            "node": "op known?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "op known?": {
+      "main": [
+        [
+          {
+            "node": "has body?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "calendar:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "has body?": {
+      "main": [
+        [
+          {
+            "node": "calendar:send",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "calendar:get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calendar:send": {
+      "main": [
+        [
+          {
+            "node": "calendar:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calendar:get": {
+      "main": [
+        [
+          {
+            "node": "calendar:result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1",
+    "errorWorkflow": "ErrWf7Kq2Lm9Xp4T"
+  }
+}

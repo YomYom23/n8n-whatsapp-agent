@@ -218,7 +218,7 @@ flowchart LR
 | `log` | `send`, `conversation` | Writes the data-table log row; starts `crm-sync` and `sheets-log` without waiting |
 | `crm-sync` | `log` | Brings HubSpot up to the conversation's target state |
 | `sheets-log` | `log` | Appends the message row to the Google Sheet log |
-| `calendar-adapter`, `sheets-adapter`, `slack-adapter`, `hubspot-adapter` | the workflows above | One per outside service, with the contracts in section 13. Live version uses the built-in n8n node; the fake version calls the mock server |
+| `calendar-adapter`, `sheets-adapter`, `slack-adapter`, `hubspot-adapter` | the workflows above | One per outside service, with the contracts in section 13. The live version calls the API with an HTTP Request node and the n8n credential for that service (changed in P8 from the built-in nodes: the HTTP status and body map exactly onto the contract's error kinds, and Sheets values come back as strings, like the fake's CSV copy); the fake version calls the mock server |
 | `doctor` | Manual only | Read-only Graph API checks of the Meta setup (built last; cut first) |
 | `error` | n8n Error Trigger | Posts any failed run to Slack; if that post fails, sends an email directly through an SMTP node |
 
@@ -667,7 +667,7 @@ Spikes come first; each records its result in `docs/spikes.md`, and the chosen b
 | P5 | Handoff, close, relay within the window, Return to bot, Mark as booked, Reopen, `slack-adapter`, Slack ingress workflows | Author + Agent | 24, 25 |
 | P6 | 24-hour path: waiting messages, Send template, Discard, release refusal | Author + Agent | 24 |
 | P7 | `crm-sync`, `hubspot-adapter` (live and fake), `sheets-log` | Author + Agent | 24, 25 |
-| P8 | Live-model tier, guard-removal run, adapter contract test, full hand test, metrics, README | Agent; Author runs hand tests | 23, 31, 33 (`hand-test.md`), 34, 35 |
+| P8 | Live-model tier, guard-removal run, adapter contract test, full hand test, metrics, README; also the live adapters and the `error` workflow, which no earlier step listed | Agent; Author runs hand tests | 23, 24, 31, 33 (`hand-test.md`), 34, 35 |
 | P9 | `doctor` | Author + Agent | 24 |
 
 Until P1's captures exist, the Agent uses hand-written webhook bodies in Meta's documented format; they are replaced by redacted captures in P1.

@@ -219,9 +219,9 @@
       "main": [
         [
           {
-            "index": 0,
-            "node": "found?",
-            "type": "main"
+            "node": "contact:found",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -255,6 +255,17 @@
             "index": 0,
             "node": "contact stored?",
             "type": "main"
+          }
+        ]
+      ]
+    },
+    "contact:found": {
+      "main": [
+        [
+          {
+            "node": "found?",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -879,7 +890,7 @@
           "conditions": [
             {
               "id": "5o9l1wb4",
-              "leftValue": "={{ (() => { const r = $('hubspot: find contact').first().json; if (!r.ok) throw new Error('hubspot hubspot: find contact: ' + JSON.stringify(r.error || r).slice(0, 300)); return Boolean(r.contact_id); })() }}",
+              "leftValue": "={{ $json.found }}",
               "operator": {
                 "operation": "true",
                 "singleValue": true,
@@ -1265,10 +1276,24 @@
       ],
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2
+    },
+    {
+      "id": "c7d1a2b3-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "name": "contact:found",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1650,
+        120
+      ],
+      "parameters": {
+        "jsCode": "// A failed search must stop crm-sync (error workflow), never read as 'no contact': creating one\n// after a failed search could duplicate the contact.\nconst r = $input.first().json;\nif (!r.ok) throw new Error('hubspot find_contact: ' + JSON.stringify(r.error || r).slice(0, 300));\nreturn [{ json: { found: Boolean(r.contact_id) } }];"
+      }
     }
   ],
   "settings": {
     "availableInMCP": true,
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "errorWorkflow": "ErrWf7Kq2Lm9Xp4T"
   }
 }

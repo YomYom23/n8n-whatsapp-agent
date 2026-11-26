@@ -1,0 +1,107 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sheets:row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "sheets: append": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sheets:check",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "sheets:row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sheets: append",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "w0nopyCWUVZCSL7T",
+  "name": "sheets-log",
+  "nodes": [
+    {
+      "id": "d8226723-705a-412f-a6b7-45336c71b9e8",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "fac1be22-bf93-41bb-9d76-4832f655c39b",
+      "name": "sheets: append",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "sheets-adapter",
+          "mode": "list",
+          "value": "ZH0uq96AjSZJkI5i"
+        }
+      },
+      "position": [
+        440,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "1ecf5310-135d-4e6f-882f-046030384e45",
+      "name": "sheets:check",
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nif (!r.ok) throw new Error('sheets append_log: ' + JSON.stringify(r.error || r).slice(0, 300));\nreturn [{ json: { ok: true } }];"
+      },
+      "position": [
+        660,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "438488b3-e0cb-4d7d-9f12-7294b51d9d74",
+      "name": "sheets:row",
+      "parameters": {
+        "jsCode": "// @lib mask\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['mask'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // Masks a WhatsApp number for Slack posts and the Sheets log (design sections 11 and 15).\n\n  const MASK_CHAR = '*';\n  const KEEP_DIGITS = 4;\n\n  // Keeps only the last 4 digits. Non-digits (such as a leading +) are dropped first.\n  // A number with 4 digits or fewer is masked completely, so nothing leaks from a short value.\n  function maskNumber(waId) {\n    if (waId === null || waId === undefined) return '';\n    const digits = String(waId).replace(/\\D/g, '');\n    if (digits.length <= KEEP_DIGITS) return MASK_CHAR.repeat(digits.length);\n    return MASK_CHAR.repeat(digits.length - KEEP_DIGITS) + digits.slice(-KEEP_DIGITS);\n  }\n\n  module.exports = { maskNumber };\n  return module.exports;\n})();\nconst { maskNumber } = __lib['mask'];\n// @end-lib\nconst r = $('When Executed by Another Workflow').first().json;\nreturn [{ json: { op: 'append_log', row: { ...r, wa_id: maskNumber(r.wa_id) } } }];"
+      },
+      "position": [
+        220,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

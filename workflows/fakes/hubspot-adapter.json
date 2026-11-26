@@ -1,0 +1,86 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "fake:call",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "fake:call": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "fake:result",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "fake:result",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "gTLF7DkHIVjAbz1y",
+  "name": "hubspot-adapter",
+  "nodes": [
+    {
+      "id": "0ead15ad-e1ba-43ed-8113-3beeeb9f909b",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "311f374a-9404-49d7-829a-9f3a80ba3821",
+      "name": "fake:call",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "method": "POST",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "url": "={{ $env.MOCK_URL }}/adapter/hubspot"
+      },
+      "position": [
+        220,
+        0
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5
+    },
+    {
+      "id": "10ab9012-b182-4a3f-8f3a-42ede36dffad",
+      "name": "fake:result",
+      "parameters": {
+        "jsCode": " const r = $input.first().json;\n if (r.error && r.ok === undefined) return [{ json: { ok: false, error: { kind: 'unavailable', message: String(r.error.message || r.error) } } }];\n return [{ json: r }];"
+      },
+      "position": [
+        440,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

@@ -1,7 +1,7 @@
 # Replay scenarios (design file 29). Run with: python tests/replay.py
 # Each scenario is tagged with the build step that enables it. Without --upto, the harness runs
 # every scenario up to current_step, so raise it as each step's workflows land.
-current_step = "P6"
+current_step = "P7"
 
 # --- P2: harness plumbing ------------------------------------------------------
 # No events. Proves the harness can load the mock, clear and count every table, and read calls.
@@ -643,7 +643,7 @@ jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 }
 route = "number_pick"
 sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "Here are the next times we have open" }, { kind = "normal", text_contains = "You're booked for Thursday December 3 at 8 AM" }]
 calls = { "calendar.create_event" = 1 }
-rows = { conversations = 1, message_log = 6 }
+rows = { conversations = 1, message_log = 8 }
 
 
 # An address outside the service areas gets the out-of-area line and no times are looked up.
@@ -671,7 +671,7 @@ jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 }
 [scenario.expect]
 sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = "normal", text_contains = "don't clean in ZIP code 99999" }]
 calls = { "calendar.busy" = 0 }
-rows = { message_log = 4 }
+rows = { message_log = 5 }
 
 
 # No ZIP code twice: asked once more, then handed off as zip_not_found (the handoff itself is P5).
@@ -706,7 +706,7 @@ sends = [{ kind = "normal", text_contains = "address for the clean" }, { kind = 
 # the handoff is a stage reply (handoff:zip_not_found), so the logged route stays stage_answer
 calls = { "calendar.busy" = 0 }
 slack_posts = 1
-rows = { message_log = 6 }
+rows = { message_log = 7 }
 
 
 # The classifier names a slot that was never offered: the answer counts as missing and the
@@ -1201,7 +1201,7 @@ jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking"
 [scenario.expect]
 sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }]
 slack_posts = 2
-rows = { message_log = 3 }
+rows = { message_log = 4 }
 
 # CUJ 8: a wrong number gets one apology and is closed. A later message is posted under the close
 # alert with no reply (removing the guard sends it to the classifier). After Reopen the bot answers again.
@@ -1500,3 +1500,94 @@ jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking"
 sends = [{ kind = "normal", text_contains = "passing this to a member of our team" }, { kind = "normal", text_contains = "opted out" }]
 slack_posts = 4
 rows = { pending_owner_messages = 1, do_not_contact = 1 }
+
+
+# From P7 a CRM milestone (enquiry, booked) adds a crm_* event row to message_log.
+# --- P7: crm-sync and sheets-log -----------------------------------------------------------
+
+# CUJ 2 with HubSpot: the service pick creates the contact and a deal at Enquiry, the offered times
+# change nothing, the booking moves the deal to Booked. Every in and out message goes to the Sheets log.
+[[scenario]]
+name = "crm_enquiry_then_booking"
+step = "P7"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "I'd like a deep clean"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "12 Main St, New York NY 10001"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "2"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "deep_clean", confidence = 0.9 } }, { hazards = {} }]
+
+[scenario.expect]
+calls = { "hubspot.find_contact" = 1, "hubspot.create_contact" = 1, "hubspot.create_deal" = 1, "hubspot.move_deal" = 1, "sheets.append_log" = 6 }
+rows = { message_log = 8 }
+
+# Mark as booked starts crm-sync: the deal is created straight at Booked.
+[[scenario]]
+name = "crm_mark_as_booked"
+step = "P7"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "mark_booked", "actions.0.action_ts" = "1764601324.000200" }
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+calls = { "hubspot.find_contact" = 1, "hubspot.create_contact" = 1, "hubspot.create_deal" = 1, "hubspot.move_deal" = 0 }
+
+# No contact is created for a number on do-not-contact: an enquiry after STOP and START... is skipped
+# only while opted out, so here the customer opts out and an owner Mark as booked creates nothing.
+[[scenario]]
+name = "crm_none_for_opted_out"
+step = "P7"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "can I talk to a person?"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "STOP"
+
+[[scenario.event]]
+source = "slack_actions"
+signing = "valid"
+fixture = "tests/fixtures/slack/block_action.json"
+set = { "actions.0.action_id" = "mark_booked", "actions.0.action_ts" = "1764601325.000200" }
+
+[scenario.script]
+jev.stage = [{ hazards = { wants_human = 0.9 }, answer = { value = "just_asking", confidence = 0.9 } }]
+
+[scenario.expect]
+hubspot_calls = 0

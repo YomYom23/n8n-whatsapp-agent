@@ -269,7 +269,7 @@
       "id": "a8dc1e97-5ef5-4145-acd6-4076609f3377",
       "name": "click:log-input",
       "parameters": {
-        "jsCode": "const d = $json;\nreturn [{ json: { now: d.now, wa_id: d.wa_id, direction: 'event', author: 'owner', kind: d.click_kind, text: 'slack user ' + d.slack_user } }];"
+        "jsCode": "const d = $json;\nreturn [{ json: { now: d.now, wa_id: d.wa_id, direction: 'event', author: 'owner', kind: d.click_kind, text: 'slack user ' + d.slack_user,\n  crm_event: d.click_kind === 'click_mark_booked' && d.updates ? 'booked' : '' } }];"
       },
       "position": [
         1100,

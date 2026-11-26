@@ -1,5 +1,16 @@
 {
   "connections": {
+    "Insert row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "crm?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
     "When Executed by Another Workflow": {
       "main": [
         [
@@ -11,12 +22,74 @@
         ]
       ]
     },
+    "crm-sync": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sheets?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "crm:input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "crm-sync",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "crm?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "crm:input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "sheets?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
     "log:row": {
       "main": [
         [
           {
             "index": 0,
             "node": "Insert row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "sheets:input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sheets-log",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "sheets?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sheets:input",
             "type": "main"
           }
         ]
@@ -239,6 +312,79 @@
       "typeVersion": 1.3
     },
     {
+      "id": "a10acb74-f52f-4b06-b40a-4e8c48477d5e",
+      "name": "crm-sync",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "crm-sync",
+          "mode": "list",
+          "value": "xT78azlEPylSlome"
+        }
+      },
+      "position": [
+        1100,
+        -150
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "c1e8fe77-f312-4c0b-a78f-893d4d914054",
+      "name": "crm:input",
+      "parameters": {
+        "jsCode": "const i = $('When Executed by Another Workflow').first().json;\nreturn [{ json: { wa_id: i.wa_id, event: i.crm_event, now: i.now || i.logged_at } }];"
+      },
+      "position": [
+        880,
+        -150
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "72a7df6b-4947-4fc1-94ce-2cf90750f692",
+      "name": "crm?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ijlakg36",
+              "leftValue": "={{ Boolean($('When Executed by Another Workflow').first().json.crm_event) }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        660,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
       "id": "f425523f-a5fd-4cd7-9bc3-d232a00e2aab",
       "name": "log:row",
       "parameters": {
@@ -250,6 +396,79 @@
       ],
       "type": "n8n-nodes-base.code",
       "typeVersion": 2
+    },
+    {
+      "id": "6f264939-4f76-412a-9427-50dc55f66845",
+      "name": "sheets-log",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "sheets-log",
+          "mode": "list",
+          "value": "w0nopyCWUVZCSL7T"
+        }
+      },
+      "position": [
+        1760,
+        -100
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "b46f7a0d-3f95-4f6e-9798-de29d3d1997d",
+      "name": "sheets:input",
+      "parameters": {
+        "jsCode": "return [{ json: $('log:row').first().json }];"
+      },
+      "position": [
+        1540,
+        -100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "executeOnce": true,
+      "id": "be63b887-6b86-4ed4-9abd-0fadf96d27a6",
+      "name": "sheets?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ga14mlof",
+              "leftValue": "={{ ['in', 'out'].includes($('log:row').first().json.direction) }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        1320,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
     }
   ],
   "settings": {

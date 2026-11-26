@@ -1,0 +1,1274 @@
+{
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "conversations: get",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "contact stored?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "deal:input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "contact:find-input",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "contact:create-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "hubspot: create contact",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "contact:find-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "hubspot: find contact",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "conversations: get": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "do_not_contact: get",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "conversations: update": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "milestone?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "crm:log-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "message_log: insert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "crm:plan": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "sync?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "crm:row": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "conversations: update",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "deal:action": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "deal:create-input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "deal:move-input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "crm:row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "deal:create-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "hubspot: create deal",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "deal:input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "deal:action",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "deal:move-input": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "hubspot: move deal",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "do_not_contact: get": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "crm:plan",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "found?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "deal:input",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "contact:create-input",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "hubspot: create contact": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "deal:input",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "hubspot: create deal": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "crm:row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "hubspot: find contact": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "found?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "hubspot: move deal": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "crm:row",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "milestone?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "crm:log-input",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "sync?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "contact stored?",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "id": "xT78azlEPylSlome",
+  "name": "crm-sync",
+  "nodes": [
+    {
+      "id": "9a08a525-cff5-43c9-99ea-d135436cf328",
+      "name": "When Executed by Another Workflow",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "1e440080-6610-495b-8baf-3268b0a69f42",
+      "name": "contact stored?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "kmynwdvc",
+              "leftValue": "={{ Boolean($('crm:plan').first().json.contact_id) }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        1100,
+        -100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "37cc833f-552b-49e4-b722-3ce94d50358d",
+      "name": "contact:create-input",
+      "parameters": {
+        "jsCode": "return [{ json: { op: 'create_contact', phone: $('crm:plan').first().json.phone } }];"
+      },
+      "position": [
+        1980,
+        100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "345dda1a-c0e8-4466-8bac-b8d15a3a9e9d",
+      "name": "contact:find-input",
+      "parameters": {
+        "jsCode": "return [{ json: { op: 'find_contact', phone: $('crm:plan').first().json.phone } }];"
+      },
+      "position": [
+        1320,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "59865d58-087e-47e0-ac87-181c35db233e",
+      "name": "conversations: get",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "conversations",
+          "mode": "list",
+          "value": "__table:conversations__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $('When Executed by Another Workflow').first().json.wa_id }}"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row"
+      },
+      "position": [
+        220,
+        0
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "a13f4b1a-449f-4237-b352-f595344051db",
+      "name": "conversations: update",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "stage",
+              "id": "stage",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "stage_version",
+              "id": "stage_version",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "stage_before_close",
+              "id": "stage_before_close",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "closed_reason",
+              "id": "closed_reason",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "close_thread_ts",
+              "id": "close_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "service",
+              "id": "service",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "address",
+              "id": "address",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "zip",
+              "id": "zip",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "offered_slots",
+              "id": "offered_slots",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "last_offered_day",
+              "id": "last_offered_day",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "reoffer_used",
+              "id": "reoffer_used",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "boolean"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slot_taken_count",
+              "id": "slot_taken_count",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "unclear_in_a_row",
+              "id": "unclear_in_a_row",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "zip_asks",
+              "id": "zip_asks",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "human_owned",
+              "id": "human_owned",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "boolean"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "handoff_reason",
+              "id": "handoff_reason",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "handoff_episode",
+              "id": "handoff_episode",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_channel",
+              "id": "slack_channel",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "slack_thread_ts",
+              "id": "slack_thread_ts",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "last_customer_at",
+              "id": "last_customer_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "last_bot_question",
+              "id": "last_bot_question",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "booked_event_id",
+              "id": "booked_event_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "booked_label",
+              "id": "booked_label",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "hubspot_contact_id",
+              "id": "hubspot_contact_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "hubspot_deal_id",
+              "id": "hubspot_deal_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "deal_stage",
+              "id": "deal_stage",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {}
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "conversations",
+          "mode": "list",
+          "value": "__table:conversations__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $json.wa_id }}"
+            }
+          ]
+        },
+        "operation": "update",
+        "resource": "row"
+      },
+      "position": [
+        3520,
+        -100
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "2a3fc07f-46e4-4b84-b64e-188123547ff9",
+      "name": "crm:log-input",
+      "parameters": {
+        "jsCode": "const p = $('crm:plan').first().json;\n// written here, not through log: log starts crm-sync, so calling it back would make a loop\nreturn [{ json: { logged_at: p.now, wa_id: p.wa_id, direction: 'event', author: 'system', kind: 'crm_' + p.stage,\n  text: $('deal:input').first().json.action, execution_id: String($execution.id) } }];"
+      },
+      "position": [
+        3960,
+        -200
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "d4facfaf-f85c-4934-a10a-cc9231696c1c",
+      "name": "crm:plan",
+      "parameters": {
+        "jsCode": "// @lib crm\n// generated from lib/ by scripts/build_code_nodes.js: edit lib/, not this region\nconst __lib = {};\n__lib['crm'] = (function () {\n  const module = { exports: {} };\n  const exports = module.exports;\n  const require = (p) => __lib[String(p).replace(/^\\.\\//, '')];\n  'use strict';\n  // HubSpot target state (design section 15). Pure: the caller does the HubSpot work.\n\n  const EVENTS = ['enquiry', 'booked'];\n\n  // conversation: the conversations row (stage, hubspot_deal_id, deal_stage).\n  // event: 'enquiry' or 'booked'. opts.onDnc: the number is on do-not-contact.\n  // Returns { wantContact, dealAction: 'create' | 'move' | 'none', stage: 'enquiry' | 'booked' | null }.\n  // A contact already stored is found again by the caller; wantContact only says one may exist.\n  function targetState(conversation, event, opts) {\n    if (!EVENTS.includes(event)) throw new Error('unknown crm event: ' + event);\n    const onDnc = Boolean(opts && opts.onDnc);\n    if (onDnc || conversation.stage === 'closed') {\n      return { wantContact: false, dealAction: 'none', stage: null };\n    }\n    const stage = event;\n    const dealId = conversation.hubspot_deal_id;\n    const current = conversation.deal_stage;\n    let dealAction;\n    if (!dealId) dealAction = 'create';\n    else if (stage === 'enquiry' && current === 'booked') dealAction = 'create'; // a new enquiry\n    else if (current === stage) dealAction = 'none';\n    else dealAction = 'move';\n    return { wantContact: true, dealAction, stage };\n  }\n\n  module.exports = { targetState };\n  return module.exports;\n})();\nconst { targetState } = __lib['crm'];\n// @end-lib\nconst i = $('When Executed by Another Workflow').first().json;\nconst conv = $('conversations: get').all().map((x) => x.json).find((c) => c.wa_id) || null;\nconst onDnc = $('do_not_contact: get').all().some((x) => x.json.wa_id === i.wa_id);\nif (!conv) return [{ json: { sync: false, why: 'no conversation' } }];\nconst t = targetState(conv, i.event, { onDnc });\nreturn [{ json: { sync: t.wantContact, ...t, wa_id: i.wa_id, phone: '+' + i.wa_id, event: i.event, now: i.now,\n  contact_id: conv.hubspot_contact_id || '', deal_id: conv.hubspot_deal_id || '' } }];"
+      },
+      "position": [
+        660,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "77b10621-57d1-4ec0-876b-51c8c3eb3178",
+      "name": "crm:row",
+      "parameters": {
+        "jsCode": "const p = $('crm:plan').first().json;\nconst d = $('deal:input').first().json;\nconst tryJson = (n) => { try { return $(n).first().json; } catch (e) { return null; } };\nlet dealId = p.deal_id;\nconst created = tryJson('hubspot: create deal');\nconst moved = tryJson('hubspot: move deal');\nconst r = d.action === 'create' ? created : d.action === 'move' ? moved : { ok: true };\nif (!r || !r.ok) throw new Error('hubspot ' + d.action + '_deal: ' + JSON.stringify((r && r.error) || r).slice(0, 300));\nif (d.action === 'create') dealId = r.deal_id;\nreturn [{ json: { wa_id: p.wa_id, hubspot_contact_id: d.contact_id, hubspot_deal_id: dealId, deal_stage: d.action === 'none' ? (p.stage) : p.stage } }];"
+      },
+      "position": [
+        3300,
+        -100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "e661f239-4a14-4349-95e3-574fb0fd111f",
+      "name": "deal:action",
+      "parameters": {
+        "options": {},
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "12es39x3",
+                    "leftValue": "={{ $json.action }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "create"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "create",
+              "renameOutput": true
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "82ceqoos",
+                    "leftValue": "={{ $json.action }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "move"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "move",
+              "renameOutput": true
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "wqvypig3",
+                    "leftValue": "={{ $json.action }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "none"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                }
+              },
+              "outputKey": "none",
+              "renameOutput": true
+            }
+          ]
+        }
+      },
+      "position": [
+        2640,
+        -100
+      ],
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2
+    },
+    {
+      "id": "fe85e5c3-2dee-4d2f-b630-e083b19c2ba1",
+      "name": "deal:create-input",
+      "parameters": {
+        "jsCode": "return [{ json: $json.req }];"
+      },
+      "position": [
+        2860,
+        -250
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "4a63aeef-e343-4a3e-b6bf-d28bac022621",
+      "name": "deal:input",
+      "parameters": {
+        "jsCode": "const p = $('crm:plan').first().json;\nconst tryJson = (n) => { try { return $(n).first().json; } catch (e) { return null; } };\nlet contactId = p.contact_id;\nconst found = tryJson('hubspot: find contact');\nif (!contactId && found && found.contact_id) contactId = found.contact_id;\nconst created = tryJson('hubspot: create contact');\nif (!contactId && created) {\n  if (!created.ok) throw new Error('hubspot create_contact: ' + JSON.stringify(created.error || created).slice(0, 300));\n  contactId = created.contact_id;\n}\nconst stageId = p.stage === 'booked' ? $env.HUBSPOT_STAGE_BOOKED : $env.HUBSPOT_STAGE_ENQUIRY;\nconst req = p.dealAction === 'create' ? { op: 'create_deal', contact_id: contactId, stage: stageId, name: 'WhatsApp ' + p.phone.slice(-4) + ' ' + p.now.slice(0, 10) }\n  : p.dealAction === 'move' ? { op: 'move_deal', deal_id: p.deal_id, stage: stageId } : null;\nreturn [{ json: { action: p.dealAction, contact_id: contactId, req } }];"
+      },
+      "position": [
+        2420,
+        -100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "f4f40414-60ea-4c94-93f0-72acca880ce4",
+      "name": "deal:move-input",
+      "parameters": {
+        "jsCode": "return [{ json: $json.req }];"
+      },
+      "position": [
+        2860,
+        -100
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "alwaysOutputData": true,
+      "id": "c2abc541-96c8-4fde-bf92-6fc0979b139e",
+      "name": "do_not_contact: get",
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "do_not_contact",
+          "mode": "list",
+          "value": "__table:do_not_contact__"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "wa_id",
+              "keyValue": "={{ $('When Executed by Another Workflow').first().json.wa_id }}"
+            }
+          ]
+        },
+        "operation": "get",
+        "resource": "row"
+      },
+      "position": [
+        440,
+        0
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "118ec5bf-8316-4a9f-937f-09ce729d289a",
+      "name": "found?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "5o9l1wb4",
+              "leftValue": "={{ (() => { const r = $('hubspot: find contact').first().json; if (!r.ok) throw new Error('hubspot hubspot: find contact: ' + JSON.stringify(r.error || r).slice(0, 300)); return Boolean(r.contact_id); })() }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        1760,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "d7fdd711-dcc2-49f3-9dec-dcbf2ce28a4f",
+      "name": "hubspot: create contact",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "hubspot-adapter",
+          "mode": "list",
+          "value": "gTLF7DkHIVjAbz1y"
+        }
+      },
+      "position": [
+        2200,
+        100
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "b24bfc15-04cb-4011-a6e8-be1ececb861f",
+      "name": "hubspot: create deal",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "hubspot-adapter",
+          "mode": "list",
+          "value": "gTLF7DkHIVjAbz1y"
+        }
+      },
+      "position": [
+        3080,
+        -250
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "58b2c5d2-3762-45f4-8661-47a185bb0054",
+      "name": "hubspot: find contact",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "hubspot-adapter",
+          "mode": "list",
+          "value": "gTLF7DkHIVjAbz1y"
+        }
+      },
+      "position": [
+        1540,
+        0
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "796695b3-3ed7-45b4-941a-6253439b8081",
+      "name": "hubspot: move deal",
+      "parameters": {
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "cachedResultName": "hubspot-adapter",
+          "mode": "list",
+          "value": "gTLF7DkHIVjAbz1y"
+        }
+      },
+      "position": [
+        3080,
+        -100
+      ],
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2
+    },
+    {
+      "id": "0950742d-560c-47ca-a020-a4f05e5da6f2",
+      "name": "message_log: insert",
+      "parameters": {
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "logged_at",
+              "id": "logged_at",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "dateTime"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "wa_id",
+              "id": "wa_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "direction",
+              "id": "direction",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "author",
+              "id": "author",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "kind",
+              "id": "kind",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "text",
+              "id": "text",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "route",
+              "id": "route",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "stage",
+              "id": "stage",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "classifier",
+              "id": "classifier",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "draft",
+              "id": "draft",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "problems",
+              "id": "problems",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "facts_version",
+              "id": "facts_version",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "execution_id",
+              "id": "execution_id",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "workflow_version",
+              "id": "workflow_version",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "input_tokens",
+              "id": "input_tokens",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "output_tokens",
+              "id": "output_tokens",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "reply_ms",
+              "id": "reply_ms",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "number"
+            }
+          ],
+          "value": {}
+        },
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "message_log",
+          "mode": "list",
+          "value": "__table:message_log__"
+        },
+        "operation": "insert",
+        "resource": "row"
+      },
+      "position": [
+        4180,
+        -200
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "1dfad008-e782-482e-97cf-3eedc7b1679e",
+      "name": "milestone?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "vxlrnd3l",
+              "leftValue": "={{ $('deal:input').first().json.action !== 'none' }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        3740,
+        -100
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    },
+    {
+      "id": "9ee50962-3d5f-4d40-a09c-de115c5ad70c",
+      "name": "sync?",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "d85tfhuk",
+              "leftValue": "={{ $('crm:plan').first().json.sync }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "position": [
+        880,
+        0
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2
+    }
+  ],
+  "settings": {
+    "availableInMCP": true,
+    "executionOrder": "v1"
+  }
+}

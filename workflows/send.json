@@ -132,9 +132,9 @@
       "main": [
         [
           {
-            "index": 0,
-            "node": "log: out",
-            "type": "main"
+            "node": "clock:now",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -218,6 +218,28 @@
             "index": 0,
             "node": "send:result",
             "type": "main"
+          }
+        ]
+      ]
+    },
+    "clock:now": {
+      "main": [
+        [
+          {
+            "node": "send:timing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send:timing": {
+      "main": [
+        [
+          {
+            "node": "log: out",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -678,7 +700,7 @@
       "id": "ef90c3fe-6a7d-401b-ad69-f1f70256a515",
       "name": "send:result",
       "parameters": {
-        "jsCode": "const input = $('send:decide').first().json;\nconst r = $input.first().json;\nconst failed = Boolean(r.error);\nconst now = input.now;\nconst replyMs = input.received_at ? Date.parse(now) - Date.parse(input.received_at) : null;\nreturn [{ json: {\n  now, wa_id: input.wa_id, direction: 'out', author: input.sender_kind,\n  kind: failed ? 'send_error' : input.kind, text: input.text || '', route: input.route, stage: input.stage,\n  classifier: input.classifier, draft: input.draft, problems: input.problems, facts_version: input.facts_version,\n  input_tokens: input.input_tokens, output_tokens: input.output_tokens, reply_ms: replyMs,\n  // Meta's message ID, or Twilio's message SID on the Twilio route\n  meta_message_id: failed ? null : (r.messages && r.messages[0] && r.messages[0].id) || r.sid || null,\n  error: failed ? JSON.stringify(r.error).slice(0, 500) : null,\n} }];"
+        "jsCode": "const input = $('send:decide').first().json;\nconst r = $input.first().json;\nconst failed = Boolean(r.error);\nconst now = input.now;\nreturn [{ json: {\n  now, wa_id: input.wa_id, direction: 'out', author: input.sender_kind,\n  kind: failed ? 'send_error' : input.kind, text: input.text || '', route: input.route, stage: input.stage,\n  classifier: input.classifier, draft: input.draft, problems: input.problems, facts_version: input.facts_version,\n  input_tokens: input.input_tokens, output_tokens: input.output_tokens, reply_ms: null,\n  // Meta's message ID, or Twilio's message SID on the Twilio route\n  meta_message_id: failed ? null : (r.messages && r.messages[0] && r.messages[0].id) || r.sid || null,\n  error: failed ? JSON.stringify(r.error).slice(0, 500) : null,\n} }];"
       },
       "position": [
         1344,
@@ -866,6 +888,32 @@
         }
       },
       "onError": "continueErrorOutput"
+    },
+    {
+      "id": "e09c3d11-6956-4fdd-873d-94bc2d62fbe1",
+      "name": "clock:now",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1564,
+        -40
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: { now: new Date().toISOString() } }];"
+      }
+    },
+    {
+      "id": "45942529-9915-4329-8dc2-97a6c01e310f",
+      "name": "send:timing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1784,
+        -40
+      ],
+      "parameters": {
+        "jsCode": "// reply_ms: from the inbound message's receipt (ingress clock) to the provider accepting the send,\n// read from the clock after the API call. send:decide's now is the turn's start time, so it can't be used.\nconst out = $('send:result').first().json;\nconst input = $('send:decide').first().json;\nconst sentAt = Date.parse($json.now);\nconst receivedAt = input.received_at ? Date.parse(input.received_at) : NaN;\nconst replyMs = out.error || !Number.isFinite(receivedAt) || !Number.isFinite(sentAt) ? null : Math.max(0, sentAt - receivedAt);\nreturn [{ json: { ...out, reply_ms: replyMs } }];"
+      }
     }
   ],
   "settings": {

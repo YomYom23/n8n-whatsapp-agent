@@ -355,6 +355,11 @@ def run_scenario(sc, inst, mock, env, tier):
         if ev.get("wait", True):
             inst.wait_idle()
     inst.wait_idle()
+    # Every event must end done or duplicate. A failed row is one the processor gave up on, for example
+    # a sub-workflow that returned no items and left the run holding its lease until it expired.
+    failed = [r.get("kind") for r in inst.rows("inbox") if r.get("status") == "failed"]
+    if failed:
+        return [f"inbox: {len(failed)} event(s) ended failed: {failed}"]
     expect = dict(sc.get("expect") or {})
     if tier == "live":  # model output varies, so only the outcome is checked, not the wording
         for s in expect.get("sends", []):

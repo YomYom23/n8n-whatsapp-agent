@@ -519,7 +519,8 @@
         100
       ],
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.2
+      "typeVersion": 1.2,
+      "alwaysOutputData": true
     },
     {
       "id": "be0de965-7db4-446c-bbcd-64145f8c8f0e",
@@ -1833,7 +1834,8 @@
         300
       ],
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.2
+      "typeVersion": 1.2,
+      "alwaysOutputData": true
     },
     {
       "id": "92afefed-a2c5-42ed-8dd4-29cdf4a45a6a",
@@ -1940,7 +1942,8 @@
         350
       ],
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.2
+      "typeVersion": 1.2,
+      "alwaysOutputData": true
     },
     {
       "id": "14838362-0627-4bd7-9fa5-07e4e63e3b75",
@@ -1964,7 +1967,8 @@
         550
       ],
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.2
+      "typeVersion": 1.2,
+      "alwaysOutputData": true
     },
     {
       "id": "56babea8-b8da-4e4e-a6fd-eb9e0deb39ba",

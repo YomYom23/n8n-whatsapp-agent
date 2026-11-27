@@ -18,9 +18,9 @@ The hand-test window is also the window `scripts/report_metrics.py` reads for th
     route each run used.
     **Twilio keeps the opt-out keywords for itself.** A message that is exactly STOP (or STOPALL,
     UNSUBSCRIBE, CANCEL, END, QUIT) unsubscribes the phone from the sandbox and never reaches n8n, and
-    START, YES and UNSTOP are taken the same way. On the Twilio route, step 11 sends "please stop
-    messaging me" instead (the opt-out phrase rule and the classifier's opt_out hazard), and step 13
-    can't be run: the replay's STOP and START scenarios cover the keyword gate. If the phone sent a bare
+    START, YES and UNSTOP are taken the same way. Twilio also caught "please stop messaging me" in the
+    2026-11-27 run, so on the Twilio route steps 11 to 13 are skipped and recorded as skipped: the
+    replay's STOP, START and opt-out phrase scenarios cover them, and they run on Meta's number. If the phone sent a bare
     STOP by mistake, send START to the sandbox and then the join code again.
 *   The live instance runs the workflows from git (`python scripts/deploy_workflows.py --instance live`),
     and the live adapters (calendar, Sheets, Slack, HubSpot) point at test accounts.

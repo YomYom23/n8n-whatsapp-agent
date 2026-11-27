@@ -24,7 +24,7 @@ was sent and written.
 
 | Run | Result | What it means |
 | --- | --- | --- |
-| Fixed tier | **passed 60 of 60** | Model answers and AI drafts are scripted, including drafts that are bad on purpose. Every guard has at least one scenario it must catch. |
+| Fixed tier | **passed 61 of 61** | Model answers and AI drafts are scripted, including drafts that are bad on purpose. Every guard has at least one scenario it must catch. |
 | Guard-removal run | **32 of 32 guards** caused their scenario to fail when removed; the 33rd, `sig_twilio` (added with the Twilio route), was removed on its own and both its scenarios failed | Each guard is removed in turn and its scenarios are run again. A guard counts only if removing it makes a scenario fail. |
 | Live-model tier | _not run yet_ | Real Jev and Haiku calls, everything else still faked. Reported on its own, with no pass threshold, and never added to the fixed tier. |
 

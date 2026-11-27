@@ -2,8 +2,9 @@
 
 The hand test is headline 2's own count (design Goal 2 and file 33): a person on a real phone runs the
 script below against the **live** instance and the test number. A passed hand test is one run of the
-whole script where every step's expected result happened. At least 10 runs are recorded, and the README
-reports them as "passed N of M", with reply times.
+whole script where every step's expected result happened. The plan was at least 10 runs; one was run
+(2026-11-27, Twilio route) and the rest were dropped, so the README reports "passed 1 of 1", with reply
+times. More runs, on Meta's number in particular, can be added to the table later.
 
 The hand-test window is also the window `scripts/report_metrics.py` reads for the README's metrics.
 

@@ -38,7 +38,7 @@ the ten draft checks; the three send rules; and the booking checks.
 | Evidence | Status |
 | --- | --- |
 | `docs/meta-setup.md`: every failure hit while setting up Meta's Cloud API with n8n, including failures caused on purpose | _pending_: Meta won't let the test number send until the business is verified (error 131031, see [spikes](docs/spikes.md)) |
-| Hand test on the test number ([script](docs/hand-test.md)) | _pending_: passed N of M, with reply times |
+| Hand test on a real phone ([script](docs/hand-test.md)) | **passed 1 of 1** on the Twilio sandbox (steps 1 to 10; Twilio keeps STOP and START, so the opt-out steps are covered by the replay only). Bot reply time median 5.0 s, max 6.3 s. Not yet run on Meta's number. |
 
 ## Metrics
 

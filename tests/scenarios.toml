@@ -533,6 +533,31 @@ slack_posts = 1
 rows = { message_log = 2 }
 
 
+# Code: the writer stopped at max_tokens, so its reply is cut off mid-word. It must not be sent.
+[[scenario]]
+name = "draft_truncated"
+step = "P3"
+now = "2026-12-01T15:00:00Z"
+
+[[scenario.event]]
+source = "meta"
+signing = "valid"
+fixture = "tests/fixtures/meta/text.json"
+text = "what does a deep clean include?"
+
+[scenario.script]
+jev.stage = [{ hazards = {}, answer = { value = "other_question", confidence = 0.9 } }]
+jev.draft_check = [{ problems = {} }]
+haiku = [{ text = "A deep clean covers everything in a regular clean, plus the inside of the f", input_tokens = 748, output_tokens = 400, stop_reason = "max_tokens" }]
+
+[scenario.expect]
+route = "other_question"
+sends = [{ kind = "normal", text_contains = "can't answer that one properly" }]
+problems = ["writer_failed"]
+slack_posts = 1
+rows = { message_log = 2 }
+
+
 # Code: the draft is over 600 characters (every number in it is in the facts).
 [[scenario]]
 name = "draft_too_long"

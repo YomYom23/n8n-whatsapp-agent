@@ -16,6 +16,12 @@ The hand-test window is also the window `scripts/report_metrics.py` reads for th
     "When a message comes in" URL set to `https://<N8N_HOST>/webhook/ingress-twilio` (POST), and the
     phone joined to the sandbox, the same script runs over Twilio. Rejoin every 3 days. Record which
     route each run used.
+    **Twilio keeps the opt-out keywords for itself.** A message that is exactly STOP (or STOPALL,
+    UNSUBSCRIBE, CANCEL, END, QUIT) unsubscribes the phone from the sandbox and never reaches n8n, and
+    START, YES and UNSTOP are taken the same way. On the Twilio route, step 11 sends "please stop
+    messaging me" instead (the opt-out phrase rule and the classifier's opt_out hazard), and step 13
+    can't be run: the replay's STOP and START scenarios cover the keyword gate. If the phone sent a bare
+    STOP by mistake, send START to the sandbox and then the join code again.
 *   The live instance runs the workflows from git (`python scripts/deploy_workflows.py --instance live`),
     and the live adapters (calendar, Sheets, Slack, HubSpot) point at test accounts.
 *   `python tests/adapter_contract.py` passes.

@@ -23,7 +23,7 @@ Service stand-ins (paths as the dry-run deployment rewrites them):
 Scenario body:
     { name, now, live_models,
       jev: { stage: [answers...], draft_check: [answers...] },
-      haiku: [{ text, input_tokens, output_tokens }],
+      haiku: [{ text, input_tokens, output_tokens, stop_reason }],   (stop_reason defaults to end_turn)
       calendar: { busy: [{start,end}], events: {id: {status,start,end,...}} },
       sheets: { facts_dir, unavailable },
       slack: { unavailable },
@@ -324,7 +324,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(500, {"type": "error", "error": {"type": "api_error", "message": "mock: no scripted Haiku reply left"}})
         h = STATE.haiku.pop(0)
         self._json(200, {"id": f"msg_mock_{next(STATE.ids)}", "type": "message", "role": "assistant",
-                         "model": body.get("model", "mock"), "stop_reason": "end_turn",
+                         "model": body.get("model", "mock"), "stop_reason": h.get("stop_reason", "end_turn"),
                          "content": [{"type": "text", "text": h.get("text", "")}],
                          "usage": {"input_tokens": h.get("input_tokens", 0), "output_tokens": h.get("output_tokens", 0)}})
 

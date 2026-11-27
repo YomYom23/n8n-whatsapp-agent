@@ -45,7 +45,7 @@ Tick a step only if everything in its "Expect" column happened.
 
 | # | Who | Do | Expect |
 | --- | --- | --- | --- |
-| 1 | Phone | "are you open on Saturdays?" | One reply with Saturday's hours from the facts sheet and nothing else (CUJ 1). Two `message_log` rows with route `answer`. |
+| 1 | Phone | "are you open on Saturdays?" | One reply with Saturday's hours from the facts sheet (CUJ 1); at stage `new` it ends with the fixed "Would you like to book a clean?". Two `message_log` rows with route `other_question`. |
 | 2 | Phone | "I'd like a deep clean" | The bot asks for the address. HubSpot test account: a contact for the phone and a deal at Enquiry (CUJ 2). |
 | 3 | Phone | an address in a service-area ZIP, such as "12 Main St, New York NY 10001" | Three numbered times, one per day on three different days, all inside opening hours and at least 12 hours away. |
 | 4 | Phone | "2" | A confirmation naming time 2. Test calendar: an event at that time with the address. HubSpot: the deal at Booked. |
@@ -63,7 +63,7 @@ Tick a step only if everything in its "Expect" column happened.
 
 | Run | Date (UTC) | Tester | Steps passed | Passed? | Reply time median / max | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | | | of 13 | | | |
+| 1 | 2026-11-27 | author | 10 of 10 run (11-13 skipped) | Yes | 5.0 s / 6.3 s | Twilio route. Contact already existed in HubSpot from earlier testing, so `find_contact` found it and only the deal was created. Owner relay took 1.4 s (not counted: bot replies only). |
 | 2 | | | of 13 | | | |
 | 3 | | | of 13 | | | |
 | 4 | | | of 13 | | | |
